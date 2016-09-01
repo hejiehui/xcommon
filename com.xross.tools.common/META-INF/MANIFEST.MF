@@ -3,10 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Common
 Bundle-SymbolicName: com.xross.tools.common
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.xross.tools.common.Activator
+Bundle-Activator: com.xrosstools.common.Activator
 Bundle-Vendor: XROSS
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.xross.tools.common
+Export-Package: com.xrosstools.common

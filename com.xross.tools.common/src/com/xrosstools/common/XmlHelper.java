@@ -1,4 +1,4 @@
-package com.xross.tools.common;
+package com.xrosstools.common;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

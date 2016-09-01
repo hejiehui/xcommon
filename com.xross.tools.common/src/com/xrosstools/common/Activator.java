@@ -1,4 +1,4 @@
-package com.xross.tools.common;
+package com.xrosstools.common;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
