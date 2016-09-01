@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common
-Bundle-SymbolicName: com.xross.tools.common
+Bundle-SymbolicName: com.xrosstools.common
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.xrosstools.common.Activator
 Bundle-Vendor: XROSS
