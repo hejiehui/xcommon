@@ -1,12 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common
-Bundle-SymbolicName: com.xrosstools.common
+Bundle-SymbolicName: com.xrosstools.common;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.xrosstools.common.Activator
-Bundle-Vendor: XROSS
+Bundle-Vendor: he, jiehui
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: com.xrosstools.common
+Export-Package: com.xrosstools.common;uses:="org.eclipse.ui.plugin,org.osgi.framework,org.w3c.dom"
+Bundle-ClassPath: lib/dom4j-1.6.1.jar,
+ .
