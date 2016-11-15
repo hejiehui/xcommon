@@ -3,6 +3,8 @@ package com.xrosstools.common;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -33,6 +35,16 @@ public class XmlHelper {
 		}
 		
 		return null;
+	}
+	
+	public static List<Node> getValidChildNodes(Node node) {
+		List<Node> nl = new ArrayList<>();
+		NodeList nodeList = node.getChildNodes();
+		for(int i = 0; i < nodeList.getLength(); i++){
+			if(isValidNode(nodeList.item(i)))
+				nl.add(nodeList.item(i));
+		}
+		return nl;
 	}
 	
 	public static String format(Document doc) throws Exception {
