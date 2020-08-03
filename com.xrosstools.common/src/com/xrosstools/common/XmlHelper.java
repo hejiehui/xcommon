@@ -38,7 +38,7 @@ public class XmlHelper {
 	}
 	
 	public static List<Node> getValidChildNodes(Node node) {
-		List<Node> nl = new ArrayList<>();
+		List<Node> nl = new ArrayList();
 		NodeList nodeList = node.getChildNodes();
 		for(int i = 0; i < nodeList.getLength(); i++){
 			if(isValidNode(nodeList.item(i)))
