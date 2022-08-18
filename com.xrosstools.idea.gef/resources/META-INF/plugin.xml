@@ -1,0 +1,27 @@
+<idea-plugin>
+  <id>com.xrosstools.idea.gef</id>
+  <name>Xross Tools idea Graphic Edit Framework</name>
+  <version>1.0</version>
+  <vendor email="he_jiehui@163.com" url="https://github.com/hejiehui/xross-tools-installer">Xross Tools</vendor>
+
+  <description><![CDATA[
+      Xross Tools idea Graphic Edit Framework. Inspired by Eclipse GEF and usage is alike.<br>
+      <em>Xross Tools GEF</em>
+    ]]></description>
+
+  <change-notes><![CDATA[
+      Inital version<br>
+      <em>1.0</em>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="173.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+</idea-plugin>
