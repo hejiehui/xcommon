@@ -35,7 +35,7 @@ public class EditContext {
         trinity.editPart = part;
     }
 
-    public void add(TreeEditPart part, Object model) {
+    public void add(AbstractTreeEditPart part, Object model) {
         Trinity trinity = findContent(model);
 
         if(trinity == null) {
@@ -58,7 +58,7 @@ public class EditContext {
         return t == null ? null : t.editPart;
     }
 
-    public TreeEditPart findTreeEditPart(Object model) {
+    public AbstractTreeEditPart findTreeEditPart(Object model) {
         Trinity t = findContent(model);
         return t == null ? null : t.treeEditPart;
     }
@@ -85,8 +85,8 @@ public class EditContext {
     private class Trinity {
         Object model;
         GraphicalEditPart editPart;
-        TreeEditPart treeEditPart;
+        AbstractTreeEditPart treeEditPart;
         GraphicalEditPart getEditPart(){return editPart;}
-        TreeEditPart getTreeEditPart(){return treeEditPart;}
+        AbstractTreeEditPart getTreeEditPart(){return treeEditPart;}
     }
 }

@@ -9,7 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class DiagramEditorProvider<T extends IPropertySource> implements FileEditorProvider {
+public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> implements FileEditorProvider {
     public abstract FileType getFileType();
     public abstract String getExtention();
     public abstract String getEditorTypeId();

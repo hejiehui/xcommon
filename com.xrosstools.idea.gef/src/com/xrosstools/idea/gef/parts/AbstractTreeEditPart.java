@@ -9,11 +9,11 @@ import javax.swing.tree.DefaultTreeModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreeEditPart extends AbstractEditPart {
+public abstract class AbstractTreeEditPart extends AbstractEditPart {
     private DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(this);
-    private List<TreeEditPart> childEditParts = new ArrayList<>();
+    private List<AbstractTreeEditPart> childEditParts = new ArrayList<>();
 
-    public TreeEditPart(Object model) {
+    public AbstractTreeEditPart(Object model) {
         setModel(model);
     }
 
@@ -31,7 +31,7 @@ public class TreeEditPart extends AbstractEditPart {
 
     @Override
     protected void addChildPartVisual(EditPart childEditPart, int index) {
-        DefaultMutableTreeNode childNode = ((TreeEditPart) childEditPart).treeNode;
+        DefaultMutableTreeNode childNode = ((AbstractTreeEditPart) childEditPart).treeNode;
         DefaultMutableTreeNode childParentNode = (DefaultMutableTreeNode) childNode.getParent();
         if (childParentNode != null && childParentNode.getUserObject() != null && childParentNode.getUserObject() != this)
             getTreeModel().removeNodeFromParent(childNode);
@@ -40,7 +40,7 @@ public class TreeEditPart extends AbstractEditPart {
 
     @Override
     protected void removeChildVisual(EditPart childEditPart) {
-        getTreeModel().removeNodeFromParent(((TreeEditPart) childEditPart).treeNode);
+        getTreeModel().removeNodeFromParent(((AbstractTreeEditPart) childEditPart).treeNode);
     }
 
     public DefaultMutableTreeNode getTreeNode() {
@@ -55,7 +55,7 @@ public class TreeEditPart extends AbstractEditPart {
         return IconLoader.findIcon(Activator.getIconPath(getModel().getClass()));
     }
 
-    public final TreeEditPart findEditPart(Object model) {
+    public final AbstractTreeEditPart findEditPart(Object model) {
         return getContext().findTreeEditPart(model);
     }
 }

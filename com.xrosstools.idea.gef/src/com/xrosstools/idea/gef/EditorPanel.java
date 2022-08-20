@@ -13,7 +13,7 @@ import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.EditContext;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.parts.GraphicalEditPart;
-import com.xrosstools.idea.gef.parts.TreeEditPart;
+import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
@@ -35,7 +35,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     private JScrollPane innerDiagramPane;
     private UnitPanel unitPanel;
     private GraphicalEditPart root;
-    private TreeEditPart treeRoot;
+    private AbstractTreeEditPart treeRoot;
 
     private T diagram;
     private ContextMenuProvider contextMenuBuilder;
@@ -179,7 +179,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory(editContext);
 
         root = (GraphicalEditPart) editPartFactory.createEditPart(null, diagram);
-        treeRoot = (TreeEditPart) treeEditPartFactory.createEditPart(null, diagram);
+        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(null, diagram);
 
         treeModel = new DefaultTreeModel(treeRoot.getTreeNode(), false);
         tableModel = new PropertyTableModel((IPropertySource)treeRoot.getModel(), contentProvider);
@@ -217,7 +217,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                                                           boolean sel, boolean expanded, boolean leaf, int row,
                                                           boolean hasFocus){
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-                TreeEditPart treePart = (TreeEditPart)((DefaultMutableTreeNode)value).getUserObject();
+                AbstractTreeEditPart treePart = (AbstractTreeEditPart)((DefaultMutableTreeNode)value).getUserObject();
                 setText(treePart.getText());
                 setIcon(treePart.getImage());
                 return this;
@@ -332,7 +332,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private void updateTreeSelection(Object model) {
         triggedByFigure = true;
-        TreeEditPart treePart = treeRoot.findEditPart(model);
+        AbstractTreeEditPart treePart = treeRoot.findEditPart(model);
         if(treePart == null) {
             treeNavigator.clearSelection();
             return;
@@ -372,7 +372,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         if(treeNode == null)
             return;
 
-        TreeEditPart treePart = (TreeEditPart)treeNode.getUserObject();
+        AbstractTreeEditPart treePart = (AbstractTreeEditPart)treeNode.getUserObject();
 
         Figure selected = treePart.getContext().findFigure(treePart.getModel());
         updateFigureSelection(selected);
