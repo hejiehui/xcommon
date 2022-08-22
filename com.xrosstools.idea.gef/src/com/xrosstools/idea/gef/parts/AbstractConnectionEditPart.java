@@ -3,9 +3,9 @@ package com.xrosstools.idea.gef.parts;
 import com.xrosstools.idea.gef.figures.AbstractAnchor;
 import com.xrosstools.idea.gef.figures.Figure;
 
-public abstract class ConnectionEditPart extends GraphicalEditPart {
-    private GraphicalEditPart source;
-    private GraphicalEditPart target;
+public abstract class AbstractConnectionEditPart extends AbstractGraphicalEditPart {
+    private AbstractGraphicalEditPart source;
+    private AbstractGraphicalEditPart target;
 
 //    @Override
 //    public void remove() {
@@ -13,19 +13,19 @@ public abstract class ConnectionEditPart extends GraphicalEditPart {
 //        getTarget().removeTargetConnection(this);
 //    }
 
-    public GraphicalEditPart getSource() {
+    public AbstractGraphicalEditPart getSource() {
         return source;
     }
 
-    public GraphicalEditPart getTarget() {
+    public AbstractGraphicalEditPart getTarget() {
         return target;
     }
 
-    public void setSource(GraphicalEditPart source) {
+    public void setSource(AbstractGraphicalEditPart source) {
         this.source = source;
     }
 
-    public void setTarget(GraphicalEditPart target) {
+    public void setTarget(AbstractGraphicalEditPart target) {
         this.target = target;
     }
 

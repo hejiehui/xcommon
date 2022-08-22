@@ -1,6 +1,6 @@
 package com.xrosstools.idea.gef.figures;
 
-import com.xrosstools.idea.gef.parts.GraphicalEditPart;
+import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +13,7 @@ public class Figure implements ImageObserver {
     private static final Color SELECTION_LINE_COLOR = Color.lightGray;
 
     private JComponent rootPane;
-    private GraphicalEditPart part;
+    private AbstractGraphicalEditPart part;
     private Figure parent;
     private LayoutManager layout;
 
@@ -51,11 +51,11 @@ public class Figure implements ImageObserver {
             c.setRootPane(rootPane);
     }
 
-    public GraphicalEditPart getPart() {
+    public AbstractGraphicalEditPart getPart() {
         return part;
     }
 
-    public void setPart(GraphicalEditPart part) {
+    public void setPart(AbstractGraphicalEditPart part) {
         this.part = part;
     }
 

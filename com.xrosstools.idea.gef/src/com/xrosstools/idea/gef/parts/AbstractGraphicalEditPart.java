@@ -8,16 +8,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class GraphicalEditPart extends AbstractEditPart {
+public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     public static final int SELECTED_NONE = 0;
 
     public static final int SELECTED = 1;
 
     private Figure figure;
     private int flags;
-    private List<GraphicalEditPart> childEditParts = new ArrayList<>();
-    private List<ConnectionEditPart> sourceConnEditParts = new ArrayList<>();
-    private List<ConnectionEditPart> targteConnEditParts = new ArrayList<>();
+    private List<AbstractGraphicalEditPart> childEditParts = new ArrayList<>();
+    private List<AbstractConnectionEditPart> sourceConnEditParts = new ArrayList<>();
+    private List<AbstractConnectionEditPart> targteConnEditParts = new ArrayList<>();
     private int selected;
 
     private EditPolicy editPolicy;
@@ -32,11 +32,11 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
      */
     public void performAction() {}
 
-    public List<GraphicalEditPart> getChildren() {
+    public List<AbstractGraphicalEditPart> getChildren() {
         return childEditParts;
     }
 
-    public List<ConnectionEditPart> getSourceConnections() {
+    public List<AbstractConnectionEditPart> getSourceConnections() {
         return sourceConnEditParts;
     }
 
@@ -44,7 +44,7 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
         return Collections.EMPTY_LIST;
     }
 
-    public List<ConnectionEditPart> getTargetConnections() {
+    public List<AbstractConnectionEditPart> getTargetConnections() {
         return targteConnEditParts;
     }
 
@@ -52,17 +52,17 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
         return Collections.EMPTY_LIST;
     }
 
-    public void addConnectionVisual(ConnectionEditPart childEditPart, int index) {
+    public void addConnectionVisual(AbstractConnectionEditPart childEditPart, int index) {
         getFigure().add(childEditPart.getFigure(), index);
     }
 
     public void addChildVisual(EditPart childEditPart, int index) {
-        getFigure().add(((GraphicalEditPart)childEditPart).getFigure(), index);
+        getFigure().add(((AbstractGraphicalEditPart)childEditPart).getFigure(), index);
     }
 
     protected void addChildPartVisual(EditPart childEditPart, int index) {
-        if(childEditPart instanceof ConnectionEditPart) {
-            addConnectionVisual((ConnectionEditPart)childEditPart, index);
+        if(childEditPart instanceof AbstractConnectionEditPart) {
+            addConnectionVisual((AbstractConnectionEditPart)childEditPart, index);
         }else {
             addChildVisual(childEditPart, index);
         }
@@ -74,7 +74,7 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
     }
 
     protected void removeChildVisual(EditPart childEditPart) {
-        getFigure().remove(((GraphicalEditPart)childEditPart).getFigure());
+        getFigure().remove(((AbstractGraphicalEditPart)childEditPart).getFigure());
     }
 
     public final Figure getFigure() {
@@ -102,7 +102,7 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
         return getFigure() != null;
     }
 
-    public final GraphicalEditPart findEditPart(Object model) {
+    public final AbstractGraphicalEditPart findEditPart(Object model) {
         return getContext().findEditPart(model);
     }
 
@@ -118,11 +118,11 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
 
     public void eraseTargetFeedback() {}
 
-    public AbstractAnchor getSourceConnectionAnchor(ConnectionEditPart connectionEditPart) {
+    public AbstractAnchor getSourceConnectionAnchor(AbstractConnectionEditPart connectionEditPart) {
         return new ChopboxAnchor(getFigure());
     }
 
-    public AbstractAnchor getTargetConnectionAnchor(ConnectionEditPart connectionEditPart) {
+    public AbstractAnchor getTargetConnectionAnchor(AbstractConnectionEditPart connectionEditPart) {
         return new ChopboxAnchor(getFigure());
     }
 
@@ -148,14 +148,14 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
 
         @Override
         public void addChildModel(List parts, Object child, int index) {
-            ConnectionEditPart connection = (ConnectionEditPart)createOrFindPart(child);
+            AbstractConnectionEditPart connection = (AbstractConnectionEditPart)createOrFindPart(child);
             parts.add(index, connection);
 
-            GraphicalEditPart source = connection.getSource();
+            AbstractGraphicalEditPart source = connection.getSource();
             if (source != null)
                 source.getSourceConnections().remove(connection);
 
-            connection.setSource(GraphicalEditPart.this);
+            connection.setSource(AbstractGraphicalEditPart.this);
             addChildPartVisual(connection, index);
 
             connection.addNotify();
@@ -164,8 +164,8 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
 
         @Override
         public void removeChild(List parts, EditPart childEditPart) {
-            ConnectionEditPart connection = (ConnectionEditPart)childEditPart;
-            if (connection.getSource() == GraphicalEditPart.this) {
+            AbstractConnectionEditPart connection = (AbstractConnectionEditPart)childEditPart;
+            if (connection.getSource() == AbstractGraphicalEditPart.this) {
                 connection.deactivate();
                 removeChildVisual(childEditPart);
                 connection.setSource(null);
@@ -182,19 +182,19 @@ public abstract class GraphicalEditPart extends AbstractEditPart {
 
         @Override
         public void addChildModel(List parts, Object child, int index) {
-            ConnectionEditPart connection = (ConnectionEditPart)createOrFindPart(child);
+            AbstractConnectionEditPart connection = (AbstractConnectionEditPart)createOrFindPart(child);
             parts.add(index, connection);
 
-            GraphicalEditPart target = connection.getTarget();
+            AbstractGraphicalEditPart target = connection.getTarget();
             if (target != null)
                 target.getTargetConnections().remove(connection);
-            connection.setTarget(GraphicalEditPart.this);
+            connection.setTarget(AbstractGraphicalEditPart.this);
         }
 
         @Override
         public void removeChild(List parts, EditPart childEditPart) {
-            ConnectionEditPart connection = (ConnectionEditPart)childEditPart;
-            if (connection.getTarget() == GraphicalEditPart.this)
+            AbstractConnectionEditPart connection = (AbstractConnectionEditPart)childEditPart;
+            if (connection.getTarget() == AbstractGraphicalEditPart.this)
                 connection.setTarget(null);
             parts.remove(childEditPart);
         }

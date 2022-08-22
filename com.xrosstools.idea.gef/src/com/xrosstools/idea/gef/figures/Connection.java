@@ -1,6 +1,6 @@
 package com.xrosstools.idea.gef.figures;
 
-import com.xrosstools.idea.gef.parts.ConnectionEditPart;
+import com.xrosstools.idea.gef.parts.AbstractConnectionEditPart;
 import com.xrosstools.idea.gef.routers.ConnectionLocator;
 import com.xrosstools.idea.gef.routers.ConnectionRouter;
 import com.xrosstools.idea.gef.routers.PointList;
@@ -28,8 +28,8 @@ public class Connection extends Figure {
         add(targetDecoration, new ConnectionEndpointLocator(false));
     }
 
-    public ConnectionEditPart getConnectionPart() {
-        return (ConnectionEditPart)getPart();
+    public AbstractConnectionEditPart getConnectionPart() {
+        return (AbstractConnectionEditPart)getPart();
     }
 
     public void add(Figure child, ConnectionLocator locator) {
