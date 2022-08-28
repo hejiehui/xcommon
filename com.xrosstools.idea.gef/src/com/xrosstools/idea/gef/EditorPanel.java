@@ -259,19 +259,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         return selected == null ? rootFigure : selected;
     }
 
-    private Command updateHover(Figure underPoint, Command command, Point location) {
+    private void updateHover(Figure underPoint, Point location) {
         underPoint = underPoint == null ? root.getFigure() : underPoint;
 
         if(lastHover != null && lastHover != underPoint)
             lastHover.setInsertionPoint(null);
 
-        if(command != null)
-            underPoint.setInsertionPoint(location);
+        underPoint.setInsertionPoint(location);
 
         unitPanel.repaint();
         lastHover = underPoint;
-
-        return command;
     }
 
     private void clearHover() {
@@ -538,14 +535,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                 return;
 
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, getMoveCommand(underPoint, p), p);
+            updateHover(underPoint, p);
         }
         public void mouseReleased(MouseEvent e) {
             // Drag and drop
             if (lastSelected != null && lastHover != null && lastSelected != lastHover) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
-                execute(updateHover(underPoint, getMoveCommand(underPoint, p), p));
+                updateHover(underPoint, p);
+                execute(getMoveCommand(underPoint, p));
                 return;
             }
 
@@ -575,12 +573,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         public void mouseMoved(MouseEvent e) {
             Point p = e.getPoint();
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, getCreateCommand(underPoint, p), p);
+            updateHover(underPoint, p);
         }
         public void mousePressed(MouseEvent e) {
             Point p = e.getPoint();
             Figure underPoint = findFigureAt(p);
-            Command createCommand = updateHover(underPoint, getCreateCommand(underPoint, p), p);
+            updateHover(underPoint, p);
+            Command createCommand = getCreateCommand(underPoint, p);
 
             if(createCommand != null) {
                 execute(createCommand);
