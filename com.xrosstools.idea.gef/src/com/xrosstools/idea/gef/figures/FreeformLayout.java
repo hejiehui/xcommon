@@ -3,8 +3,16 @@ package com.xrosstools.idea.gef.figures;
 import java.awt.*;
 
 public class FreeformLayout implements LayoutManager {
+    private static final int DEFAULT_MARGIN = 200;
     private int margin = 200;
 
+    public FreeformLayout() {
+        this(DEFAULT_MARGIN);
+    }
+
+    public FreeformLayout(int margin) {
+        this.margin = margin;
+    }
     @Override
     public void setConstraint(Figure figure, Object constraint) {
 
@@ -12,6 +20,8 @@ public class FreeformLayout implements LayoutManager {
 
     @Override
     public Dimension preferredLayoutSize(Figure parent) {
+        int parentX = parent.getLocation().x;
+        int parentY = parent.getLocation().y;
         int width=0;
         int height=0;
 
@@ -19,11 +29,11 @@ public class FreeformLayout implements LayoutManager {
             Dimension size = c.getPreferredSize();
             Point location = c.getLocation();
 
-            int cWidth = c.getX() + (int)size.getWidth();
+            int cWidth = c.getX() + (int)size.getWidth() - parentX;
             if(cWidth > width)
                 width = cWidth;
 
-            int cHeight = c.getY() + (int)size.getHeight();
+            int cHeight = c.getY() + (int)size.getHeight() - parentY;
             if(cHeight > height)
                 height = cHeight;
 
