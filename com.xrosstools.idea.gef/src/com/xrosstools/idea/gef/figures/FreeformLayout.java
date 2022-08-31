@@ -5,6 +5,7 @@ import java.awt.*;
 public class FreeformLayout implements LayoutManager {
     private static final int DEFAULT_MARGIN = 200;
     private int margin = 200;
+    private Point oldParentLocation;
 
     public FreeformLayout() {
         this(DEFAULT_MARGIN);
@@ -20,6 +21,7 @@ public class FreeformLayout implements LayoutManager {
 
     @Override
     public Dimension preferredLayoutSize(Figure parent) {
+        checkParentLocaton(parent);
         int parentX = parent.getLocation().x;
         int parentY = parent.getLocation().y;
         int width=0;
@@ -43,10 +45,31 @@ public class FreeformLayout implements LayoutManager {
 
     @Override
     public void layoutContainer(Figure parent) {
+
         for (Figure c : parent.getComponents()) {
             Dimension size = c.getPreferredSize();
             c.setSize(size);
         }
+    }
+
+    private void checkParentLocaton(Figure parent) {
+        Point parentLocation = parent.getLocation();
+        if(oldParentLocation == null)
+            oldParentLocation = parentLocation;
+
+        if(oldParentLocation.x == parentLocation.x && oldParentLocation.y == parentLocation.y)
+            return;
+
+        int deltaX = parentLocation.x - oldParentLocation.x;
+        int deltaY = parentLocation.y - oldParentLocation.y;
+
+        for (Figure c : parent.getComponents()) {
+            Point loc = c.getLocation();
+            loc.translate(deltaX, deltaY);
+            c.setLocation(loc);
+        }
+
+        oldParentLocation = parentLocation;
     }
 
     @Override
