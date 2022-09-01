@@ -52,10 +52,14 @@ public class FreeformLayout implements LayoutManager {
         }
     }
 
+
     private void checkParentLocaton(Figure parent) {
         Point parentLocation = parent.getLocation();
-        if(oldParentLocation == null)
+        //This is the first time model file is opened, so we just init location
+        if(oldParentLocation == null) {
             oldParentLocation = parentLocation;
+            return;
+        }
 
         if(oldParentLocation.x == parentLocation.x && oldParentLocation.y == parentLocation.y)
             return;

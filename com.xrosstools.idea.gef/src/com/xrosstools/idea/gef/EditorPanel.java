@@ -197,12 +197,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private TreeSelectionListener treeSelectionListener = e -> selectTreeNode();
 
+    private boolean isPopupTrigger(MouseEvent evt) {
+        return evt.isPopupTrigger() || evt.getButton() == MouseEvent.BUTTON3;
+    }
+
     private void postBuild() {
         treeNavigator.addTreeSelectionListener(treeSelectionListener);
 
         treeNavigator.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent evt) {
-                if (evt.isPopupTrigger()) {
+                if (isPopupTrigger(evt)) {
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode)treeNavigator.getLastSelectedPathComponent();
                     if(node == null)
                         return;
@@ -547,7 +551,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                 return;
             }
 
-            if (e.isPopupTrigger())
+            if (isPopupTrigger(e))
                 showContexMenu(e.getX(), e.getY());
         }
         public void mouseClicked(MouseEvent e) {

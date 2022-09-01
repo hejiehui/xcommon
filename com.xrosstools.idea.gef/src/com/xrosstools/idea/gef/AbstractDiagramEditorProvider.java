@@ -4,12 +4,13 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> implements FileEditorProvider {
+public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> implements FileEditorProvider, DumbAware {
     public abstract FileType getFileType();
     public abstract String getExtention();
     public abstract String getEditorTypeId();
