@@ -17,10 +17,8 @@ public class Figure implements ImageObserver {
     private Figure parent;
     private LayoutManager layout;
 
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    //The location are all relative to parent
+    private Rectangle bounds = new Rectangle();
     private int lineWidth = 1;
     private Dimension preferredSize;
     private Dimension minSize;
@@ -60,43 +58,43 @@ public class Figure implements ImageObserver {
     }
 
     public int getX() {
-        return x;
+        return bounds.x;
     }
 
     public int getInnerX() {
-        return x + insets.left;
+        return bounds.x + insets.left;
     }
 
     public int getInnerY() {
-        return y + insets.top;
+        return bounds.y + insets.top;
     }
 
     public void setX(int x) {
-        this.x = x;
+        bounds.x = x;
     }
 
     public int getY() {
-        return y;
+        return bounds.y;
     }
 
     public void setY(int y) {
-        this.y = y;
+        bounds.y = y;
     }
 
     public int getWidth() {
-        return width;
+        return bounds.width;
     }
 
     public void setWidth(int width) {
-        this.width = width;
+        bounds.width = width;
     }
 
     public int getHeight() {
-        return height;
+        return bounds.height;
     }
 
     public void setHeight(int height) {
-        this.height = height;
+        bounds.height = height;
     }
 
     public int getMarginWidth() {
@@ -112,15 +110,15 @@ public class Figure implements ImageObserver {
     }
 
     public Dimension getInnerSize() {
-        return new Dimension(width - getMarginWidth(), height - getMarginHeight());
+        return new Dimension(bounds.width - getMarginWidth(), bounds.height - getMarginHeight());
     }
 
     public int getInnerWidth() {
-        return width - getMarginWidth();
+        return bounds.width - getMarginWidth();
     }
 
     public int getInnerrHeight() {
-        return height - getMarginHeight();
+        return bounds.height - getMarginHeight();
     }
 
     public boolean isSelectable() {
@@ -144,52 +142,49 @@ public class Figure implements ImageObserver {
     }
 
     public Point getLocation() {
-        return new Point(x, y);
+        return bounds.getLocation();
     }
 
     public void setLocation(Point location) {
-        this.x = location.x;
-        this.y = location.y;
+        bounds.setLocation(location);
     }
 
     public void setLocation(int x, int y) {
-        this.x = x;
-        this.y = y;
+        bounds.setLocation(x, y);
     }
 
     public Point getTop() {
-        return new Point(x + width/2, y);
+        return new Point(bounds.x + bounds.width/2, bounds.y);
     }
 
     public Point getLeft() {
-        return new Point(x, y + height/2);
+        return new Point(bounds.x, bounds.y + bounds.height/2);
     }
 
     public Point getBottom() {
-        return new Point(x + width/2, y + height);
+        return new Point(bounds.x + bounds.width/2, bounds.y + bounds.height);
     }
 
     public Point getRight() {
-        return new Point(x + width, y + height/2);
+        return new Point(bounds.x + bounds.width, bounds.y + bounds.height/2);
     }
 
     public Point getCenter() {
-        return new Point(x + width/2, y + height/2);
+        return new Point(bounds.x + bounds.width/2, bounds.y + bounds.height/2);
     }
 
-    public Rectangle getBound() {
-        return new Rectangle(x, y, width, height);
+    public Rectangle getBounds() {
+        return new Rectangle(bounds);
     }
 
     public void setBounds(Rectangle bounds) {
-        x = bounds.x;
-        y = bounds.y;
-        width = bounds.width;
-        height = bounds.height;
+        this.bounds = new Rectangle(bounds);
     }
 
     public final Rectangle getClientArea() {
-        return getBound();
+        Rectangle rect = new Rectangle(getInnerLocation(), getInnerSize());
+        rect.translate(-getX(), -getY());
+        return rect;
     }
 
     public void resizeToPreferredSize() {
@@ -197,16 +192,15 @@ public class Figure implements ImageObserver {
     }
 
     public void setSize(Dimension size) {
-        setSize(size.width,size.height);
+        bounds.setSize(size);
     }
 
     public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
+        bounds.setSize(width, height);
     }
 
     public Dimension getSize() {
-        return new Dimension(width, height);
+        return bounds.getSize();
     }
 
     public void setPreferredSize(Dimension preferredSize) {
@@ -214,15 +208,19 @@ public class Figure implements ImageObserver {
     }
 
     public Dimension getPreferredSize() {
-        preferredSize = layout == null ? getSize() : layout.preferredLayoutSize(this);
+        Dimension d;
+        if(preferredSize != null)
+            d = new Dimension(preferredSize);
+        else
+            d = layout == null ? getSize() : layout.preferredLayoutSize(this);
 
         if(minSize == null)
-            return preferredSize;
+            return d;
 
-        preferredSize.height = Math.max(minSize.height, preferredSize.height);
-        preferredSize.width = Math.max(minSize.width, preferredSize.width);
+        d.height = Math.max(minSize.height, d.height);
+        d.width = Math.max(minSize.width, d.width);
 
-        return preferredSize;
+        return d;
     }
 
     public List<Figure> getComponents() {
@@ -241,8 +239,15 @@ public class Figure implements ImageObserver {
         this.connections = connections;
     }
 
+    public boolean containsPoint(Point hit) {
+        return containsPoint(hit.x, hit.y);
+    }
+
     public boolean containsPoint(int x, int y) {
-        return containsPoint(new Point(x, y));
+        if(visible == false)
+            return false;
+
+        return bounds.contains(x, y);
     }
 
     public Figure selectFigureAt(int x, int y) {
@@ -257,7 +262,7 @@ public class Figure implements ImageObserver {
         Figure found;
         // Check connection first because endpoint of connection may overlap with under figure
         for (Connection conn: connections) {
-            found = conn.findFigureAt(x, y);
+            found = conn.findFigureAt(x - getX(), y - getY());
             if(found == null)
                 continue;
 
@@ -265,28 +270,39 @@ public class Figure implements ImageObserver {
         }
 
         for(Figure child: components) {
-            found = child.findFigureAt(x, y);
+            found = child.findFigureAt(x - getX(), y - getY());
             if(found == null)
                 continue;
 
             return found;
         }
+
         if(!containsPoint(x, y))
             return null;
 
         return this;
     }
 
-    public boolean containsPoint(Point hit) {
-        if(visible == false)
-            return false;
+    public void translateFromParent(Point t) {
+        t.translate(-getBounds().x - getInsets().left, -getBounds().y - getInsets().top);
+    }
 
-        if(x > hit.x || x + width < hit.x)
-            return false;
-        if(y > hit.y || y + height < hit.y)
-            return false;
+    public final void translateToAbsolute(Point t) {
+        if (getParent() != null) {
+            getParent().translateToParent(t);
+            getParent().translateToAbsolute(t);
+        }
+    }
 
-        return true;
+    public void translateToParent(Point t) {
+        t.translate(getBounds().x + getInsets().left, getBounds().y + getInsets().top);
+    }
+
+    public final void translateToRelative(Point t) {
+        if (getParent() != null) {
+            getParent().translateToRelative(t);
+            getParent().translateFromParent(t);
+        }
     }
 
     public Point getInsertionPoint() {
@@ -405,8 +421,17 @@ public class Figure implements ImageObserver {
     }
 
     public void paintChildren(Graphics graphics) {
+        if(components.isEmpty())
+            return;
+
+        graphics.translate(getInnerX(), getInnerY());
+        Dimension innerSize = getInnerSize();
+//        graphics.clipRect(0, 0, innerSize.width, innerSize.height);
+
         for (Figure f: components)
             f.paint(graphics);
+
+        graphics.translate(-getInnerX(), -getInnerY());
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -107,5 +108,11 @@ public class DiagramEditor<T extends IPropertySource> implements FileEditor, Fil
 
     @Override
     public <K> void putUserData(@NotNull Key<K> key, @Nullable K t) {
+    }
+
+
+    @Nullable
+    public VirtualFile getFile() {
+        return contentProvider.getFile();
     }
 }

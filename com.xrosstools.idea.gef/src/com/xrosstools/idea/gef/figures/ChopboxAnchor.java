@@ -14,7 +14,7 @@ public class ChopboxAnchor extends AbstractAnchor {
     public Point getLocation(Point refernce) {
         Figure owner = getOwner();
         //Return null if the point is inside figure
-        if(owner.getBound().contains(refernce))
+        if(owner.getBounds().contains(refernce))
             return null;
 
         Point start = owner.getCenter();

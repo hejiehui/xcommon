@@ -67,7 +67,7 @@ public class Connection extends Figure {
         points.addPoint(getConnectionPart().getTargetAnchor().getLocation(start));
     }
 
-    public Figure findFigureAt(int x, int y) {
+    public Figure findFigureAt(Point absLocation, int x, int y) {
         for(Figure child: children.keySet()) {
             if(child.containsPoint(x, y))
                 return child;

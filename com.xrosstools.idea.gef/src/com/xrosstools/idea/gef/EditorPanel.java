@@ -514,6 +514,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         private Command getMoveCommand(Figure underPoint, Point p) {
             p = new Point(p);
             p.translate(deltaX, deltaY);
+            underPoint.translateToRelative(p);
             return underPoint.getPart().getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
         }
         public void enter() {
@@ -572,6 +573,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
+            underPoint.translateToRelative(p);
             return underPoint.getPart().getEditPolicy().getCreateCommand(newModel, p);
         }
         public void mouseMoved(MouseEvent e) {

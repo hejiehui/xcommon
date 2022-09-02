@@ -98,6 +98,10 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
         return editPolicy;
     }
 
+    public void setLayoutConstraint(EditPart editpart, Figure figure, Object obj) {
+        getFigure().getLayoutManager().setConstraint(figure, obj);
+    }
+
     public boolean isSelectable() {
         return getFigure() != null;
     }

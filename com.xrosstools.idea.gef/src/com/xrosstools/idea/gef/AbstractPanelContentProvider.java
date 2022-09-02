@@ -1,6 +1,7 @@
 package com.xrosstools.idea.gef;
 
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
@@ -10,7 +11,15 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 
 public abstract class AbstractPanelContentProvider<T extends IPropertySource> implements PanelContentProvider<T> {
+    private VirtualFile virtualFile;
     private EditorPanel editorPanel;
+    public VirtualFile getFile() {
+        return virtualFile;
+    }
+
+    public AbstractPanelContentProvider(VirtualFile virtualFile) {
+        this.virtualFile = virtualFile;
+    }
 
     @Override
     public void setEditorPanel(EditorPanel editorPanel) {

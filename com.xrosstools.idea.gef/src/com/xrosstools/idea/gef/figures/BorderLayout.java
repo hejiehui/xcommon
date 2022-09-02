@@ -92,10 +92,7 @@ public class BorderLayout implements LayoutManager {
 
     @Override
     public synchronized void layoutContainer(Figure container) {
-        Point innerLoc = container.getInnerLocation();
-        Dimension innerSize = container.getInnerSize();
-
-        Rectangle area = new Rectangle(innerLoc, innerSize);
+        Rectangle area = container.getClientArea();
         Rectangle rect = new Rectangle();
         if (top != null && top.isVisible()) {
             Dimension childSize = top.getPreferredSize();
@@ -175,6 +172,11 @@ public class BorderLayout implements LayoutManager {
                 left = child;
                 break;
         }
+    }
+
+    @Override
+    public Object getConstraint(Figure figure) {
+        return null;
     }
 
     public void setHorizontalSpacing(int gap) {
