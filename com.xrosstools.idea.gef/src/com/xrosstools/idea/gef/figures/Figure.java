@@ -424,14 +424,14 @@ public class Figure implements ImageObserver {
         if(components.isEmpty())
             return;
 
-        graphics.translate(getInnerX(), getInnerY());
+        graphics.translate(getX(), getY());
         Dimension innerSize = getInnerSize();
 //        graphics.clipRect(0, 0, innerSize.width, innerSize.height);
 
         for (Figure f: components)
             f.paint(graphics);
 
-        graphics.translate(-getInnerX(), -getInnerY());
+        graphics.translate(-getX(), -getY());
     }
 
     @Override

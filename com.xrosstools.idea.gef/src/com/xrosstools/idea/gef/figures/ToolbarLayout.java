@@ -103,8 +103,9 @@ public class ToolbarLayout implements LayoutManager {
     @Override
     public void layoutContainer(Figure parent) {
         synchronized (parent) {
-            Point innerLoc = parent.getInnerLocation();
-            Dimension innerSize = parent.getInnerSize();
+            Rectangle area = parent.getClientArea();
+            Point innerLoc = area.getLocation();
+            Dimension innerSize = area.getSize();
             int px = innerLoc.x;
             int py = innerLoc.y;
 
@@ -118,7 +119,7 @@ public class ToolbarLayout implements LayoutManager {
 
                 switch (alignment) {
                     case ALIGN_CENTER:
-                        minorPos = (int)(middle - minorPos/2);
+                        minorPos = (middle - minorPos/2);
                         break;
                     case ALIGN_TOPLEFT:
                         minorPos = 0;
