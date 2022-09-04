@@ -357,8 +357,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         }
 
         refreshVisual();
-        adjust(innerDiagramPane.getVerticalScrollBar(), lastSelected.getY(), lastSelected.getHeight());
-        adjust(innerDiagramPane.getHorizontalScrollBar(), lastSelected.getX(), lastSelected.getWidth());
+
+        Point pos = lastSelected.getLocation();
+        lastSelected.translateToAbsolute(pos);
+
+        adjust(innerDiagramPane.getVerticalScrollBar(), pos.y, lastSelected.getHeight());
+        adjust(innerDiagramPane.getHorizontalScrollBar(), pos.x, lastSelected.getWidth());
     }
 
     private boolean triggedByFigure = false;
@@ -512,13 +516,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         private Command getMoveCommand(Figure underPoint, Point p) {
             p = new Point(p);
             p.translate(deltaX, deltaY);
-            underPoint.translateToRelative(p);
+            lastSelected.translateToRelative(p);
             return underPoint.getPart().getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
         }
         public void enter() {
             moved = false;
-            deltaX = lastSelected.getX() - lastHit.x;
-            deltaY = lastSelected.getY() - lastHit.y;
+            Point pos = lastSelected.getLocation();
+            lastSelected.translateToAbsolute(pos);
+            deltaX = pos.x - lastHit.x;
+            deltaY = pos.y - lastHit.y;
         }
         public void mouseMoved(MouseEvent e) {
             updateTooltip(e.getPoint());
@@ -571,7 +577,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
-            underPoint.translateToRelative(p);
+            underPoint.getPart().getContentPane().translateToRelative(p);
             return underPoint.getPart().getEditPolicy().getCreateCommand(newModel, p);
         }
         public void mouseMoved(MouseEvent e) {
