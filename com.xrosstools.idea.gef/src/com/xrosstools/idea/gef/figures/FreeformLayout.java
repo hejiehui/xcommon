@@ -45,7 +45,7 @@ public class FreeformLayout implements LayoutManager {
                     if (r.height == -1)
                         r.height = preferredSize.height;
                 }
-                rect.union(r);
+                rect = rect.union(r);
             }
         }
 

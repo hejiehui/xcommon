@@ -445,11 +445,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     }
 
     private void updateVisual() {
-        int height = unitPanel.getPreferredSize().height;
-        innerDiagramPane.getVerticalScrollBar().setMaximum(height);
-
-        int width = unitPanel.getPreferredSize().width;
-        innerDiagramPane.getHorizontalScrollBar().setMaximum(width);
+        Dimension size = unitPanel.getPreferredSize();
+        innerDiagramPane.getVerticalScrollBar().setMaximum(size.height);
+        innerDiagramPane.getHorizontalScrollBar().setMaximum(size.width);
         repaint();
     }
 

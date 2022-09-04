@@ -261,8 +261,11 @@ public class Figure implements ImageObserver {
     public Figure findFigureAt(int x, int y) {
         Figure found;
         // Check connection first because endpoint of connection may overlap with under figure
+
+        Point absLoc = new Point(x, y);
+        translateToAbsolute(absLoc);
         for (Connection conn: connections) {
-            found = conn.findFigureAt(x - getX(), y - getY());
+            found = conn.findFigureAt(absLoc.x, absLoc.y);
             if(found == null)
                 continue;
 
@@ -390,6 +393,10 @@ public class Figure implements ImageObserver {
     }
 
     public void paintSelection(Graphics graphics) {
+        //For root figure, no need to show selection
+        if(parent == null)
+            return;
+
         Stroke s = setLineWidth(graphics, 2);
 
         Color oldColor = graphics.getColor();
