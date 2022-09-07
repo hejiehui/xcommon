@@ -263,7 +263,7 @@ public class Figure implements ImageObserver {
         // Check connection first because endpoint of connection may overlap with under figure
 
         Point absLoc = new Point(x, y);
-        translateToAbsolute(absLoc);
+//        translateToAbsolute(absLoc);
         for (Connection conn: connections) {
             found = conn.findFigureAt(absLoc.x, absLoc.y);
             if(found == null)

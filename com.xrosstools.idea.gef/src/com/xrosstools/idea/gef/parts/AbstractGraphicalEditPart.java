@@ -99,7 +99,7 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     public void setLayoutConstraint(EditPart editpart, Figure figure, Object obj) {
-        getFigure().getLayoutManager().setConstraint(figure, obj);
+        getContentPane().getLayoutManager().setConstraint(figure, obj);
     }
 
     public boolean isSelectable() {

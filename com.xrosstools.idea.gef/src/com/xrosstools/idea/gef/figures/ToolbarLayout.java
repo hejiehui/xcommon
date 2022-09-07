@@ -114,7 +114,11 @@ public class ToolbarLayout implements LayoutManager {
 
             for (Figure c :parent.getComponents()) {
                 Dimension size = c.getPreferredSize();
+
+                size.width = !horizontal && size.width == -1 ? innerSize.width : size.width;
+                size.height = horizontal && size.height == -1 ? innerSize.height: size.height;
                 c.setSize(size);
+
                 int minorPos = horizontal ? size.height : size.width;
 
                 switch (alignment) {
