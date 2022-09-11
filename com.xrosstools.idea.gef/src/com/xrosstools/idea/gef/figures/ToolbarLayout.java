@@ -67,13 +67,11 @@ public class ToolbarLayout implements LayoutManager {
     @Override
     public Dimension preferredLayoutSize(Figure parent) {
         synchronized (parent) {
-            Insets ins = parent.getInsets();
             int count = parent.getComponentCount();
             int width = 0;
             int height = 0;
             for(Figure c: parent.getComponents()) {
                 Dimension size = c.getPreferredSize();
-//                c.setSize(size);
                 if (horizontal) {
                     width += size.width;
                     height = Math.max(height, size.height);
@@ -91,8 +89,6 @@ public class ToolbarLayout implements LayoutManager {
             width += parent.getMarginWidth();
             height += parent.getMarginHeight();
             return new Dimension(width, height);
-//            parent.setSize(width, height);
-//            return parent.getSize();
         }
     }
 
@@ -104,10 +100,9 @@ public class ToolbarLayout implements LayoutManager {
     public void layoutContainer(Figure parent) {
         synchronized (parent) {
             Rectangle area = parent.getClientArea();
-            Point innerLoc = area.getLocation();
             Dimension innerSize = area.getSize();
-            int px = innerLoc.x;
-            int py = innerLoc.y;
+            int px = 0;
+            int py = 0;
 
             int middle = horizontal ? innerSize.height/2 : innerSize.width/2;
             int nextPos = 0;

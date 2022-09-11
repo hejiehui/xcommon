@@ -93,6 +93,7 @@ public class BorderLayout implements LayoutManager {
     @Override
     public synchronized void layoutContainer(Figure container) {
         Rectangle area = container.getClientArea();
+        area.setLocation(0, 0);
         Rectangle rect = new Rectangle();
         if (top != null && top.isVisible()) {
             Dimension childSize = top.getPreferredSize();

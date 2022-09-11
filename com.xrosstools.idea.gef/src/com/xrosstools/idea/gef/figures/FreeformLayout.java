@@ -49,14 +49,11 @@ public class FreeformLayout implements LayoutManager {
             }
         }
 
-        Insets insets = parent.getInsets();
-        return (new Dimension(rect.width + parent.getMarginWidth(), rect.height + parent.getMarginHeight()));
+        return (new Dimension(rect.width + parent.getMarginWidth() + margin, rect.height + parent.getMarginHeight() + margin));
     }
 
     @Override
     public void layoutContainer(Figure parent) {
-        Point offset = getOrigin(parent);
-
         for (Figure c : parent.getComponents()) {
             Rectangle bounds = (Rectangle) getConstraint(c);
             if (bounds != null) {
@@ -68,7 +65,6 @@ public class FreeformLayout implements LayoutManager {
                     if (bounds.height == -1)
                         bounds.height = preferredSize.height;
                 }
-                bounds.translate(offset.x, offset.y);
                 c.setBounds(bounds);
             }
         }

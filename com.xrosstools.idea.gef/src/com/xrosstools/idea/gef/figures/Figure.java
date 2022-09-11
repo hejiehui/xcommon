@@ -25,6 +25,8 @@ public class Figure implements ImageObserver {
 
     private boolean visible = true;
     private boolean selected = false;
+    private boolean showSourceFeedback = false;
+    private boolean showTargetFeedback = false;
     private List<Figure> components = new ArrayList<>();
     private List<Connection> connections = new ArrayList<>();
     private Insets insets = new Insets(0, 0, 0, 0);
@@ -131,6 +133,14 @@ public class Figure implements ImageObserver {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public void setShowSourceFeedback(boolean showSourceFeedback) {
+        this.showSourceFeedback = showSourceFeedback;
+    }
+
+    public void setShowTargetFeedback(boolean showTargetFeedback) {
+        this.showTargetFeedback = showTargetFeedback;
     }
 
     public LayoutManager getLayoutManager() {
@@ -262,10 +272,8 @@ public class Figure implements ImageObserver {
         Figure found;
         // Check connection first because endpoint of connection may overlap with under figure
 
-        Point absLoc = new Point(x, y);
-//        translateToAbsolute(absLoc);
         for (Connection conn: connections) {
-            found = conn.findFigureAt(absLoc.x, absLoc.y);
+            found = conn.findFigureAt(x, y);
             if(found == null)
                 continue;
 
@@ -273,7 +281,7 @@ public class Figure implements ImageObserver {
         }
 
         for(Figure child: components) {
-            found = child.findFigureAt(x - getX(), y - getY());
+            found = child.findFigureAt(x - getInnerX(), y - getInnerY());
             if(found == null)
                 continue;
 
@@ -390,9 +398,45 @@ public class Figure implements ImageObserver {
 
         if(isSelected())
             paintSelection(graphics);
+
+        if(showSourceFeedback)
+            paintSourceFeedback(graphics);
+
+        if(showTargetFeedback)
+            paintTagetFeedback(graphics);
     }
 
     public void paintSelection(Graphics graphics) {
+        //For root figure, no need to show selection
+        if(parent == null)
+            return;
+
+        Stroke s = setLineWidth(graphics, 2);
+
+        Color oldColor = graphics.getColor();
+        graphics.setColor(SELECTION_LINE_COLOR);
+        graphics.drawRect(getX() - SELECTION_GAP, getY() - SELECTION_GAP, getWidth() + SELECTION_GAP*3, getHeight() + SELECTION_GAP*3);
+        graphics.setColor(oldColor);
+
+        restore(graphics, s);
+    }
+
+    public void paintSourceFeedback(Graphics graphics) {
+        //For root figure, no need to show selection
+        if(parent == null)
+            return;
+
+        Stroke s = setLineWidth(graphics, 2);
+
+        Color oldColor = graphics.getColor();
+        graphics.setColor(SELECTION_LINE_COLOR);
+        graphics.drawRect(getX() - SELECTION_GAP, getY() - SELECTION_GAP, getWidth() + SELECTION_GAP*3, getHeight() + SELECTION_GAP*3);
+        graphics.setColor(oldColor);
+
+        restore(graphics, s);
+    }
+
+    public void paintTagetFeedback(Graphics graphics) {
         //For root figure, no need to show selection
         if(parent == null)
             return;
@@ -431,14 +475,10 @@ public class Figure implements ImageObserver {
         if(components.isEmpty())
             return;
 
-        graphics.translate(getX(), getY());
-        Dimension innerSize = getInnerSize();
-//        graphics.clipRect(0, 0, innerSize.width, innerSize.height);
-
+        graphics.translate(getInnerX(), getInnerY());
         for (Figure f: components)
             f.paint(graphics);
-
-        graphics.translate(-getX(), -getY());
+        graphics.translate(-getInnerX(), -getInnerY());
     }
 
     @Override

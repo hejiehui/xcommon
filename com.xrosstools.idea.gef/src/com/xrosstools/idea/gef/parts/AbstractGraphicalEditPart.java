@@ -114,13 +114,21 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
         return selected;
     }
 
-    public void showSourceFeedback() {}
+    public void showSourceFeedback() {
+        getFigure().setShowSourceFeedback(true);
+    }
 
-    public void eraseSourceFeedback() {}
+    public void eraseSourceFeedback() {
+        getFigure().setShowSourceFeedback(false);
+    }
 
-    public void showTargetFeedback() {}
+    public void showTargetFeedback() {
+        getFigure().setShowTargetFeedback(true);
+    }
 
-    public void eraseTargetFeedback() {}
+    public void eraseTargetFeedback() {
+        getFigure().setShowTargetFeedback(false);
+    }
 
     public AbstractAnchor getSourceConnectionAnchor(AbstractConnectionEditPart connectionEditPart) {
         return new ChopboxAnchor(getFigure());

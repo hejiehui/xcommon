@@ -46,6 +46,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     private PropertyTableModel tableModel;
     private Figure lastSelected;
     private Figure lastHover;
+    private Point lastHoverlocation;
+    private Point delta;
+    private boolean moved;
+
+    private Figure lastSelectableSource;
+    private Figure lastSelectableTarget;
+
     private Object newModel;
     private AbstractGraphicalEditPart sourcePart;
 
@@ -271,16 +278,21 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
         underPoint.setInsertionPoint(location);
 
+       lastHoverlocation = location;
         unitPanel.repaint();
         lastHover = underPoint;
     }
 
     private void clearHover() {
-        if(lastHover != null) {
-            lastHover.setInsertionPoint(null);
-            unitPanel.repaint();
-            lastHover = null;
-        }
+        if(lastHover == null)
+            return;
+
+        lastHover.setInsertionPoint(null);
+        unitPanel.repaint();
+        lastHover = null;
+        lastHoverlocation = null;
+        delta = null;
+        repaint();
     }
 
     private void registerListener() {
@@ -459,6 +471,19 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         @Override
         protected void paintChildren(Graphics g) {
             root.getFigure().paint(g);
+            paintDraggedSelection(g);
+        }
+
+        protected void paintDraggedSelection(Graphics g) {
+            if(!moved)
+                return;
+
+            Point location = lastSelected.getLocation();
+            lastHoverlocation.translate(delta.x, delta.y);
+            lastSelected.setLocation(lastHoverlocation);
+            g.setXORMode(lastSelected.getForegroundColor() == null ? Color.white : lastSelected.getForegroundColor());
+            lastSelected.paintComponent(g);
+            lastSelected.setLocation(location);
         }
 
         @Override
@@ -495,6 +520,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
             newModel = null;
             sourcePart = null;
+
+            clearHover();
             treeNavigator.clearSelection();
 
             refreshVisual();
@@ -510,12 +537,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     };
 
     private InteractionHandle figureSelected = new InteractionHandle("figureSelected") {
-        private boolean moved;
-        public int deltaX;
-        public int deltaY;
         private Command getMoveCommand(Figure underPoint, Point p) {
             p = new Point(p);
-            p.translate(deltaX, deltaY);
+            p.translate(delta.x, delta.y);
             lastSelected.translateToRelative(p);
             return underPoint.getPart().getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
         }
@@ -523,8 +547,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             moved = false;
             Point pos = lastSelected.getLocation();
             lastSelected.translateToAbsolute(pos);
-            deltaX = pos.x - lastHit.x;
-            deltaY = pos.y - lastHit.y;
+            delta = new Point();
+            delta.x = pos.x - lastHit.x;
+            delta.y = pos.y - lastHit.y;
         }
         public void mouseMoved(MouseEvent e) {
             updateTooltip(e.getPoint());
@@ -547,6 +572,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             updateHover(underPoint, p);
         }
         public void mouseReleased(MouseEvent e) {
+            moved = false;
             // Drag and drop
             if (lastSelected != null && lastHover != null && lastSelected != lastHover) {
                 Point p = e.getPoint();
@@ -606,10 +632,19 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     private InteractionHandle connectionCreated = new InteractionHandle("connectionCreated") {
         public void mouseMoved(MouseEvent e) {
             Figure f = findFigureAt(e.getPoint());
-            if(f.getPart().getEditPolicy().isSelectableSource(newModel))
+
+            if(f == lastSelectableSource)
+                return;
+
+            eraseSourceFeedback();
+            if(f.getPart().getEditPolicy().isSelectableSource(newModel)) {
                 f.getPart().showSourceFeedback();
+                lastSelectableSource = f;
+                repaint();
+            }
         }
         public void mousePressed(MouseEvent e) {
+            eraseSourceFeedback();
             Figure f = findFigureAt(e.getPoint());
             if(f.getPart().getEditPolicy().isSelectableSource(newModel)) {
                 sourcePart = f.getPart();
@@ -619,8 +654,18 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             }
         }
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+            if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                eraseSourceFeedback();
                 gotoNext(ready);
+            }
+        }
+
+        private void eraseSourceFeedback() {
+            if(lastSelectableSource != null) {
+                lastSelectableSource.getPart().eraseSourceFeedback();
+                lastSelectableSource = null;
+                repaint();
+            }
         }
     };
 
@@ -630,10 +675,20 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         }
         public void mouseMoved(MouseEvent e) {
             Figure f = findFigureAt(e.getPoint());
-            if(getCreateConnectionCommand(f) != null)
+            if (f == lastSelectableTarget)
+                return;
+
+            eraseTargetFeedback();
+
+            if (getCreateConnectionCommand(f) != null) {
                 f.getPart().showTargetFeedback();
+                lastSelectableTarget = f;
+                repaint();
+            }
         }
+
         public void mousePressed(MouseEvent e) {
+            eraseTargetFeedback();
             Figure f = findFigureAt(e.getPoint());
             Command createConnectionCmd = getCreateConnectionCommand(f);
 
@@ -644,8 +699,18 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             gotoNext(ready);
         }
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+            if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                eraseTargetFeedback();
                 gotoNext(ready);
+            }
+        }
+
+        private void eraseTargetFeedback() {
+            if(lastSelectableTarget != null) {
+                lastSelectableTarget.getPart().eraseTargetFeedback();
+                lastSelectableTarget = null;
+                repaint();
+            }
         }
     };
 
