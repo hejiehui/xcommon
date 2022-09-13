@@ -422,33 +422,19 @@ public class Figure implements ImageObserver {
     }
 
     public void paintSourceFeedback(Graphics graphics) {
-        //For root figure, no need to show selection
-        if(parent == null)
-            return;
-
-        Stroke s = setLineWidth(graphics, 2);
-
-        Color oldColor = graphics.getColor();
-        graphics.setColor(SELECTION_LINE_COLOR);
-        graphics.drawRect(getX() - SELECTION_GAP, getY() - SELECTION_GAP, getWidth() + SELECTION_GAP*3, getHeight() + SELECTION_GAP*3);
-        graphics.setColor(oldColor);
-
-        restore(graphics, s);
+        paintSelection(graphics);
     }
 
     public void paintTagetFeedback(Graphics graphics) {
-        //For root figure, no need to show selection
-        if(parent == null)
-            return;
+        paintSelection(graphics);
+    }
 
-        Stroke s = setLineWidth(graphics, 2);
-
-        Color oldColor = graphics.getColor();
-        graphics.setColor(SELECTION_LINE_COLOR);
-        graphics.drawRect(getX() - SELECTION_GAP, getY() - SELECTION_GAP, getWidth() + SELECTION_GAP*3, getHeight() + SELECTION_GAP*3);
-        graphics.setColor(oldColor);
-
-        restore(graphics, s);
+    public void paintDragFeedback(Graphics graphics, Point lastHoverlocation) {
+        Point location = getLocation();
+        setLocation(lastHoverlocation);
+        graphics.setXORMode(getForegroundColor() == null ? Color.white : getForegroundColor());
+        paintComponent(graphics);
+        setLocation(location);
     }
 
     public void paintComponent(Graphics graphics) {}

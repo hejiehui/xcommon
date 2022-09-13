@@ -7,12 +7,6 @@ public abstract class AbstractConnectionEditPart extends AbstractGraphicalEditPa
     private AbstractGraphicalEditPart source;
     private AbstractGraphicalEditPart target;
 
-//    @Override
-//    public void remove() {
-//        getSource().removeSourceConnection(this);
-//        getTarget().removeTargetConnection(this);
-//    }
-
     public AbstractGraphicalEditPart getSource() {
         return source;
     }

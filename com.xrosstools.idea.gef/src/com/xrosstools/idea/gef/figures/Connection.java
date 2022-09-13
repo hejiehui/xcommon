@@ -1,6 +1,7 @@
 package com.xrosstools.idea.gef.figures;
 
 import com.xrosstools.idea.gef.parts.AbstractConnectionEditPart;
+import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
 import com.xrosstools.idea.gef.routers.ConnectionLocator;
 import com.xrosstools.idea.gef.routers.ConnectionRouter;
 import com.xrosstools.idea.gef.routers.PointList;
@@ -10,6 +11,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Connection extends Figure {
+    private AbstractGraphicalEditPart sourcePart;
+    private boolean showSourceFeedback;
+    private Object feedbackTarget;
+
     private Endpoint sourceEndpoint;
     private Endpoint targetEndpoint;
     private PointList points = new PointList();
@@ -39,17 +44,17 @@ public class Connection extends Figure {
 
     @Override
     public void layout() {
-        points.removeAllPoints();
         layoutEndpoints();
-
+        layout(points);
         if(router != null)
             router.route(this);
+    }
 
+    public void layout(PointList pointList) {
         for(Map.Entry<Figure, ConnectionLocator> childEntry: children.entrySet()) {
-            childEntry.getKey().setLocation(childEntry.getValue().getLocation(points));
+            childEntry.getKey().setLocation(childEntry.getValue().getLocation(pointList));
             childEntry.getKey().setSize(childEntry.getKey().getPreferredSize());
             childEntry.getKey().layout();
-
         }
     }
 
@@ -57,17 +62,67 @@ public class Connection extends Figure {
      * Layout start and end point of the connection
      */
     public void layoutEndpoints() {
-        Figure sourceFigure = getConnectionPart().getSourceFigure();
-        Figure targetFigure = getConnectionPart().getTargetFigure();
+        points.removeAllPoints();
 
-        Point start = sourceFigure.getCenter();
-        Point end = targetFigure.getCenter();
+        Point start = getSourceReferencePoint();
+        Point end = getTargetReferencePoint();
 
-        points.addPoint(getConnectionPart().getSourceAnchor().getLocation(end));
-        points.addPoint(getConnectionPart().getTargetAnchor().getLocation(start));
+        points.addPoint(getSourcePoint(end));
+        points.addPoint(getTargetPoint(start));
+    }
+
+    private Point getSourceReferencePoint() {
+        if(feedbackTarget == null || showSourceFeedback == false)
+            return getConnectionPart().getSourceFigure().getCenter();
+
+        return getReferencePoint();
+    }
+
+    private Point getTargetReferencePoint() {
+        if(feedbackTarget == null || showSourceFeedback == true)
+            return getConnectionPart().getTargetFigure().getCenter();
+
+        return getReferencePoint();
+    }
+
+    private Point getReferencePoint() {
+        return feedbackTarget instanceof Point ? (Point)feedbackTarget : ((Figure)feedbackTarget).getCenter();
+    }
+
+    private Point getSourcePoint(Point end) {
+        if(feedbackTarget == null || (feedbackTarget != null && showSourceFeedback == false))
+            return getConnectionPart().getSourceAnchor().getLocation(end);
+
+        return getAnchorLocation(end);
+    }
+
+    private Point getTargetPoint(Point start) {
+        if(feedbackTarget == null || (feedbackTarget != null && showSourceFeedback == true))
+            return getConnectionPart().getTargetAnchor().getLocation(start);
+
+        return getAnchorLocation(start);
+    }
+
+    private Point getAnchorLocation(Point referencePoint) {
+        if(feedbackTarget instanceof Point)
+            return (Point)feedbackTarget;
+
+        Figure figure = (Figure)feedbackTarget;
+        AbstractAnchor anchor = showSourceFeedback ?
+                figure.getPart().getSourceConnectionAnchor(getConnectionPart()) :
+                figure.getPart().getTargetConnectionAnchor(getConnectionPart());
+
+        return anchor.getLocation(referencePoint);
+    }
+
+    public void setSourcePart(AbstractGraphicalEditPart sourcePart) {
+        this.sourcePart = sourcePart;
     }
 
     public Figure findFigureAt(int x, int y) {
+        if(feedbackTarget != null)
+            return null;
+
         for(Figure child: children.keySet()) {
             if(child.containsPoint(x, y))
                 return child;
@@ -89,6 +144,65 @@ public class Connection extends Figure {
         graphics.drawPolyline(points.getXPoints(), points.getYPoints(), points.getPoints());
 
         restore(graphics, s);
+    }
+
+    public void paintCreationFeedback(Graphics graphics) {
+        Figure sourceFigure = sourcePart.getFigure();
+
+        if(sourceFigure == feedbackTarget || feedbackTarget == null)
+            return;
+
+        Point zero = sourceFigure.getParent().getLocation();
+        sourceFigure.getParent().translateToAbsolute(zero);
+        graphics.translate(zero.x, zero.y);
+
+
+        points.removeAllPoints();
+
+        Point start, end;
+        if(feedbackTarget instanceof Point) {
+            start = new ChopboxAnchor(sourceFigure).getLocation((Point) feedbackTarget);
+            end = (Point)feedbackTarget;
+        } else {
+            start = new ChopboxAnchor(sourceFigure).getLocation(((Figure)feedbackTarget).getCenter());
+            end = new ChopboxAnchor((Figure)feedbackTarget).getLocation(sourceFigure.getCenter());
+        }
+        points.addPoint(start);
+        points.addPoint(end);
+
+        layout(points);
+        paintComponent(graphics);
+        paintChildren(graphics);
+
+        graphics.translate(-zero.x, -zero.y);
+    }
+
+    public void clearFeedback() {
+        feedbackTarget = null;
+    }
+
+    public void relocateSourceFeedback(Object lastHoverlocation) {
+        showSourceFeedback = true;
+        setFeedback(lastHoverlocation);
+    }
+
+    public void relocateTargetFeedback(Object lastHoverlocation) {
+        showSourceFeedback = false;
+        setFeedback(lastHoverlocation);
+    }
+
+    private void setFeedback(Object feedbackTarget) {
+        if (feedbackTarget == null) {
+            clearFeedback();
+            return;
+        }
+
+        if (feedbackTarget instanceof Point) {
+            Point feedbackLocation = new Point((Point)feedbackTarget);
+            (getConnectionPart() == null ? sourcePart.getFigure() : getConnectionPart().getSourceFigure()).translateToRelative(feedbackLocation);
+            this.feedbackTarget = feedbackLocation;
+        }else
+            this.feedbackTarget = feedbackTarget;
     }
 
     @Override
