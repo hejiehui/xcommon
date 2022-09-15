@@ -596,7 +596,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
-            underPoint.getPart().getContentPane().translateToRelative(p);
+            Figure contentPanel = underPoint.getPart().getContentPane();
+            contentPanel.translateToRelative(p);
+            contentPanel.translateFromParent(p);
             return underPoint.getPart().getEditPolicy().getCreateCommand(newModel, p);
         }
         public void mouseMoved(MouseEvent e) {

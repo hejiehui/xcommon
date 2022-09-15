@@ -111,7 +111,7 @@ public class DiagramEditor<T extends IPropertySource> implements FileEditor, Fil
     }
 
 
-    @Nullable
+    @NotNull
     public VirtualFile getFile() {
         return contentProvider.getFile();
     }
