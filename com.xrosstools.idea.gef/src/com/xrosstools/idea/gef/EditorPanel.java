@@ -15,6 +15,7 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
 import com.xrosstools.idea.gef.util.SimpleTableRenderer;
+import org.apache.commons.httpclient.methods.multipart.Part;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
@@ -527,7 +528,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             p = new Point(p);
             p.translate(delta.x, delta.y);
             lastSelected.translateToRelative(p);
-            return underPoint.getPart().getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
+            AbstractGraphicalEditPart parentPart = underPoint == lastSelected ? (AbstractGraphicalEditPart)lastSelected.getPart().getParent() : underPoint.getPart();
+            return parentPart.getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
         }
         public void enter() {
             moved = false;
@@ -560,12 +562,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         public void mouseReleased(MouseEvent e) {
             moved = false;
             // Drag and drop
-            if (lastSelected != null && lastHover != null && lastSelected != lastHover) {
+            if (lastSelected != null && lastHover != null) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
                 updateHover(underPoint, p);
-                execute(getMoveCommand(underPoint, p));
-                return;
+                if(underPoint.getPart() == lastSelected.getPart().getParent() || underPoint == lastSelected)
+                    execute(getMoveCommand(underPoint, p));
             }
 
             if (isPopupTrigger(e))

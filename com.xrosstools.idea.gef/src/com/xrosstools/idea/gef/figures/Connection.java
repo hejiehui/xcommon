@@ -46,11 +46,11 @@ public class Connection extends Figure {
     public void layout() {
         layoutEndpoints();
         layout(points);
-        if(router != null)
-            router.route(this);
     }
 
     public void layout(PointList pointList) {
+        if(router != null)
+            router.route(this);
         for(Map.Entry<Figure, ConnectionLocator> childEntry: children.entrySet()) {
             childEntry.getKey().setLocation(childEntry.getValue().getLocation(pointList));
             childEntry.getKey().setSize(childEntry.getKey().getPreferredSize());
