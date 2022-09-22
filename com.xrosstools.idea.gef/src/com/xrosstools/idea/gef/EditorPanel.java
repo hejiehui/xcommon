@@ -7,20 +7,18 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.xrosstools.idea.gef.commands.Command;
-import com.xrosstools.idea.gef.figures.Connection;
-import com.xrosstools.idea.gef.figures.Endpoint;
-import com.xrosstools.idea.gef.figures.Figure;
+import com.xrosstools.idea.gef.figures.*;
 import com.xrosstools.idea.gef.parts.*;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
 import com.xrosstools.idea.gef.util.SimpleTableRenderer;
-import org.apache.commons.httpclient.methods.multipart.Part;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.util.Enumeration;
 
@@ -271,14 +269,19 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         }
 
         if(cmd != null && underPoint != lastSelected) {
-            Figure contentPanel = underPoint.getPart().getContentPane();
-            Point localLocation = new Point(location);
-            contentPanel.translateToRelative(localLocation);
-            contentPanel.translateFromParent(localLocation);
-            contentPanel.setInsertionPoint(localLocation);
+            Figure contentPane = underPoint.getPart().getContentPane();
+            boolean toolbarLayout = contentPane.getLayoutManager() instanceof ToolbarLayout;
+            //When moving figure arround, we don't show insertion feedback if it is not toobar layout
+            //I know it is not very elegant, but I don't have better solution for now
+            if(toolbarLayout || !toolbarLayout && newModel != null) {
+                Point localLocation = new Point(location);
+                contentPane.translateToRelative(localLocation);
+                contentPane.translateFromParent(localLocation);
+                contentPane.setInsertionPoint(localLocation);
+            }
         }
 
-        lastHoverlocation = location;
+        K:lastHoverlocation = location;
         unitPanel.repaint();
         lastHover = underPoint;
     }
@@ -532,14 +535,24 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         private boolean moved;
         private Point delta;
 
-        private Command getMoveCommand(Figure underPoint, Point p) {
-            if(underPoint.getPart() != lastSelected.getPart().getParent() && underPoint != lastSelected)
-                return null;
-
+        private Command getCommand(Figure underPoint, Point p) {
             p = new Point(p);
             p.translate(delta.x, delta.y);
-            lastSelected.translateToRelative(p);
+            if(underPoint.getPart() != lastSelected.getPart().getParent() && underPoint != lastSelected)
+                return getAddCommand(underPoint, p);
+            else
+                return getMoveCommand(underPoint, p);
+        }
+        private Command getAddCommand(Figure underPoint, Point p) {
+            underPoint.getPart().getContentPane().translateToRelative(p);
+            AbstractGraphicalEditPart newParentPart = underPoint.getPart();
+            if(newParentPart == null || !newParentPart.getContentPane().containsPoint(p))
+                return null;
 
+            return newParentPart.getEditPolicy().getAddCommand(newParentPart, lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
+        }
+        private Command getMoveCommand(Figure underPoint, Point p) {
+            lastSelected.translateToRelative(p);
             AbstractGraphicalEditPart parentPart = (AbstractGraphicalEditPart)lastSelected.getPart().getParent();
             if(parentPart == null || !parentPart.getContentPane().containsPoint(p))
                 return null;
@@ -572,7 +585,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                 return;
 
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, p, getMoveCommand(underPoint, p));
+            updateHover(underPoint, p, getCommand(underPoint, p));
         }
         public void mouseReleased(MouseEvent e) {
             moved = false;
@@ -580,7 +593,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             if (lastSelected != null && lastHover != null) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
-                Command moveCmd = getMoveCommand(underPoint, p);
+                Command moveCmd = getCommand(underPoint, p);
                 updateHover(underPoint, p, moveCmd);
                 execute(moveCmd);
             }
@@ -614,9 +627,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
             p = new Point(p);
-            Figure contentPanel = underPoint.getPart().getContentPane();
-            contentPanel.translateToRelative(p);
-            contentPanel.translateFromParent(p);
+            Figure contentPane = underPoint.getPart().getContentPane();
+            contentPane.translateToRelative(p);
+            contentPane.translateFromParent(p);
             return underPoint.getPart().getEditPolicy().getCreateCommand(newModel, p);
         }
         public void mouseMoved(MouseEvent e) {

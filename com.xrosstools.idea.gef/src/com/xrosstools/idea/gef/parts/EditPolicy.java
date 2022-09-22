@@ -29,9 +29,14 @@ public class EditPolicy {
     public Command getCreateCommand(Object newModel, Point location) {return null;}
 
     /**
-     * Move an element from elsewhere
+     * Move an element within parent
      */
     public Command getMoveCommand(AbstractGraphicalEditPart child, Rectangle constraint) {return null;}
+
+    /**
+     * Move an element from elsewhere
+     */
+    public Command getAddCommand(AbstractGraphicalEditPart target, AbstractGraphicalEditPart child, Rectangle constraint) {return null;}
 
     /**
      * Change size and/or location
