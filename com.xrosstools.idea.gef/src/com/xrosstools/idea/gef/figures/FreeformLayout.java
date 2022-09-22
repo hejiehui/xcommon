@@ -9,6 +9,7 @@ public class FreeformLayout implements LayoutManager {
     private static final int DEFAULT_MARGIN = 200;
     private int margin = 200;
     private Map constraints = new HashMap();
+    private static final int CROSS_WIDTH = 15;
 
     public FreeformLayout() {
         this(DEFAULT_MARGIN);
@@ -76,5 +77,10 @@ public class FreeformLayout implements LayoutManager {
     }
 
     @Override
-    public void paintInsertionFeedback(Figure parent, Point insertionPoint, Graphics gef) {}
+    public void paintInsertionFeedback(Figure parent, Point insertionPoint, Graphics gef) {
+        int centerX = parent.getInnerX() + insertionPoint.x;
+        int centerY = parent.getInnerY() + insertionPoint.y;
+        gef.drawLine(centerX - CROSS_WIDTH, centerY, centerX + CROSS_WIDTH, centerY);
+        gef.drawLine(centerX, centerY - CROSS_WIDTH, centerX, centerY + CROSS_WIDTH);
+    }
 }

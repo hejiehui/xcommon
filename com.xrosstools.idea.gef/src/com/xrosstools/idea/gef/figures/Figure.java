@@ -324,8 +324,8 @@ public class Figure implements ImageObserver {
         this.insertionPoint = insertionPoint;
     }
 
-    public int getInsertionIndex() {
-        return layout.getInsertionIndex(this, insertionPoint);
+    public int getInsertionIndex(Point location) {
+        return layout.getInsertionIndex(this, location);
     }
 
     public void layout() {
@@ -393,6 +393,7 @@ public class Figure implements ImageObserver {
 
         layout();
         paintComponent(graphics);
+        paintInsertionFeedback(graphics);
         paintChildren(graphics);
         painLink(graphics);
 
@@ -438,6 +439,11 @@ public class Figure implements ImageObserver {
     }
 
     public void paintComponent(Graphics graphics) {}
+
+    public void paintInsertionFeedback(Graphics graphics){
+        if(layout != null && insertionPoint != null)
+            layout.paintInsertionFeedback(this, insertionPoint, graphics);
+    }
 
     public Stroke setLineWidth(Graphics graphics, int size) {
         Graphics2D g2 = (Graphics2D)graphics;

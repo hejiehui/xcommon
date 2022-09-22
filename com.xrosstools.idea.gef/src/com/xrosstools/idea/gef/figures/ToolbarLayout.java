@@ -10,8 +10,6 @@ public class ToolbarLayout implements LayoutManager {
     /** Constant to specify components to be aligned on the right/bottom */
     public static final int ALIGN_BOTTOMRIGHT = 2;
 
-    private static final int BORDER_WIDTH = 5;
-
     private boolean horizontal;
     private int alignment;
     private int gap;
@@ -159,30 +157,33 @@ public class ToolbarLayout implements LayoutManager {
         if(insertionIndex == 0) {
             Figure child = parent.getComponents().get(0);
             if(vertical)
-                insertionY = child.getY() - BORDER_WIDTH;
+                insertionY = parent.getInsets().top/2;
             else
-                insertionX = child.getX() - BORDER_WIDTH;
+                insertionX = parent.getInsets().left/2;;
         } else if (insertionIndex < parent.getComponentCount()) {
             Figure child = parent.getComponents().get(insertionIndex);
             if(vertical)
-                insertionY = child.getY() - gap / 2;
+                insertionY = parent.getInnerY() + child.getY() - gap / 2;
             else
-                insertionX = child.getX() - gap / 2;
+                insertionX = parent.getInnerX() + child.getX() - gap / 2;
         } else {
             Figure child = parent.getComponents().get(insertionIndex -1);
             if (vertical)
-                insertionY = child .getY() + child.getHeight() + BORDER_WIDTH;
+                insertionY = parent.getHeight() - parent.getInsets().bottom/2;
             else
-                insertionX = child .getX() + child.getWidth() + BORDER_WIDTH;
+                insertionX = parent.getWidth() - parent.getInsets().right/2;;
         }
 
         if(vertical)
-            gef.drawLine(parent.getX(), insertionY, parent.getX() + parent.getWidth(), insertionY);
+            gef.drawLine(parent.getInnerX(), insertionY, parent.getInnerX() + parent.getInnerWidth(), insertionY);
         else
-            gef.drawLine(insertionX, parent.getY(), insertionX, parent.getY() + parent.getHeight());
+            gef.drawLine(insertionX, parent.getInnerY(), insertionX, parent.getInnerY() + parent.getInnerrHeight());
     }
 
     public int getInsertionIndex(Figure parent, Point insertionPoint) {
+        if(insertionPoint == null)
+            return 0;
+
         int insertionIndex = 0;
 
         /* for two element, t

@@ -263,15 +263,22 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         return selected == null ? rootFigure : selected;
     }
 
-    private void updateHover(Figure underPoint, Point location) {
+    private void updateHover(Figure underPoint, Point location, Command cmd) {
         underPoint = underPoint == null ? root.getFigure() : underPoint;
 
-        if(lastHover != null && lastHover != underPoint)
-            lastHover.setInsertionPoint(null);
+        if(lastHover != null && lastHover != underPoint) {
+            lastHover.getPart().getContentPane().setInsertionPoint(null);
+        }
 
-        underPoint.setInsertionPoint(location);
+        if(cmd != null && underPoint != lastSelected) {
+            Figure contentPanel = underPoint.getPart().getContentPane();
+            Point localLocation = new Point(location);
+            contentPanel.translateToRelative(localLocation);
+            contentPanel.translateFromParent(localLocation);
+            contentPanel.setInsertionPoint(localLocation);
+        }
 
-       lastHoverlocation = location;
+        lastHoverlocation = location;
         unitPanel.repaint();
         lastHover = underPoint;
     }
@@ -280,7 +287,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         if(lastHover == null)
             return;
 
-        lastHover.setInsertionPoint(null);
+        lastHover.getPart().getContentPane().setInsertionPoint(null);
         unitPanel.repaint();
         lastHover = null;
         lastHoverlocation = null;
@@ -465,6 +472,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     private class UnitPanel extends JPanel {
         @Override
         protected void paintChildren(Graphics g) {
+            root.getFigure().layout();
             root.getFigure().paint(g);
             curHandle.paint(g);
         }
@@ -475,7 +483,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                 return new Dimension(500,800);
 
             Dimension size = root.getFigure().getPreferredSize();
-            root.getFigure().layout();
+            root.getFigure().setSize(size);
             size.height+=100;
             return size;
         }
@@ -525,10 +533,17 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         private Point delta;
 
         private Command getMoveCommand(Figure underPoint, Point p) {
+            if(underPoint.getPart() != lastSelected.getPart().getParent() && underPoint != lastSelected)
+                return null;
+
             p = new Point(p);
             p.translate(delta.x, delta.y);
             lastSelected.translateToRelative(p);
-            AbstractGraphicalEditPart parentPart = underPoint == lastSelected ? (AbstractGraphicalEditPart)lastSelected.getPart().getParent() : underPoint.getPart();
+
+            AbstractGraphicalEditPart parentPart = (AbstractGraphicalEditPart)lastSelected.getPart().getParent();
+            if(parentPart == null || !parentPart.getContentPane().containsPoint(p))
+                return null;
+
             return parentPart.getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
         }
         public void enter() {
@@ -557,7 +572,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                 return;
 
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, p);
+            updateHover(underPoint, p, getMoveCommand(underPoint, p));
         }
         public void mouseReleased(MouseEvent e) {
             moved = false;
@@ -565,9 +580,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             if (lastSelected != null && lastHover != null) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
-                updateHover(underPoint, p);
-                if(underPoint.getPart() == lastSelected.getPart().getParent() || underPoint == lastSelected)
-                    execute(getMoveCommand(underPoint, p));
+                Command moveCmd = getMoveCommand(underPoint, p);
+                updateHover(underPoint, p, moveCmd);
+                execute(moveCmd);
             }
 
             if (isPopupTrigger(e))
@@ -598,6 +613,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
+            p = new Point(p);
             Figure contentPanel = underPoint.getPart().getContentPane();
             contentPanel.translateToRelative(p);
             contentPanel.translateFromParent(p);
@@ -606,17 +622,14 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         public void mouseMoved(MouseEvent e) {
             Point p = e.getPoint();
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, p);
+            updateHover(underPoint, p, getCreateCommand(underPoint, p));
         }
         public void mousePressed(MouseEvent e) {
             Point p = e.getPoint();
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, p);
             Command createCommand = getCreateCommand(underPoint, p);
-
-            if(createCommand != null) {
-                execute(createCommand);
-            }
+            updateHover(underPoint, p, createCommand);
+            execute(createCommand);
 
             gotoNext(ready);
         }
