@@ -549,7 +549,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             if(newParentPart == null || !newParentPart.getContentPane().containsPoint(p))
                 return null;
 
-            return newParentPart.getEditPolicy().getAddCommand(newParentPart, lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
+            return newParentPart.getEditPolicy().getAddCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
         }
         private Command getMoveCommand(Figure underPoint, Point p) {
             lastSelected.translateToRelative(p);

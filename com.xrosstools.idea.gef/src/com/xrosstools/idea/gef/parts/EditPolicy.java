@@ -36,7 +36,7 @@ public class EditPolicy {
     /**
      * Move an element from elsewhere
      */
-    public Command getAddCommand(AbstractGraphicalEditPart target, AbstractGraphicalEditPart child, Rectangle constraint) {return null;}
+    public Command getAddCommand(AbstractGraphicalEditPart child, Rectangle constraint) {return null;}
 
     /**
      * Change size and/or location
