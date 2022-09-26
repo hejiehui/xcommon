@@ -588,9 +588,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             updateHover(underPoint, p, getCommand(underPoint, p));
         }
         public void mouseReleased(MouseEvent e) {
-            moved = false;
             // Drag and drop
-            if (lastSelected != null && lastHover != null) {
+            if (moved && lastSelected != null && lastHover != null) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
                 Command moveCmd = getCommand(underPoint, p);
@@ -600,6 +599,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
             if (isPopupTrigger(e))
                 showContexMenu(e.getX(), e.getY());
+            moved = false;
         }
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
