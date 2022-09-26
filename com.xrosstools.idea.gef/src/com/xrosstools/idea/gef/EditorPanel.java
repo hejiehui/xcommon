@@ -619,11 +619,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             if(!moved)
                 return;
 
-            try {
-                lastHoverlocation.translate(delta.x, delta.y);
-            } catch(Throwable e) {
-                e.printStackTrace();
-            }
+            lastHoverlocation.translate(delta.x, delta.y);
             lastSelected.paintDragFeedback(g, lastHoverlocation);
         }
     };
