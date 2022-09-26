@@ -257,7 +257,10 @@ public class Figure implements ImageObserver {
         if(visible == false)
             return false;
 
-        return bounds.contains(x, y);
+        if(bounds.contains(x, y))
+            return true;
+
+        return parent == null;
     }
 
     public Figure selectFigureAt(int x, int y) {
