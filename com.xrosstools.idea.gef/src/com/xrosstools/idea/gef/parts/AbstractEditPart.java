@@ -5,6 +5,7 @@ import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 
@@ -26,8 +27,15 @@ public abstract class AbstractEditPart implements EditPart {
     }
 
     public void activate(){
-        if(getModel() instanceof IPropertySource)
-            ((IPropertySource)getModel()).getListeners().addPropertyChangeListener(this);
+        if(!(getModel() instanceof IPropertySource))
+            return;
+
+        PropertyChangeSupport support = ((IPropertySource)getModel()).getListeners();
+        for(PropertyChangeListener listener: support.getPropertyChangeListeners())
+            if(listener == this)
+                return;
+
+        support.addPropertyChangeListener(this);
     }
 
     public void deactivate(){
@@ -46,11 +54,6 @@ public abstract class AbstractEditPart implements EditPart {
             return;
 
         this.model = model;
-        if(model instanceof IPropertySource) {
-            PropertyChangeSupport support = ((IPropertySource)model).getListeners();
-            support.removePropertyChangeListener(this);
-            support.addPropertyChangeListener(this);
-        }
     }
 
     public List getModelChildren() {
