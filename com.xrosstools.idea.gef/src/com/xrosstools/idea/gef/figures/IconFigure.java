@@ -25,9 +25,6 @@ public class IconFigure extends Figure {
         image.paintIcon(getRootPane(), graphics, getInnerX(), getInnerY());
     }
 
-    // Do not show selection frame
-    public void paintSelection(Graphics graphics) {}
-
     public void setSource(String source) {
         image = source == null ? null: IconLoader.findIcon(Activator.getIconPath(source));
         if (image == null)

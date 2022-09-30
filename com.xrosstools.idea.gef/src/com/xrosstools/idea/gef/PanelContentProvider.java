@@ -19,8 +19,8 @@ public interface PanelContentProvider<T extends IPropertySource> extends Propert
     ContextMenuProvider getOutlineContextMenuProvider();
     void buildPalette(JPanel palette);
     void buildToolbar(JToolBar toolbar);
-    EditPartFactory createEditPartFactory(EditContext context);
-    EditPartFactory createTreePartFactory(EditContext context);
+    EditPartFactory createEditPartFactory();
+    EditPartFactory createTreePartFactory();
 
     void preBuildRoot();
     void postBuildRoot();

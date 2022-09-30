@@ -24,7 +24,7 @@ public class EditContext {
         return contentPane.getTreeModel();
     }
 
-    public void add(AbstractGraphicalEditPart part, Object model) {
+    public void add(EditPart part, Object model) {
         Trinity trinity = findContent(model);
 
         if(trinity == null) {
@@ -32,18 +32,11 @@ public class EditContext {
             trinity.model = model;
             contents.add(trinity);
         }
-        trinity.editPart = part;
-    }
 
-    public void add(AbstractTreeEditPart part, Object model) {
-        Trinity trinity = findContent(model);
-
-        if(trinity == null) {
-            trinity = new Trinity();
-            trinity.model = model;
-            contents.add(trinity);
-        }
-        trinity.treeEditPart = part;
+        if(part instanceof AbstractGraphicalEditPart)
+            trinity.editPart = (AbstractGraphicalEditPart)part;
+        else
+            trinity.treeEditPart = (AbstractTreeEditPart)part;
     }
 
     public void remove(Object model) {

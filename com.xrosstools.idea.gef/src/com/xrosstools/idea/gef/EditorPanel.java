@@ -173,11 +173,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private void build() {
         EditContext editContext = new EditContext(this);
-        EditPartFactory editPartFactory = contentProvider.createEditPartFactory(editContext);
-        EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory(editContext);
+        EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
+        EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
 
-        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(null, diagram);
-        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(null, diagram);
+        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext,null, diagram);
+        root.activate();
+        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext,null, diagram);
+        treeRoot.activate();
 
         treeModel = new DefaultTreeModel(treeRoot.getTreeNode(), false);
         tableModel = new PropertyTableModel((IPropertySource)treeRoot.getModel(), contentProvider);

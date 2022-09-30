@@ -157,7 +157,11 @@ public abstract class AbstractEditPart implements EditPart {
 
     protected EditPart createOrFindPart(Object model) {
         EditPart childEditPart = findEditPart(model);
-        return childEditPart == null? getEditPartFactory().createEditPart(this, model) : childEditPart;
+        if(childEditPart != null)
+            return childEditPart;
+
+        childEditPart = getEditPartFactory().createEditPart(getContext(), this, model);
+        return childEditPart;
     }
 
     private EditPartHandler nodeHandler = new EditPartHandler() {
@@ -169,7 +173,7 @@ public abstract class AbstractEditPart implements EditPart {
         }
 
         public void addChildModel(List parts, Object child, int index) {
-            EditPart childEditPart = getEditPartFactory().createEditPart(AbstractEditPart.this, child);
+            EditPart childEditPart = getEditPartFactory().createEditPart(getContext(), AbstractEditPart.this, child);
             parts.add(index, childEditPart);
             addChildPartVisual(childEditPart, index);
             childEditPart.addNotify();

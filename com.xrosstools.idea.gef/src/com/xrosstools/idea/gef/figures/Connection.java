@@ -124,8 +124,11 @@ public class Connection extends Figure {
             return null;
 
         for(Figure child: children.keySet()) {
-            if(child.containsPoint(x, y))
-                return child;
+            Figure found = child.findFigureAt(x, y);
+            if(found == null)
+                continue;
+
+            return found;
         }
 
         if(points.containsPoint(x, y))
