@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools idea Graphic Edit Framework</name>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <vendor email="he_jiehui@163.com" url="https://github.com/hejiehui/xross-tools-installer">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,7 +10,9 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      Inital version<br>
+      Fix empty popup menu and duplicate separator<br>
+      <em>1.0.1</em>
+      <p>Inital version<br>
       <em>1.0</em>
     ]]>
   </change-notes>

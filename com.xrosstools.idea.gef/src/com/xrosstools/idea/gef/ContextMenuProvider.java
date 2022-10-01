@@ -25,6 +25,9 @@ public abstract class ContextMenuProvider {
     }
 
     public static void addSeparator(JPopupMenu menu) {
+        Object last = menu.getComponentCount() > 0 ? menu.getComponents()[menu.getComponentCount()-1] : null;
+        if(last instanceof JPopupMenu.Separator)
+            return;
         menu.addSeparator();
     }
 
@@ -45,21 +48,45 @@ public abstract class ContextMenuProvider {
 
     public static JMenuItem createItem(String text, List<JMenuItem> items) {
         JMenu menu = new JMenu(text);
-        for(JMenuItem item: items)
+        boolean allSeparator = true;
+        for(JMenuItem item: items) {
+            if (item != SEPARATOR)
+                allSeparator = false;
             menu.add(item);
+        }
+
+        if(allSeparator)
+            menu.removeAll();
+
         return menu;
     }
 
     public static void addAll(JPopupMenu menu, List<JMenuItem> items) {
-        for(JMenuItem item: items)
-            if(item == SEPARATOR)
-                menu.addSeparator();
-            else
+        Object lastItem = menu.getComponentCount() > 0 ? menu.getComponents()[menu.getComponentCount()-1] : null;
+        if(lastItem instanceof JPopupMenu.Separator)
+            lastItem = SEPARATOR;
+
+        for (int i = 0; i < items.size(); i++) {
+            JMenuItem item = items.get(i);
+            if (item == SEPARATOR && lastItem != SEPARATOR) {
+                addSeparator(menu);
+                lastItem = SEPARATOR;
+            } else {
+                if (isEmpty(item))
+                    continue;;
+
+                lastItem = item;
                 menu.add(item);
+            }
+        }
+    }
+
+    private static boolean isEmpty(JMenuItem item) {
+        return item instanceof JMenu ? ((JMenu)item).getItemCount() == 0 : false;
     }
 
     public void attachListener(MenuElement menuElement) {
-        if(menuElement.getSubElements() != null && menuElement.getSubElements().length > 0) {
+        if(menuElement.getSubElements().length > 0) {
             for(MenuElement item: menuElement.getSubElements()){
                 attachListener(item);
             }
