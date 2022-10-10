@@ -376,6 +376,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     }
 
     private void adjustEditPanel() {
+        if(lastSelected == null)
+            return;
+
         Point pos = lastSelected.getLocation();
         lastSelected.translateToAbsolute(pos);
 

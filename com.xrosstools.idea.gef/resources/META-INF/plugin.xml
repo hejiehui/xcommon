@@ -10,10 +10,12 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      Fix empty popup menu and duplicate separator<br>
+      <em>1.0.2</em>
+      Fix NPE when selecting non visual element<br>
       <em>1.0.1</em>
-      <p>Inital version<br>
+      Fix empty popup menu and duplicate separator<br>
       <em>1.0</em>
+      <p>Inital version<br>
     ]]>
   </change-notes>
 
