@@ -10,6 +10,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.0.3</em>
+      Fix set color for Label<br>
       <em>1.0.2</em>
       Fix NPE when selecting non visual element<br>
       <em>1.0.1</em>

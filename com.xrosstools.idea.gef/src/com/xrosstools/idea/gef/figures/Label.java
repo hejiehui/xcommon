@@ -18,6 +18,12 @@ public class Label extends Figure {
 
     public void setForegroundColor(Color foreground) {
         this.foreground = foreground;
+        setTextColor();
+    }
+
+    private void setTextColor() {
+        if(foreground != null && text != null)
+            text.setForegroundColor(foreground);
     }
 
     public void setText(String textStr) {
@@ -26,9 +32,7 @@ public class Label extends Figure {
             add(text);
         }
         text.setText(textStr);
-        if(foreground != null)
-            text.setForegroundColor(foreground);
-
+        setTextColor();
         repaint();
     }
 
