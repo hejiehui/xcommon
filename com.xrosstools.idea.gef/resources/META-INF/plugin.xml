@@ -10,6 +10,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.0.4</em>
+      Validate xml node before get its children<br>
       <em>1.0.3</em>
       Fix set color for Label<br>
       <em>1.0.2</em>
