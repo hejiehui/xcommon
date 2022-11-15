@@ -110,6 +110,10 @@ public abstract class AbstractEditPart implements EditPart {
 
     protected void refreshChildren() {
         refreshModelPart(getChildren(), getModelChildren(), nodeHandler);
+        for(Object obj: getChildren()) {
+            EditPart childPart = (EditPart)obj;
+            childPart.refresh();
+        }
     }
 
 

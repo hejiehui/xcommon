@@ -57,7 +57,7 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     public void addChildVisual(EditPart childEditPart, int index) {
-        getFigure().add(((AbstractGraphicalEditPart)childEditPart).getFigure(), index);
+        getContentPane().add(((AbstractGraphicalEditPart)childEditPart).getFigure(), index);
     }
 
     protected void addChildPartVisual(EditPart childEditPart, int index) {
@@ -74,7 +74,7 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     protected void removeChildVisual(EditPart childEditPart) {
-        getFigure().remove(((AbstractGraphicalEditPart)childEditPart).getFigure());
+        getContentPane().remove(((AbstractGraphicalEditPart)childEditPart).getFigure());
     }
 
     public final Figure getFigure() {
