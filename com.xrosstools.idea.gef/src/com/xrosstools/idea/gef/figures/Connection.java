@@ -184,6 +184,24 @@ public class Connection extends Figure {
         feedbackTarget = null;
     }
 
+    public boolean hasFeedback() {
+        return feedbackTarget != null;
+    }
+
+    public boolean isConnectToSameNode() {
+        if(feedbackTarget == null) {
+            return getConnectionPart().getSource() == getConnectionPart().getTarget();
+        }
+
+        if(feedbackTarget instanceof Point)
+            return false;
+
+        if(showSourceFeedback == true && feedbackTarget == getConnectionPart().getSourceFigure())
+            return true;
+
+        return showSourceFeedback == false && feedbackTarget == getConnectionPart().getTargetFigure();
+    }
+
     public void relocateSourceFeedback(Object lastHoverlocation) {
         showSourceFeedback = true;
         setFeedback(lastHoverlocation);
@@ -192,6 +210,10 @@ public class Connection extends Figure {
     public void relocateTargetFeedback(Object lastHoverlocation) {
         showSourceFeedback = false;
         setFeedback(lastHoverlocation);
+    }
+
+    public Object getFeedback() {
+        return feedbackTarget;
     }
 
     private void setFeedback(Object feedbackTarget) {

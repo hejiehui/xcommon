@@ -10,6 +10,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.0.6</em>
+      Add isConnectToSameNode to Connection.<br>
       <em>1.0.5</em>
       Fix refresh edit part children<br>
       <em>1.0.4</em>
