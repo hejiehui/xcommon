@@ -1,14 +1,20 @@
 package com.xrosstools.idea.gef;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.xrosstools.idea.gef.commands.Command;
-import com.xrosstools.idea.gef.figures.*;
-import com.xrosstools.idea.gef.parts.*;
+import com.xrosstools.idea.gef.figures.Connection;
+import com.xrosstools.idea.gef.figures.Endpoint;
+import com.xrosstools.idea.gef.figures.Figure;
+import com.xrosstools.idea.gef.figures.ToolbarLayout;
+import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
+import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
+import com.xrosstools.idea.gef.parts.EditContext;
+import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
@@ -18,7 +24,6 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.util.Enumeration;
 
@@ -146,7 +151,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     }
 
     private JButton createResetButton() {
-        JButton btn = new JButton("Select", IconLoader.findIcon("icons/tree.png"));
+        JButton btn = new JButton("Select", AllIcons.Actions.Back);
         btn.setPreferredSize(new Dimension(100, 50));
         btn.setContentAreaFilled(false);
         btn.addActionListener(e -> reset());

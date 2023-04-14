@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef;
 
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.util.IPropertySource;
@@ -50,8 +49,8 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         editorPanel.createModel(model);
     }
 
-    public JButton createToolbarButton(Action action, String iconName, String tooltip) {
-        JButton btn = new JButton(IconLoader.findIcon(Activator.getIconPath(iconName)));
+    public JButton createToolbarButton(Action action, Icon icon, String tooltip) {
+        JButton btn = new JButton(icon);
         btn.setToolTipText(tooltip);
         btn.setContentAreaFilled(false);
         btn.addActionListener(action);
@@ -60,8 +59,8 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         return btn;
     }
 
-    public JButton createPaletteButton(ActionListener action, String iconName, String tooltip) {
-        JButton btn = new JButton(tooltip, IconLoader.findIcon(Activator.getIconPath(iconName)));
+    public JButton createPaletteButton(ActionListener action, Icon icon, String tooltip) {
+        JButton btn = new JButton(tooltip, icon);
         btn.setContentAreaFilled(false);
         btn.addActionListener(action);
         return btn;

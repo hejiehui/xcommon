@@ -1,8 +1,5 @@
 package com.xrosstools.idea.gef.parts;
 
-import com.intellij.openapi.util.IconLoader;
-import com.xrosstools.idea.gef.Activator;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -51,9 +48,7 @@ public abstract class AbstractTreeEditPart extends AbstractEditPart {
         return "";
     }
 
-    public Icon getImage() {
-        return IconLoader.findIcon(Activator.getIconPath(getModel().getClass()));
-    }
+    public abstract Icon getImage();
 
     public final AbstractTreeEditPart findEditPart(Object model) {
         return getContext().findTreeEditPart(model);

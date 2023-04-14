@@ -1,8 +1,5 @@
 package com.xrosstools.idea.gef.figures;
 
-import com.intellij.openapi.util.IconLoader;
-import com.xrosstools.idea.gef.Activator;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -13,8 +10,8 @@ public class IconFigure extends Figure {
         setSource(null);
     }
 
-    public IconFigure(String source) {
-        setSource(source);
+    public IconFigure(Icon icon) {
+        setSource(icon);
     }
 
     @Override
@@ -25,8 +22,8 @@ public class IconFigure extends Figure {
         image.paintIcon(getRootPane(), graphics, getInnerX(), getInnerY());
     }
 
-    public void setSource(String source) {
-        image = source == null ? null: IconLoader.findIcon(Activator.getIconPath(source));
+    public void setSource(Icon icon) {
+        image = icon;
         if (image == null)
             setSize(0,16);
         else {

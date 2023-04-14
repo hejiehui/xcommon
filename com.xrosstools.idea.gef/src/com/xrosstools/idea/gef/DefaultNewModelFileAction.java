@@ -8,28 +8,28 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 
+import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 
 public class DefaultNewModelFileAction extends AnAction {
     private String modelTypeName;
     private String modelTypeExt;
-    private String iconName;
+    private Icon icon;
     private String newFileName;
     private String templatePath;
 
     public DefaultNewModelFileAction(
             String modelTypeName,
             String modelTypeExt,
-            String iconName,
+            Icon icon,
             String newFileName,
             String templatePath) {
         this.modelTypeName = modelTypeName;
         this.modelTypeExt = modelTypeExt;
-        this.iconName = iconName;
+        this.icon = icon;
         this.newFileName = newFileName;
         this.templatePath = templatePath;
     }
@@ -49,7 +49,7 @@ public class DefaultNewModelFileAction extends AnAction {
 
         final VirtualFile dir = selected;
 
-        Messages.InputDialog dialog = new Messages.InputDialog(project, "New " + modelTypeName + " Model", "Name: ", IconLoader.findIcon(Activator.getIconPath(iconName)), newFileName, new InputValidator() {
+        Messages.InputDialog dialog = new Messages.InputDialog(project, "New " + modelTypeName + " Model", "Name: ", icon, newFileName, new InputValidator() {
             @Override
             public boolean checkInput(String s) {
                 return true;

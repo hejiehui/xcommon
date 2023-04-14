@@ -1,5 +1,6 @@
 package com.xrosstools.idea.gef.figures;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class Label extends Figure {
@@ -36,12 +37,12 @@ public class Label extends Figure {
         repaint();
     }
 
-    public void setIcon(String iconLoc) {
+    public void setIcon(Icon iconSrc) {
         if (icon == null) {
             icon = new IconFigure();
             add(icon);
         }
-        icon.setSource(iconLoc);
+        icon.setSource(iconSrc);
     }
 
     public void setLabelAlignment(int position){
