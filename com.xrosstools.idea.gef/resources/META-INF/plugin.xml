@@ -1,29 +1,23 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools idea Graphic Edit Framework</name>
-  <version>1.0.1</version>
+  <version>1.0.7</version>
   <vendor email="he_jiehui@163.com" url="https://github.com/hejiehui/xross-tools-installer">Xross Tools</vendor>
 
   <description><![CDATA[
-      Xross Tools idea Graphic Edit Framework. Inspired by Eclipse GEF and usage is alike.<br>
-      <em>Xross Tools GEF</em>
+    Xross Tools idea IDEA Graphic Edit Framework. i.e. <em>Xross Tools IDEA GEF</em>.<br>
+    It provides common UI widgets and controls for building graphic editors. Inspired by Eclipse GEF and the usage is alike.
     ]]></description>
 
   <change-notes><![CDATA[
-      <em>1.0.6</em>
-      Add isConnectToSameNode to Connection.<br>
-      <em>1.0.5</em>
-      Fix refresh edit part children<br>
-      <em>1.0.4</em>
-      Validate xml node before get its children<br>
-      <em>1.0.3</em>
-      Fix set color for Label<br>
-      <em>1.0.2</em>
-      Fix NPE when selecting non visual element<br>
-      <em>1.0.1</em>
-      Fix empty popup menu and duplicate separator<br>
-      <em>1.0</em>
-      <p>Inital version<br>
+      <em>1.0.7</em> Explicitly depends on certain modules.<br>
+      <em>1.0.6</em> Add isConnectToSameNode to Connection.<br>
+      <em>1.0.5</em> Fix refresh edit part children<br>
+      <em>1.0.4</em> Validate xml node before get its children<br>
+      <em>1.0.3</em> Fix set color for Label<br>
+      <em>1.0.2</em> Fix NPE when selecting non visual element<br>
+      <em>1.0.1</em> Fix empty popup menu and duplicate separator<br>
+      <em>1.0</em> Inital version
     ]]>
   </change-notes>
 
@@ -32,8 +26,8 @@
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
-  <!-- uncomment to enable plugin in all products
+  <!-- uncomment to enable plugin in all products-->
   <depends>com.intellij.modules.lang</depends>
-  -->
+  <depends>com.intellij.modules.java</depends>
 
 </idea-plugin>
