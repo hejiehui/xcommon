@@ -12,4 +12,4 @@
 
 /.idea/uiDesigner.xml
 
-!/libs/dom4j-1.6.1.jar
+!/com.xrosstools.idea.gef.jar
