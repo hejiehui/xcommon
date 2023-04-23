@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
-  <name>Xross Tools idea Graphic Edit Framework</name>
-  <version>1.0.8</version>
+  <name>Xross Tools Graphic Edit Framework</name>
+  <version>1.0.9</version>
   <vendor email="he_jiehui@163.com" url="https://github.com/hejiehui/xross-tools-installer">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.0.9</em> Fix name issue.<br>
       <em>1.0.8</em> Remove dom4j dependency.<br>
       <em>1.0.7</em> Explicitly depends on certain modules.<br>
       <em>1.0.6</em> Add isConnectToSameNode to Connection.<br>
