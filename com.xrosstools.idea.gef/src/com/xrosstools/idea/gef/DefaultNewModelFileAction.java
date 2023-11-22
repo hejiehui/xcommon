@@ -13,8 +13,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
-public class DefaultNewModelFileAction extends AnAction {
+public abstract class DefaultNewModelFileAction extends AnAction {
     private String modelTypeName;
     private String modelTypeExt;
     private Icon icon;
@@ -33,6 +34,8 @@ public class DefaultNewModelFileAction extends AnAction {
         this.newFileName = newFileName;
         this.templatePath = templatePath;
     }
+
+    abstract protected InputStream getResourceAsStream();
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
@@ -84,7 +87,7 @@ public class DefaultNewModelFileAction extends AnAction {
                 try {
                     VirtualFile newFile = dir.createChildData(project, name + "." + modelTypeExt);
 
-                    BufferedInputStream in = new BufferedInputStream(getClass().getResourceAsStream(templatePath));
+                    BufferedInputStream in = new BufferedInputStream(DefaultNewModelFileAction.this.getResourceAsStream());
                     int buf_size = 1024;
                     byte[] buffer = new byte[buf_size];
                     int len;

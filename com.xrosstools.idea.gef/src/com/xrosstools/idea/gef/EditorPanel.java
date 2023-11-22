@@ -372,10 +372,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         if (lastSelected != null)
             lastSelected.setSelected(false);
 
-        if (selected != null) {
-            lastSelected = selected;
+        lastSelected = selected;
+        if (lastSelected != null)
             lastSelected.setSelected(true);
-        }
 
         refreshVisual();
     }
@@ -408,6 +407,14 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         Figure selected = treePart.getContext().findFigure(treePart.getModel());
         updateFigureSelection(selected);
         updatePropertySelection(treePart.getModel());
+
+        if(selected == null) {
+            gotoNext(ready);
+        } else {
+            lastHit = null;
+            gotoNext(figureSelected);
+        }
+
         adjustEditPanel();
     }
 
@@ -527,7 +534,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             sourcePart = null;
 
             clearHover();
-            treeNavigator.clearSelection();
+            //treeNavigator.clearSelection();
 
             refreshVisual();
         }
@@ -574,6 +581,10 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             Point pos = lastSelected.getLocation();
             lastSelected.translateToAbsolute(pos);
             delta = new Point();
+
+            if(lastHit == null)
+                return;
+
             delta.x = pos.x - lastHit.x;
             delta.y = pos.y - lastHit.y;
         }

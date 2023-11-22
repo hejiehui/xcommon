@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.0.10</em> Fix load resource file bug and UI interaction logic.<br>
       <em>1.0.9</em> Fix name issue.<br>
       <em>1.0.8</em> Remove dom4j dependency.<br>
       <em>1.0.7</em> Explicitly depends on certain modules.<br>
