@@ -534,7 +534,6 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
             sourcePart = null;
 
             clearHover();
-            //treeNavigator.clearSelection();
 
             refreshVisual();
         }
@@ -614,7 +613,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
                 Command moveCmd = getCommand(underPoint, p);
-                updateHover(underPoint, p, moveCmd);
+                //updateHover(underPoint, p, moveCmd);
+                clearHover();
                 execute(moveCmd);
             }
 
