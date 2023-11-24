@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.0.9</version>
+  <version>1.0.10</version>
   <vendor email="he_jiehui@163.com" url="https://github.com/hejiehui/xross-tools-installer">Xross Tools</vendor>
 
   <description><![CDATA[
