@@ -13,7 +13,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class DefaultNewModelFileAction extends AnAction {
     private String modelTypeName;
@@ -27,12 +26,12 @@ public class DefaultNewModelFileAction extends AnAction {
             String modelTypeExt,
             Icon icon,
             String newFileName,
-            String template) {
+            String templatePath) {
         this.modelTypeName = modelTypeName;
         this.modelTypeExt = modelTypeExt;
         this.icon = icon;
         this.newFileName = newFileName;
-        this.template = template;
+        this.template = getTemplate(this.getClass(), templatePath);
     }
 
     @Override
@@ -93,7 +92,7 @@ public class DefaultNewModelFileAction extends AnAction {
         });
     }
 
-    public static String getTemplate(Class clazz, String templateLocation) {
+    private String getTemplate(Class clazz, String templateLocation) {
         BufferedInputStream in = new BufferedInputStream(clazz.getResourceAsStream(templateLocation));
         int buf_size = 1024;
         byte[] buffer = new byte[buf_size];
