@@ -1,8 +1,8 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.0.11</version>
-  <vendor email="he_jiehui@163.com" url="https://github.com/hejiehui/xross-tools-installer">Xross Tools</vendor>
+  <version>1.0.12</version>
+  <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
     Xross Tools idea IDEA Graphic Edit Framework. i.e. <em>Xross Tools IDEA GEF</em>.<br>
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.0.12</em> Fix visual inconsistency between toolbar and main window, and minor optimization when comparing file extension.<br>
       <em>1.0.11</em> optimize interface to support backward compatibility.<br>
       <em>1.0.10</em> Fix load resource file bug and UI interaction logic.<br>
       <em>1.0.9</em> Fix name issue.<br>

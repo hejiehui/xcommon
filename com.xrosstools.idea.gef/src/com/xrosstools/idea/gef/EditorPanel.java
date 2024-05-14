@@ -1,6 +1,9 @@
 package com.xrosstools.idea.gef;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
@@ -116,10 +119,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     }
 
     private JComponent createToolbar() {
-        JToolBar  toolbar = new JToolBar ();
-        toolbar.setFloatable(false);
-        contentProvider.buildToolbar(toolbar);
-        return toolbar;
+        ActionManager actionManager = ActionManager.getInstance();
+        ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", contentProvider.createToolbar(), true);
+        return toolbar.getComponent();
     }
 
     private JComponent createTree() {

@@ -18,7 +18,13 @@ public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> i
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return virtualFile.getFileType() == getFileType() || virtualFile.getExtension().equalsIgnoreCase(getExtention());
+        if (virtualFile.getFileType() == getFileType())
+            return true;
+
+        if (virtualFile.getExtension() == null)
+            return false;
+
+        return virtualFile.getExtension().equalsIgnoreCase(getExtention());
     }
 
     @NotNull

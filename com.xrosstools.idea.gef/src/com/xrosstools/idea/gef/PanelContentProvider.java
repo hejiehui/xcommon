@@ -1,7 +1,7 @@
 package com.xrosstools.idea.gef;
 
+import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.xrosstools.idea.gef.parts.EditContext;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
@@ -18,7 +18,7 @@ public interface PanelContentProvider<T extends IPropertySource> extends Propert
     ContextMenuProvider getContextMenuProvider();
     ContextMenuProvider getOutlineContextMenuProvider();
     void buildPalette(JPanel palette);
-    void buildToolbar(JToolBar toolbar);
+    ActionGroup createToolbar();
     EditPartFactory createEditPartFactory();
     EditPartFactory createTreePartFactory();
 
