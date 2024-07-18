@@ -30,7 +30,7 @@ public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> i
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return new DiagramEditor(getEditorTypeId(), createPanelContentProvider(project, virtualFile));
+        return new DiagramEditor(project, getEditorTypeId(), createPanelContentProvider(project, virtualFile));
     }
 
     @NotNull

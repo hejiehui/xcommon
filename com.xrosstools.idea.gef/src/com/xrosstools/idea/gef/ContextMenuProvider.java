@@ -2,7 +2,9 @@ package com.xrosstools.idea.gef;
 
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandAction;
+import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
+import cucumber.api.java.hu.De;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
@@ -11,17 +13,22 @@ import java.util.List;
 public abstract class ContextMenuProvider {
     private static final JMenuItem SEPARATOR = new JMenuItem();
 
-    private PropertyChangeListener listener;
+    private CommandExecutor executor;
 
     public abstract JPopupMenu buildContextMenu(Object selected);
 
     protected JPopupMenu buildDisplayMenu(Object selected) {
         JPopupMenu menu = buildContextMenu(selected);
-        attachListener(menu);
+        attachExecutor(menu);
         return menu;
     }
+
+    @Deprecated
     public ContextMenuProvider(PropertyChangeListener listener) {
-        this.listener = listener;
+    }
+
+    public void setExecutor(CommandExecutor executor) {
+        this.executor = executor;
     }
 
     public static void addSeparator(JPopupMenu menu) {
@@ -85,17 +92,17 @@ public abstract class ContextMenuProvider {
         return item instanceof JMenu ? ((JMenu)item).getItemCount() == 0 : false;
     }
 
-    public void attachListener(MenuElement menuElement) {
+    public void attachExecutor(MenuElement menuElement) {
         if(menuElement.getSubElements().length > 0) {
             for(MenuElement item: menuElement.getSubElements()){
-                attachListener(item);
+                attachExecutor(item);
             }
         }else {
             if(menuElement instanceof JPopupMenu)
                 return;
 
             if(((JMenuItem) menuElement).getActionListeners().length != 0)
-                ((Action) ((JMenuItem) menuElement).getActionListeners()[0]).setListener(listener);
+                ((Action) ((JMenuItem) menuElement).getActionListeners()[0]).setExecutor(executor);
         }
     }
 }

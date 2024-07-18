@@ -1,15 +1,15 @@
 package com.xrosstools.idea.gef;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
+import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
+import com.xrosstools.idea.gef.commands.CommandStack;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Endpoint;
 import com.xrosstools.idea.gef.figures.Figure;
@@ -22,6 +22,7 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
 import com.xrosstools.idea.gef.util.SimpleTableRenderer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
@@ -29,8 +30,9 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Enumeration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class EditorPanel<T extends IPropertySource> extends JPanel {
+public class EditorPanel<T extends IPropertySource> extends JPanel implements CommandExecutor {
     private JBSplitter mainPane;
     private JBSplitter diagramPane;
     private Tree treeNavigator;
@@ -57,12 +59,19 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private PanelContentProvider contentProvider;
 
+    private CommandStack commandStack = new CommandStack();
+    private boolean inProcessing;
+
+    private AtomicBoolean saving = new AtomicBoolean(false);
+
     public EditorPanel(PanelContentProvider<T> contentProvider) throws Exception {
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
         diagram = contentProvider.getContent();
         contextMenuBuilder = contentProvider.getContextMenuProvider();
+        contextMenuBuilder.setExecutor(this);
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
+        outlineContextMenuProvider.setExecutor(this);
 
         createVisual();
         registerListener();
@@ -120,8 +129,50 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private JComponent createToolbar() {
         ActionManager actionManager = ActionManager.getInstance();
-        ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", contentProvider.createToolbar(), true);
+        ActionGroup actionGroup = contentProvider.createToolbar();
+        createUndoRedo(actionGroup);
+        ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", actionGroup, true);
         return toolbar.getComponent();
+    }
+
+    private void createUndoRedo(ActionGroup group) {
+        DefaultActionGroup actionGroup = (DefaultActionGroup)group;
+        if(((DefaultActionGroup) group).getChildrenCount() > 0) {
+            actionGroup.addSeparator();
+        }
+
+        actionGroup.add(new AnAction("Undo", "Undo", GefIcons.Undo) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+                undo();
+            }
+
+            @Override
+            public void update(AnActionEvent e) {
+                super.update(e);
+                Presentation presentation = e.getPresentation();
+                presentation.setEnabled(commandStack.canUndo());
+                if(presentation.isEnabled())
+                    presentation.setText("Undo " + commandStack.getUndoCommandLabel());
+            }
+        });
+
+        actionGroup.add(new AnAction("Redo", "Redo", GefIcons.Redo) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+                redo();
+            }
+
+            @Override
+            public void update(AnActionEvent e) {
+                super.update(e);
+                Presentation presentation = e.getPresentation();
+                presentation.setEnabled(commandStack.canRedo());
+                if(presentation.isEnabled())
+                    presentation.setText("Redo " + commandStack.getRedoCommandLabel());
+            }
+        });
+
     }
 
     private JComponent createTree() {
@@ -140,7 +191,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private JComponent createProperty() {
         tableProperties = new JBTable();
-        tableModel = new PropertyTableModel(diagram, contentProvider);
+        tableModel = createTableModel(diagram);
         tableProperties.setModel(tableModel);
 
         JScrollPane scrollPane = new JBScrollPane(tableProperties);
@@ -161,6 +212,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
     }
 
     private void reset(){
+        inProcessing = false;
         gotoNext(ready);
     }
 
@@ -189,7 +241,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         treeRoot.activate();
 
         treeModel = new DefaultTreeModel(treeRoot.getTreeNode(), false);
-        tableModel = new PropertyTableModel((IPropertySource)treeRoot.getModel(), contentProvider);
+        tableModel = createTableModel((IPropertySource) treeRoot.getModel());
 
         treeNavigator.setModel(treeModel);
         contentProvider.preBuildRoot();
@@ -242,14 +294,33 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         root.refresh();
         treeRoot.refresh();
         refreshVisual();
-        save();
+    }
+
+    public void contentsChanged() {
+        if(inProcessing || saving.get())
+            return;
+
+        try {
+            contentProvider.getFile().refresh(false, true);
+            diagram = (T)contentProvider.getContent();
+            build();
+            selectModel(diagram);
+            commandStack.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void save() {
         ApplicationManager.getApplication().runWriteAction(() -> {
             try {
+                saving.set(true);
+
                 contentProvider.saveContent();
+
+                saving.set(false);
             } catch (Throwable e) {
+                saving.set(false);
                 throw new IllegalStateException("Can not save change", e);
             }
         });
@@ -347,11 +418,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         if(tableModel != null && tableModel.isSame((IPropertySource) model))
             return;
 
-        tableModel = new PropertyTableModel((IPropertySource) model, contentProvider);
+        tableModel = createTableModel((IPropertySource) model);
         tableProperties.setVisible(true);
         tableProperties.setModel(tableModel);
         tableProperties.setDefaultRenderer(Object.class, new SimpleTableRenderer(tableModel));
         tableProperties.getColumnModel().getColumn(1).setCellEditor(new SimpleTableCellEditor(tableModel));
+    }
+
+    private PropertyTableModel createTableModel(IPropertySource model) {
+        return new PropertyTableModel(model, this);
     }
 
     private void updateTreeSelection(Object model) {
@@ -394,7 +469,26 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
 
     private boolean triggedByFigure = false;
 
+    private void selectModel(Object selectedNode) {
+        Figure selected = root.getContext().findFigure(selectedNode);
+        updateFigureSelection(selected);
+        updateTreeSelection(selectedNode);
+        updatePropertySelection(selectedNode);
+
+        if(selected == null) {
+            gotoNext(ready);
+        } else {
+            lastHit = null;
+            gotoNext(figureSelected);
+        }
+
+        adjustEditPanel();
+    }
+
     private void selectTreeNode() {
+        if (inProcessing)
+            return;
+
         if(triggedByFigure) {
             triggedByFigure = false;
             return;
@@ -475,16 +569,45 @@ public class EditorPanel<T extends IPropertySource> extends JPanel {
         unitPanel.grabFocus();
     }
 
-    public void execute(Command action) {
-        if(action == null)
+    public void execute(Command command) {
+        if(command == null)
             return;
 
-        action.run();
+        Object model = newModel;
+        if(model == null)
+            model = lastSelected == null ? null : lastSelected.getPart().getModel();
+        inProcessing = true;
+        commandStack.execute(command, model);
 
+        if(newModel != null)
+            newModel = null;
+
+        postExecute(model);
+    }
+
+    private void postExecute(Object model) {
+        save();
+        selectModel(model);
+        inProcessing = false;
         refresh();
     }
 
+    private void undo() {
+        inProcessing = true;
+        commandStack.undo();
+        postExecute(commandStack.getCurModel());
+    }
+
+    private void redo() {
+        inProcessing = true;
+        commandStack.redo();
+        postExecute(commandStack.getCurModel());
+    }
+
     private void updateVisual() {
+        if(inProcessing)
+            return;
+
         Dimension size = unitPanel.getPreferredSize();
         innerDiagramPane.getVerticalScrollBar().setMaximum(size.height);
         innerDiagramPane.getHorizontalScrollBar().setMaximum(size.width);

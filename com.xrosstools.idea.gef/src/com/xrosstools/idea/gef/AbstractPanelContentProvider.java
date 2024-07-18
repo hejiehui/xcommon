@@ -14,8 +14,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public abstract class AbstractPanelContentProvider<T extends IPropertySource> implements PanelContentProvider<T> {
+public abstract class AbstractPanelContentProvider<T extends IPropertySource> implements PanelContentProvider<T>, PropertyChangeListener {
     private VirtualFile virtualFile;
     private EditorPanel editorPanel;
     public VirtualFile getFile() {
@@ -42,9 +43,9 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
     @Override
     public void postBuildRoot(){}
 
+    //TODO to be removed i future
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        editorPanel.refresh();
     }
 
     public void createConnection(Object connModel){

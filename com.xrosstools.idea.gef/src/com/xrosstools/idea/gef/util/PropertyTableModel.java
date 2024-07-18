@@ -1,13 +1,17 @@
 package com.xrosstools.idea.gef.util;
 
+import com.xrosstools.idea.gef.actions.CommandExecutor;
+import com.xrosstools.idea.gef.commands.PropertyChangeCommand;
+
 import javax.swing.table.AbstractTableModel;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
 
 public class PropertyTableModel extends AbstractTableModel {
     private static final String DEFAULT = "Misc";
     private IPropertySource source;
-    private PropertyChangeListener listener;
+    private CommandExecutor executor;
     private class TableRow {
         boolean isCategory;
         String categoryName;
@@ -18,9 +22,9 @@ public class PropertyTableModel extends AbstractTableModel {
     private boolean showCatName;
     private List<TableRow> internalRows = new ArrayList<>();
 
-    public PropertyTableModel(IPropertySource source, PropertyChangeListener listener) {
+    public PropertyTableModel(IPropertySource source, CommandExecutor executor) {
         this.source = source;
-        this.listener = listener;
+        this.executor = executor;
 
         Map<String, List<TableRow>> rowByCategory = new HashMap<>();
 
@@ -118,7 +122,8 @@ public class PropertyTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        source.setPropertyValue(internalRows.get(rowIndex).propertyName, aValue);
-        listener.propertyChange(null);
+        String propertyName = (internalRows.get(rowIndex).propertyName).toString();
+        Object oldValue = source.getPropertyValue(propertyName);
+        executor.execute(new PropertyChangeCommand(source, propertyName, oldValue, aValue));
     }
 }

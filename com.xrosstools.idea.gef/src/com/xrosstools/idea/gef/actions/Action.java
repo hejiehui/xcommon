@@ -7,13 +7,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 
-public abstract class Action implements ActionListener, CommandListener {
+public abstract class Action implements ActionListener {
     private String text;
     private boolean checked;
-    private PropertyChangeListener listener;
+    private CommandExecutor executor;
 
-    public void setListener(PropertyChangeListener listener) {
-        this.listener = listener;
+    @Deprecated
+    public void setListener(PropertyChangeListener listener) {}
+
+    public void setExecutor(CommandExecutor executor) {
+        this.executor = executor;
     }
 
     public String getText() {
@@ -42,24 +45,8 @@ public abstract class Action implements ActionListener, CommandListener {
         if(c == null)
             return;
 
-        c.setListener(this);
-        c.run();
+        executor.execute(c);
     }
 
     public abstract Command createCommand();
-
-    private void postProcess() {
-        if(listener != null)
-            listener.propertyChange(null);
-    }
-
-    public void postExecute() {
-        postProcess();
-    }
-    public void postRedo() {
-        postProcess();
-    }
-    public void postUndo() {
-        postProcess();
-    }
 }

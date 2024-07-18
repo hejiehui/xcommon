@@ -6,9 +6,9 @@ import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
-import java.beans.PropertyChangeListener;
 
-public interface PanelContentProvider<T extends IPropertySource> extends PropertyChangeListener {
+//TODO remove extends from PropertyChangeListener in the future
+public interface PanelContentProvider<T extends IPropertySource>{
     VirtualFile getFile();
     void setEditorPanel(EditorPanel editorPanel);
     EditorPanel getEditorPanel();
