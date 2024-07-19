@@ -22,6 +22,7 @@ public abstract class ContextMenuProvider {
         attachExecutor(menu);
         return menu;
     }
+    public ContextMenuProvider(){}
 
     @Deprecated
     public ContextMenuProvider(PropertyChangeListener listener) {

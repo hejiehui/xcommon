@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.1.1</em> Provide default constructor for ContextMenuProvider.<br>
       <em>1.1.0</em> Support undo/redo.<br>
       <em>1.0.12</em> Fix visual inconsistency between toolbar and main window, and minor optimization when comparing file extension.<br>
       <em>1.0.11</em> optimize interface to support backward compatibility.<br>
