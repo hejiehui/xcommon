@@ -1,7 +1,5 @@
 package com.xrosstools.idea.gef.util;
 
-import com.intellij.openapi.ui.ComboBox;
-
 import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -14,6 +12,8 @@ public class SimpleTableCellEditor implements TableCellEditor {
     private PropertyTableModel model;
     private EventListenerList listenerList = new EventListenerList();
     private ChangeEvent changeEvent = new ChangeEvent(this);
+
+    private IPropertyDescriptor descriptor;
     private JComponent editor;
 
     public SimpleTableCellEditor(PropertyTableModel model) {
@@ -22,14 +22,13 @@ public class SimpleTableCellEditor implements TableCellEditor {
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        return editor = model.getDescriptor(row).getEditor(value);
+        descriptor = model.getDescriptor(row);
+        return editor = descriptor.getEditor(value);
     }
 
     @Override
     public Object getCellEditorValue() {
-        if(editor instanceof JTextField)
-            return ((JTextField)editor).getText();
-        return ((ComboBox)editor).getSelectedIndex();
+        return descriptor.getCellEditorValue();
     }
 
     @Override

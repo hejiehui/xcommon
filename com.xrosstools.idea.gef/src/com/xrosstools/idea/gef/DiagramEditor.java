@@ -26,7 +26,6 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
         this.contentProvider = contentProvider;
         PsiManager.getInstance(project).addPsiTreeChangeListener(this);
         VirtualFileManager.getInstance().addVirtualFileListener(this);
-
     }
 
     @NotNull
@@ -124,7 +123,8 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
 
     @Override
     public void selectNotify() {
-        panel.repaint();
+        if(panel != null)
+            panel.repaint();
     }
 
     @Override

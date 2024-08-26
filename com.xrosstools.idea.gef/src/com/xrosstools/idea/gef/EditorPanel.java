@@ -205,7 +205,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private JButton createResetButton() {
         JButton btn = new JButton("Select", AllIcons.Actions.Back);
-        btn.setPreferredSize(new Dimension(100, 50));
+//        btn.setPreferredSize(new Dimension(100, 50));
         btn.setContentAreaFilled(false);
         btn.addActionListener(e -> reset());
         return btn;
@@ -415,8 +415,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             return;
         }
 
-        if(tableModel != null && tableModel.isSame((IPropertySource) model))
-            return;
+//        if(tableModel != null && tableModel.isSame((IPropertySource) model))
+//            return;
 
         tableModel = createTableModel((IPropertySource) model);
         tableProperties.setVisible(true);
@@ -570,7 +570,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     public void execute(Command command) {
-        if(command == null)
+        if(command == null || command.canExecute() == false)
             return;
 
         Object model = newModel;

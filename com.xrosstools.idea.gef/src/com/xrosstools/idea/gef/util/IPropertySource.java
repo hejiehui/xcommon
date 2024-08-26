@@ -4,10 +4,11 @@ import java.beans.PropertyChangeSupport;
 
 public interface IPropertySource {
     PropertyChangeSupport getListeners();
-    Object getEditableValue();
     IPropertyDescriptor[] getPropertyDescriptors();
-    Object getPropertyValue(Object name);
-    boolean isPropertySet(Object id);
-    void resetPropertyValue(Object id);
-    void setPropertyValue(Object name, Object value);
+    Object getPropertyValue(Object id);
+    void setPropertyValue(Object id, Object value);
+
+    default Object getEditableValue(){return this;}
+    default boolean isPropertySet(Object id){return true;}
+    default void resetPropertyValue(Object id){}
 }

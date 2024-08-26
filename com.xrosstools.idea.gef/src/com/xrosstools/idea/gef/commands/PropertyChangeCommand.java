@@ -20,7 +20,7 @@ public class PropertyChangeCommand extends Command {
     }
 
     public String getLabel() {
-        return "Set property value";
+        return "Change property value";
     }
 
     public void redo() {

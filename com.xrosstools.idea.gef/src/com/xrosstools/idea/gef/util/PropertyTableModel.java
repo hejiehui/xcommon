@@ -16,6 +16,7 @@ public class PropertyTableModel extends AbstractTableModel {
         boolean isCategory;
         String categoryName;
         Object propertyName;
+        Object label;
         IPropertyDescriptor propertyDescriptor;
     }
 
@@ -29,6 +30,8 @@ public class PropertyTableModel extends AbstractTableModel {
         Map<String, List<TableRow>> rowByCategory = new HashMap<>();
 
         for (IPropertyDescriptor d: source.getPropertyDescriptors()) {
+            if(d.isVisible() == false) continue;
+
             String catName = d.getCategory();
             if(catName == null)
                 catName = DEFAULT;
@@ -45,6 +48,7 @@ public class PropertyTableModel extends AbstractTableModel {
             TableRow row = new TableRow();
             row.propertyName = d.getId();
             row.propertyDescriptor = d;
+            row.label = d.getLabel() == null ? d.getId() : d.getLabel();
             rows.add(row);
         }
 
@@ -72,10 +76,8 @@ public class PropertyTableModel extends AbstractTableModel {
             return (String)value;
 
         IPropertyDescriptor descriptor = getDescriptor(rowIndex);
-        if(descriptor == null || descriptor instanceof TextPropertyDescriptor)
-            return value == null ? "": value.toString();
-        else
-            return descriptor.getValue((int)value);
+
+        return descriptor.getDisplayText(value);
     }
 
     public boolean isSame(IPropertySource anotherSource) {
@@ -112,7 +114,7 @@ public class PropertyTableModel extends AbstractTableModel {
         TableRow row = internalRows.get(rowIndex);
 
         if(columnIndex == 0) {
-            return row.isCategory ? (showCatName ? row.categoryName : "") : ("        " + row.propertyName);
+            return row.isCategory ? (showCatName ? row.categoryName : "") : ("        " + row.label);
         } else {
             return isCellEditable(rowIndex, columnIndex) ?
                     source.getPropertyValue(internalRows.get(rowIndex).propertyName) :
@@ -124,6 +126,8 @@ public class PropertyTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         String propertyName = (internalRows.get(rowIndex).propertyName).toString();
         Object oldValue = source.getPropertyValue(propertyName);
-        executor.execute(new PropertyChangeCommand(source, propertyName, oldValue, aValue));
+
+        if(aValue != oldValue)
+            executor.execute(new PropertyChangeCommand(source, propertyName, oldValue, aValue));
     }
 }
