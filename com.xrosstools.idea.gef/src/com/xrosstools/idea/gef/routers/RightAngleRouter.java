@@ -22,6 +22,7 @@ public class RightAngleRouter implements ConnectionRouter {
         PointList pl = conn.getPoints();
         Point start = pl.getFirst();
         Point end = pl.getLast();
+        pl.removeAllPoints();
 
         Point middle;
         pl.addPoint(start);

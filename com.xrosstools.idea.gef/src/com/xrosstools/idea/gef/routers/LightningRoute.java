@@ -5,16 +5,10 @@ import com.xrosstools.idea.gef.figures.Connection;
 import java.awt.*;
 
 public class LightningRoute implements ConnectionRouter {
-    public static final int VERTICAL = 0;
-    public static final int HORIZONTAL  = 1;
+    private boolean vertical;
 
-    private int style;
-
-    public RightAngleRouter(int style) {
-        if(style != 0 && style != 1)
-            throw new IllegalArgumentException("Style is not a legal value");
-
-        this.style = style;
+    public LightningRoute(boolean vertical) {
+        this.vertical= vertical;
     }
 
     @Override
@@ -22,19 +16,17 @@ public class LightningRoute implements ConnectionRouter {
         PointList pl = conn.getPoints();
         Point start = pl.getFirst();
         Point end = pl.getLast();
+        pl.removeAllPoints();
 
-        Point middle;
         pl.addPoint(start);
-        if (style == VERTICAL) {
-            middle = new Point(start.x, end.y);
-            pl.addPoint(middle);
-            if(middle.x == end.x)
-                return;
+        if (vertical) {
+            int y = (start.y + end.y)/2;
+            pl.addPoint(new Point(start.x, y));
+            pl.addPoint(new Point(end.x, y));
         } else {
-            middle = new Point(end.x, start.y);
-            pl.addPoint(middle);
-            if(middle.y == end.y)
-                return;
+            int x = (start.x + end.x)/2;
+            pl.addPoint(new Point(x, start.y));
+            pl.addPoint(new Point(x, end.y));
         }
 
         pl.addPoint(end);
