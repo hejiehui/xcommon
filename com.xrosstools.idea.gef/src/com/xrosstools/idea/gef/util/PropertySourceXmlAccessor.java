@@ -34,7 +34,11 @@ public class PropertySourceXmlAccessor {
             String attributeValue = getAttribute(node, toAttrbuteName(propName));
             if (attributeValue == null) continue;
 
-            source.setPropertyValue(propName, descriptorMap.get(propName).convertToProperty(attributeValue));
+            //If it is String, we use value directly
+            if(source.getPropertyValue(propName) instanceof String)
+                source.setPropertyValue(propName,attributeValue);
+            else
+                source.setPropertyValue(propName, descriptorMap.get(propName).convertToProperty(attributeValue));
         }
 
         for(String propName: nodes) {

@@ -8,6 +8,10 @@ import com.xrosstools.idea.gef.parts.EditPolicy;
 public class NodeConnectionEditPolicy extends EditPolicy {
 
     public Command getDeleteCommand() {
-        return new DeleteConnectionCommand((NodeConnection) getHost().getModel());
+        return createDeleteCommand().init((NodeConnection) getHost().getModel());
+    }
+
+    public DeleteConnectionCommand createDeleteCommand() {
+        return new DeleteConnectionCommand();
     }
 }

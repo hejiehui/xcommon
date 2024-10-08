@@ -8,10 +8,11 @@ public class ReconnectSourceCommand extends Command {
 	private Node oldSource;
 	private Node newSource;
 
-	public ReconnectSourceCommand(NodeConnection connection, Node newSource){
+	public ReconnectSourceCommand init(NodeConnection connection, Node newSource){
         this.connection = connection;
         this.newSource = newSource;
         oldSource = connection.getSource();
+        return this;
     }
 
 	public String getLabel() {
@@ -29,11 +30,27 @@ public class ReconnectSourceCommand extends Command {
 		oldSource.removeOutput(connection);
 		connection.setSource(newSource);
 		newSource.addOutput(connection);
+		postExecute();
 	}
 
 	public void undo() {
 		newSource.removeOutput(connection);
 		connection.setSource(oldSource);
 		oldSource.addOutput(connection);
+		postExecute();
+	}
+
+	public void postExecute() {}
+
+	public NodeConnection getConnection() {
+		return connection;
+	}
+
+	public Node getOldSource() {
+		return oldSource;
+	}
+
+	public Node getNewSource() {
+		return newSource;
 	}
 }

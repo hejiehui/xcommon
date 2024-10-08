@@ -10,13 +10,14 @@ public class CreateNodeCommand extends Command {
     private Node node;
     private Point location;
     
-    public CreateNodeCommand(
+    public CreateNodeCommand init(
             NodeContainer nodeContainer,
             Node node,
     		Point location){
     	this.nodeContainer = nodeContainer;
     	this.node = node;
     	this.location = location;
+    	return this;
     }
 
     @Override
@@ -27,6 +28,7 @@ public class CreateNodeCommand extends Command {
     public void execute() {
         node.setLocation(location);
         nodeContainer.addChild(node);
+        postExecute();
     }
 
     public String getLabel() {
@@ -39,5 +41,20 @@ public class CreateNodeCommand extends Command {
 
     public void undo() {
         nodeContainer.removeChild(node);
+        postExecute();
     }
+
+    public NodeContainer getNodeContainer() {
+        return nodeContainer;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public Point getLocation() {
+        return location;
+    }
+
+    public void postExecute() {}
 }

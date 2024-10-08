@@ -12,7 +12,7 @@ import java.awt.*;
 
 public class NodeEditPolicy extends EditPolicy {
     public Command getDeleteCommand() {
-        return new DeleteNodeCommand(
+        return createDeleteNodeCommand().init(
                 (NodeContainer)(getHost().getParent().getModel()),
                 (Node)(getHost().getModel()));
     }
@@ -20,25 +20,42 @@ public class NodeEditPolicy extends EditPolicy {
     public boolean isSelectableSource(Object connectionModel) {return true;}
 
     public Command getChangeCommand(Rectangle constraint) {
-        MoveNodeCommand cmd = new MoveNodeCommand();
-        cmd.setNode((Node) getHost().getModel());
-        cmd.setConstraint(constraint);
-        return cmd;
+        return createChangeCommand().init((Node) getHost().getModel(), constraint);
     }
 
     public Command getCreateConnectionCommand(Object connectionModel, AbstractGraphicalEditPart sourcePart) {
-        return new CreateConnectionCommand((NodeConnection) connectionModel, (Node) sourcePart.getModel(), (Node) getHost().getModel());
+        return createCreateConnectionCommand().init((NodeConnection) connectionModel, (Node) sourcePart.getModel(), (Node) getHost().getModel());
     }
 
     public Command getReconnectSourceCommand(AbstractConnectionEditPart connectionPart) {
-        return new ReconnectSourceCommand(
-                (NodeConnection)connectionPart.getModel(),
-                (Node)getHost().getModel());
+        return createReconnectSourceCommand().init(
+                (NodeConnection) connectionPart.getModel(),
+                (Node) getHost().getModel());
     }
 
     public Command getReconnectTargetCommand(AbstractConnectionEditPart connectionPart) {
-        return new ReconnectTargetCommand(
-                (NodeConnection)connectionPart.getModel(),
-                (Node)getHost().getModel());
+        return createReconnectTargetCommand().init(
+                (NodeConnection) connectionPart.getModel(),
+                (Node) getHost().getModel());
+    }
+
+    public DeleteNodeCommand createDeleteNodeCommand() {
+        return new DeleteNodeCommand();
+    }
+
+    public MoveNodeCommand createChangeCommand() {
+        return new MoveNodeCommand();
+    }
+
+    public CreateConnectionCommand createCreateConnectionCommand() {
+        return new CreateConnectionCommand();
+    }
+
+    public ReconnectSourceCommand createReconnectSourceCommand() {
+        return new ReconnectSourceCommand();
+    }
+
+    public ReconnectTargetCommand createReconnectTargetCommand() {
+        return new ReconnectTargetCommand();
     }
 }

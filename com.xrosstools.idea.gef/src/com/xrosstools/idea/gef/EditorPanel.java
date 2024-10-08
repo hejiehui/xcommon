@@ -60,7 +60,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private PanelContentProvider contentProvider;
 
     private CommandStack commandStack = new CommandStack();
-    private boolean inProcessing;
+    private AtomicBoolean inProcessing = new AtomicBoolean(false);
 
     private AtomicBoolean saving = new AtomicBoolean(false);
 
@@ -212,7 +212,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void reset(){
-        inProcessing = false;
+        inProcessing.set(false);
         gotoNext(ready);
     }
 
@@ -297,7 +297,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     public void contentsChanged() {
-        if(inProcessing || saving.get())
+        if(inProcessing.get() || saving.get())
             return;
 
         try {
@@ -469,7 +469,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private boolean triggedByFigure = false;
 
-    private void selectModel(Object selectedNode) {
+    public void selectModel(Object selectedNode) {
         Figure selected = root.getContext().findFigure(selectedNode);
         updateFigureSelection(selected);
         updateTreeSelection(selectedNode);
@@ -486,7 +486,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void selectTreeNode() {
-        if (inProcessing)
+        if (inProcessing.get())
             return;
 
         if(triggedByFigure) {
@@ -576,7 +576,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         Object model = newModel;
         if(model == null)
             model = lastSelected == null ? null : lastSelected.getPart().getModel();
-        inProcessing = true;
+        inProcessing.set(true);
         commandStack.execute(command, model);
 
         if(newModel != null)
@@ -588,24 +588,24 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private void postExecute(Object model) {
         save();
         selectModel(model);
-        inProcessing = false;
+        inProcessing.set(false);
         refresh();
     }
 
     private void undo() {
-        inProcessing = true;
+        inProcessing.set(true);
         commandStack.undo();
         postExecute(commandStack.getCurModel());
     }
 
     private void redo() {
-        inProcessing = true;
+        inProcessing.set(true);
         commandStack.redo();
         postExecute(commandStack.getCurModel());
     }
 
     private void updateVisual() {
-        if(inProcessing)
+        if(inProcessing.get())
             return;
 
         Dimension size = unitPanel.getPreferredSize();

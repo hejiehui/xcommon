@@ -13,13 +13,14 @@ public class CreateConnectionCommand extends Command {
 	private int sourceLimit;
 	private int targetLimit;
 
-    public CreateConnectionCommand(NodeConnection connection, Node source, Node target) {
+    public CreateConnectionCommand init(NodeConnection connection, Node source, Node target) {
         this.connection = connection;
         this.source = source;
         this.target = target;
 
 		this.sourceLimit = source.getOutputLimit();
 		this.targetLimit = target.getInputLimit();
+		return this;
     }
 
 	public boolean canExecute() {
@@ -38,6 +39,7 @@ public class CreateConnectionCommand extends Command {
 	public void redo() {
 		source.addOutput(connection);
 		target.addInput(connection);
+		postExecute();
 	}
 
 	public String getLabel() {
@@ -47,5 +49,20 @@ public class CreateConnectionCommand extends Command {
 	public void undo() {
 		source.removeOutput(connection);
 		target.removeInput(connection);
+		postExecute();
 	}
+
+	public NodeConnection getConnection() {
+		return connection;
+	}
+
+	public Node getSource() {
+		return source;
+	}
+
+	public Node getTarget() {
+		return target;
+	}
+
+	public void postExecute() {}
 }

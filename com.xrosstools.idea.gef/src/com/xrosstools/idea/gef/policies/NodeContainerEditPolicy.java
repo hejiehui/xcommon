@@ -12,19 +12,24 @@ import java.awt.*;
 
 public class NodeContainerEditPolicy extends EditPolicy {
     public Command getCreateCommand(Object newModel, Point location) {
-        return new CreateNodeCommand(
+        return createCreateNodeCommand().init(
                 (NodeContainer) getHost().getModel(),
                 (Node) newModel,
                 location);
     }
 
     public Command getMoveCommand(AbstractGraphicalEditPart child, Rectangle constraint) {
-        MoveNodeCommand cmd = new MoveNodeCommand();
         if(!(child.getModel() instanceof Node))
             return null;
 
-        cmd.setNode((Node) child.getModel());
-        cmd.setConstraint(constraint);
-        return cmd;
+        return createMoveNodeCommand().init((Node) child.getModel(), constraint);
+    }
+
+    public MoveNodeCommand createMoveNodeCommand() {
+        return new MoveNodeCommand();
+    }
+
+    public CreateNodeCommand createCreateNodeCommand() {
+        return new CreateNodeCommand();
     }
 }

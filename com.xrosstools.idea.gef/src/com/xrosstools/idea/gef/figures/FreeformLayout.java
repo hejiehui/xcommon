@@ -20,8 +20,12 @@ public class FreeformLayout implements LayoutManager {
     }
     @Override
     public void setConstraint(Figure figure, Object constraint) {
-        if (constraint != null)
-            constraints.put(figure, constraint);
+        if (constraint == null)
+            return;
+
+        Rectangle bounds = (Rectangle)constraint;
+        figure.setBounds(bounds);
+        constraints.put(figure, constraint);
     }
 
     public Object getConstraint(Figure figure) {

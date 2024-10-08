@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef.commands;
 
-import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.model.Node;
 import com.xrosstools.idea.gef.model.NodeConnection;
 import com.xrosstools.idea.gef.model.NodeContainer;
@@ -9,11 +8,12 @@ public class DeleteNodeCommand extends Command {
     private NodeContainer nodeContainer;
     private Node node;
     
-    public DeleteNodeCommand(
+    public DeleteNodeCommand init(
             NodeContainer diagram,
             Node node){
     	this.nodeContainer = diagram;
     	this.node = node;
+    	return this;
     }
     
     public void execute() {
@@ -50,5 +50,13 @@ public class DeleteNodeCommand extends Command {
             NodeConnection path = (NodeConnection)conn;
             path.getSource().getOutputs().add(path);
         }
+    }
+
+    public NodeContainer getNodeContainer() {
+        return nodeContainer;
+    }
+
+    public Node getNode() {
+        return node;
     }
 }

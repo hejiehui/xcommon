@@ -9,6 +9,7 @@ public class TextPropertyDescriptor extends PropertyDescriptor{
 
     @Deprecated
     public TextPropertyDescriptor(Object propertyId, Object label) {
+        this();
         setId(propertyId);
         setLabel(label.toString());
     }
@@ -19,7 +20,7 @@ public class TextPropertyDescriptor extends PropertyDescriptor{
      * @param label used to be propertyId
      */
     public TextPropertyDescriptor(Object label) {
-        setLabel(label.toString());
+        this(label, label);
     }
 
     public TextPropertyDescriptor() {
@@ -34,7 +35,7 @@ public class TextPropertyDescriptor extends PropertyDescriptor{
     }
 
     public JComponent getEditor(Object value) {
-        editor.setText(value.toString());
+        editor.setText(getDisplayText(value));
         editor.setBorder(null);
         return editor;
     }
