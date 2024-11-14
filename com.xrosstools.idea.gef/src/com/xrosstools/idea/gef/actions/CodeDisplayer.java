@@ -2,7 +2,6 @@ package com.xrosstools.idea.gef.actions;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.JBTextArea;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +19,7 @@ public class CodeDisplayer extends DialogWrapper {
 
     @Override
     protected JComponent createCenterPanel() {
-        JBTextArea textArea = new JBTextArea();
+        JTextArea textArea = new JTextArea();
         textArea.setText(text);
 
         JBScrollPane scrollPane = new JBScrollPane(textArea);
