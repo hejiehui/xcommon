@@ -9,17 +9,16 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xrosstools.idea.gef.actions.CodeGenHelper;
 
 import javax.swing.*;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 
 public class DefaultNewModelFileAction extends AnAction {
     private String modelTypeName;
     private String modelTypeExt;
     private Icon icon;
     private String newFileName;
-    private String template;
+    private final String template;
 
     public DefaultNewModelFileAction(
             String modelTypeName,
@@ -31,7 +30,20 @@ public class DefaultNewModelFileAction extends AnAction {
         this.modelTypeExt = modelTypeExt;
         this.icon = icon;
         this.newFileName = newFileName;
-        this.template = getTemplate(this.getClass(), templatePath);
+        this.template = CodeGenHelper.getTemplate(templatePath, this.getClass()).toString();
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    /**
+     * Sub-class can use override this to modify default template
+     * @param fileName
+     * @return
+     */
+    public String createTemplateFor(String fileName) {
+        return getTemplate();
     }
 
     @Override
@@ -77,35 +89,19 @@ public class DefaultNewModelFileAction extends AnAction {
             return;
 
         final String name = dialog.getInputString();
+        final String templateStr = createTemplateFor(name);
 
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             @Override
             public void run() {
                 try {
                     VirtualFile newFile = dir.createChildData(project, name + "." + modelTypeExt);
-                    newFile.setBinaryContent(template.getBytes());
+                    newFile.setBinaryContent(templateStr.getBytes());
                     FileEditorManager.getInstance(project).openFile(newFile, true);
                 } catch (Throwable e) {
                     throw new IllegalStateException("Can not save document " + name, e);
                 }
             }
         });
-    }
-
-    private String getTemplate(Class clazz, String templateLocation) {
-        BufferedInputStream in = new BufferedInputStream(clazz.getResourceAsStream(templateLocation));
-        int buf_size = 1024;
-        byte[] buffer = new byte[buf_size];
-        int len;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            while (-1 != (len = in.read(buffer, 0, buf_size))) {
-                bos.write(buffer, 0, len);
-            }
-        } catch (Throwable e) {
-            throw new IllegalArgumentException("Can not create template from " + templateLocation, e);
-        }
-
-        return new String(bos.toByteArray());
     }
 }

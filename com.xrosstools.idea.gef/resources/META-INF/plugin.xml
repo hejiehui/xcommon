@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.2.1</em> Fix NPE in palette, optimize assign/change/open implementation and code display.<br>
       <em>1.2.0</em> Support common model, action, command, parts, properties, policies and reference.<br>
       <em>1.1.2</em> Fix NPE for DiagramEditor.selectNotify.<br>
       <em>1.1.1</em> Provide default constructor for ContextMenuProvider.<br>

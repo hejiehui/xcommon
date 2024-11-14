@@ -24,7 +24,7 @@ public class AssignImplementationAction extends Action implements Implementation
     public Command createCommand() {
         String impl = ImplementationUtil.assignImpl(project, "");
 
-        if(impl == null)
+        if(impl == null || impl.equals(""))
             return null;
 
         return new PropertyChangeCommand(source, propertyName, impl);

@@ -60,6 +60,10 @@ public class CodeGenHelper {
         return clazz.toString();
     }
 
+    public static String fileToClassName(String name) {
+        return toClassName(name.replace('_', ' '));
+    }
+
     public static String capitalize(String label) {
         char[] charArray = label.toCharArray();
         if (charArray.length > 0) {

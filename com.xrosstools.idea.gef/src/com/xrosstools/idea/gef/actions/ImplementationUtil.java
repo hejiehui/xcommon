@@ -119,7 +119,7 @@ public class ImplementationUtil implements ImplementationMessages {
         else{
             menu.add(createItem(new ChangeImplementationAction(project, source, propertyName)));
             menu.add(createItem(new RemoveImplementationAction(source, propertyName)));
-            menu.add(createItem(new OpenImplementationAction(project, implementation)));
+            menu.add(createItem(new OpenImplementationAction(project, propertyName, implementation)));
 
             if(!allowMethod)
                 return;

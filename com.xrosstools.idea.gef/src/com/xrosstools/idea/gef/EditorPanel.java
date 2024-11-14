@@ -7,6 +7,7 @@ import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
+import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
@@ -124,6 +125,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         palette.add(createResetButton());
         contentProvider.buildPalette(palette);
+
+        //Set executor to action
+        int componentCount = palette.getComponentCount();
+        for (int i = 0; i < componentCount; i++) {
+            Component component = palette.getComponent(i);
+            if(component instanceof JButton && ((JButton) component).getActionListeners()[0] instanceof Action) {
+                ((Action) ((JButton) component).getActionListeners()[0]).setExecutor(this);
+            }
+        }
+
         return palette;
     }
 
