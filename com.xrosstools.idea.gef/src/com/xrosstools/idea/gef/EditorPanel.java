@@ -141,15 +141,6 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         ActionManager actionManager = ActionManager.getInstance();
         ActionGroup actionGroup = contentProvider.createToolbar();
         createUndoRedo(actionGroup);
-
-        AnAction[] children = actionGroup.getChildren(null);
-        for (AnAction action : children) {
-            if(action instanceof AbstractPanelContentProvider.AnActionAdapter) {
-                ActionListener actionListener = ((AbstractPanelContentProvider.AnActionAdapter)action).getListener();
-                if (actionListener instanceof Action)
-                    ((Action)actionListener).setExecutor(this);
-            }
-        }
         ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", actionGroup, true);
         return toolbar.getComponent();
     }

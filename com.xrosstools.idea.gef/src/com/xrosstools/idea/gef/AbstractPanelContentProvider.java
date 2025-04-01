@@ -98,7 +98,7 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
     public void buildToolbar(JToolBar toolbar) {}
 
     public AnAction createToolbarAction(ActionListener action, Icon icon, String tooltip) {
-        return new AnActionAdapter(tooltip, tooltip, icon, action);
+        return new AnActionAdapter(tooltip, tooltip, icon, attachExecutor(action));
     }
 
     public static class AnActionAdapter extends AnAction {
@@ -124,7 +124,7 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         JButton btn = new JButton(icon);
         btn.setToolTipText(tooltip);
         btn.setContentAreaFilled(false);
-        btn.addActionListener(action);
+        btn.addActionListener(attachExecutor(action));
         btn.setSize(new Dimension(32, 32));
         btn.setPreferredSize(new Dimension(32, 32));
         return btn;
@@ -133,7 +133,13 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
     public JButton createPaletteButton(ActionListener action, Icon icon, String tooltip) {
         JButton btn = new JButton(tooltip, icon);
         btn.setContentAreaFilled(false);
-        btn.addActionListener(action);
+        btn.addActionListener(attachExecutor(action));
         return btn;
+    }
+
+    public ActionListener attachExecutor(ActionListener action) {
+        if(action instanceof Action)
+            ((Action)action).setExecutor(editorPanel);
+        return action;
     }
 }
