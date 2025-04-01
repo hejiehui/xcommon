@@ -8,7 +8,7 @@ public interface EditPartFactory {
         childEditPart.setEditPartFactory(this);
         childEditPart.setParent(parent);
         childEditPart.setContext(context);
-        context.add(childEditPart, childEditPart.getModel());
+        context.checkRootPart(parent, childEditPart);
         return childEditPart;
     }
 }

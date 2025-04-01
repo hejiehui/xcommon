@@ -5,11 +5,11 @@ import java.awt.*;
 public class RotatableDecoration extends Figure{
     private Point referencePoint;
     public void setReferencePoint(Point referencePoint) {
-        this.referencePoint = referencePoint;
+        this.referencePoint = new Point(referencePoint);
     }
 
     public Point getReferencePoint() {
-        return referencePoint;
+        return new Point(referencePoint);
     }
 
     public double getAngle() {

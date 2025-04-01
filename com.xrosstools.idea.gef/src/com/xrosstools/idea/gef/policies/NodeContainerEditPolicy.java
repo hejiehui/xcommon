@@ -11,6 +11,7 @@ import com.xrosstools.idea.gef.parts.EditPolicy;
 import java.awt.*;
 
 public class NodeContainerEditPolicy extends EditPolicy {
+    @Override
     public Command getCreateCommand(Object newModel, Point location) {
         return createCreateNodeCommand().init(
                 (NodeContainer) getHost().getModel(),
@@ -18,11 +19,17 @@ public class NodeContainerEditPolicy extends EditPolicy {
                 location);
     }
 
+    @Override
     public Command getMoveCommand(AbstractGraphicalEditPart child, Rectangle constraint) {
         if(!(child.getModel() instanceof Node))
             return null;
 
         return createMoveNodeCommand().init((Node) child.getModel(), constraint);
+    }
+
+    @Override
+    public boolean isInsertable(Command cmd) {
+        return true;
     }
 
     public MoveNodeCommand createMoveNodeCommand() {

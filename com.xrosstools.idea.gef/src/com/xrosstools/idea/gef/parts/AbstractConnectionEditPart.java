@@ -24,11 +24,11 @@ public abstract class AbstractConnectionEditPart extends AbstractGraphicalEditPa
     }
 
     public Figure getSourceFigure() {
-        return getSource().getFigure();
+        return source.getFigure();
     }
 
     public Figure getTargetFigure() {
-        return getTarget().getFigure();
+        return target.getFigure();
     }
 
     public AbstractAnchor getSourceAnchor() {

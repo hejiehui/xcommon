@@ -34,7 +34,6 @@ public class Label extends Figure {
         }
         text.setText(textStr);
         setTextColor();
-        repaint();
     }
 
     public void setIcon(Icon iconSrc) {

@@ -36,10 +36,7 @@ public class Text extends Figure {
         // paint background
         if(getBackgroundColor() != null) {
             graphics.setColor(getBackgroundColor());
-            Figure p = getParent().getParent();
-            graphics.fillRect(p.getX(), p.getY(), p.getWidth(), getParent().getHeight());
-            graphics.setColor(Color.white);
-            graphics.drawRect(p.getX(), p.getY(), p.getWidth(), p.getHeight());
+            graphics.fillRect(getInnerX(), getInnerY(), getInnerWidth(), getInnerHeight());
         }
 
         graphics.setColor(getForegroundColor());

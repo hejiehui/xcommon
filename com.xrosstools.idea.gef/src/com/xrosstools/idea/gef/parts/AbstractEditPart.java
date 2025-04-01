@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef.parts;
 
-import com.xrosstools.idea.gef.EditorPanel;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
@@ -20,7 +19,25 @@ public abstract class AbstractEditPart implements EditPart {
 
     abstract protected void removeChildVisual(EditPart childEditPart);
 
-    abstract protected EditPart findEditPart(Object model);
+    public EditPart findEditPart(Object model) {
+        if(model == null)
+            return null;
+
+        if(getModel() == model)
+            return this;
+
+        return findEditPart(getChildren(), model);
+    }
+
+    public static EditPart findEditPart(List parts, Object model) {
+        for(Object oPart: parts) {
+            EditPart part = ((EditPart)oPart).findEditPart(model);
+            if(part != null)
+                return part;
+        }
+
+        return null;
+    }
 
     public void addNotify(){
         refresh();
@@ -88,22 +105,15 @@ public abstract class AbstractEditPart implements EditPart {
         return editContext;
     }
 
-    public void propertyChange(PropertyChangeEvent evt) {
-        refresh();
-        repaint();
-    }
+    public void propertyChange(PropertyChangeEvent evt) {}
 
     public void execute(Command cmd) {
         getContext().getContentPane().execute(cmd);
     }
 
-    public void repaint() {
-        ((EditorPanel<IPropertySource>)getContext().getContentPane()).refreshVisual();
-    }
-
     public void refresh() {
-        refreshVisuals();
         refreshChildren();
+        refreshVisuals();
     }
 
     protected void refreshVisuals() {}
@@ -115,7 +125,6 @@ public abstract class AbstractEditPart implements EditPart {
             childPart.refresh();
         }
     }
-
 
     public final void refreshModelPart(List parts, List models, EditPartHandler handler) {
         int size = parts.size();
@@ -149,7 +158,6 @@ public abstract class AbstractEditPart implements EditPart {
             for(i = 0; i < trash.size(); i++)            {
                 EditPart ep = (EditPart)trash.get(i);
                 handler.removeChild(parts, ep);
-                getContext().remove(ep.getModel());
             }
         }
     }
@@ -159,20 +167,12 @@ public abstract class AbstractEditPart implements EditPart {
         parts.add(index, childPart);
     }
 
-    protected EditPart createOrFindPart(Object model) {
-        EditPart childEditPart = findEditPart(model);
-        if(childEditPart != null)
-            return childEditPart;
-
-        childEditPart = getEditPartFactory().createEditPart(getContext(), this, model);
-        return childEditPart;
-    }
+    abstract protected EditPart createOrFindPart(Object model);
 
     private EditPartHandler nodeHandler = new EditPartHandler() {
         public void reorderChild(List parts, EditPart editPart, int index) {
             removeChildVisual(editPart);
-            parts.remove(editPart);
-            parts.add(index, editPart);
+            defaultReorder(parts, editPart, index);
             addChildPartVisual(editPart, index);
         }
 

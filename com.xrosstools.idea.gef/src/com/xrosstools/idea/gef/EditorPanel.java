@@ -1,5 +1,6 @@
 package com.xrosstools.idea.gef;
 
+import com.fasterxml.jackson.databind.ser.std.AtomicReferenceSerializer;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
@@ -14,11 +15,7 @@ import com.xrosstools.idea.gef.commands.CommandStack;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Endpoint;
 import com.xrosstools.idea.gef.figures.Figure;
-import com.xrosstools.idea.gef.figures.ToolbarLayout;
-import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
-import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
-import com.xrosstools.idea.gef.parts.EditContext;
-import com.xrosstools.idea.gef.parts.EditPartFactory;
+import com.xrosstools.idea.gef.parts.*;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
@@ -32,6 +29,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorPanel<T extends IPropertySource> extends JPanel implements CommandExecutor {
     private JBSplitter mainPane;
@@ -44,7 +42,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
 
-    private T diagram;
+    private AtomicReference<T> diagramRef = new AtomicReference<>();
     private ContextMenuProvider contextMenuBuilder;
     private ContextMenuProvider outlineContextMenuProvider;
 
@@ -53,7 +51,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private PropertyTableModel tableModel;
     private Figure lastSelected;
     private Figure lastHover;
-    private Point lastHoverlocation;
+    private Point lastHoverLocation;
+    private boolean isRightButton;
 
     private Object newModel;
     private AbstractGraphicalEditPart sourcePart;
@@ -68,7 +67,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     public EditorPanel(PanelContentProvider<T> contentProvider) throws Exception {
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
-        diagram = contentProvider.getContent();
+        diagramRef.set(contentProvider.getContent());
         contextMenuBuilder = contentProvider.getContextMenuProvider();
         contextMenuBuilder.setExecutor(this);
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
@@ -120,7 +119,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private JComponent createPalette() {
         JPanel palette = new JPanel();
-        GridLayout layout = new GridLayout(0, 1, 10,0);
+        GridLayout layout = new GridLayout(0, 1, 10, 0);
         palette.setLayout(layout);
 
         palette.add(createResetButton());
@@ -142,6 +141,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         ActionManager actionManager = ActionManager.getInstance();
         ActionGroup actionGroup = contentProvider.createToolbar();
         createUndoRedo(actionGroup);
+
+        AnAction[] children = actionGroup.getChildren(null);
+        for (AnAction action : children) {
+            if(action instanceof AbstractPanelContentProvider.AnActionAdapter) {
+                ActionListener actionListener = ((AbstractPanelContentProvider.AnActionAdapter)action).getListener();
+                if (actionListener instanceof Action)
+                    ((Action)actionListener).setExecutor(this);
+            }
+        }
         ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", actionGroup, true);
         return toolbar.getComponent();
     }
@@ -202,7 +210,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private JComponent createProperty() {
         tableProperties = new JBTable();
-        tableModel = createTableModel(diagram);
+        tableModel = createTableModel(diagramRef.get());
         tableProperties.setModel(tableModel);
 
         JScrollPane scrollPane = new JBScrollPane(tableProperties);
@@ -222,17 +230,17 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         return btn;
     }
 
-    private void reset(){
+    private void reset() {
         inProcessing.set(false);
         gotoNext(ready);
     }
 
-    public void createConnection(Object connModel){
+    public void createConnection(Object connModel) {
         newModel = connModel;
         gotoNext(connectionCreated);
     }
 
-    public void createModel(Object model){
+    public void createModel(Object model) {
         newModel = model;
         gotoNext(modelCreated);
     }
@@ -246,9 +254,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
         EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
 
-        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext,null, diagram);
+        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, diagramRef.get());
         root.activate();
-        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext,null, diagram);
+        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, diagramRef.get());
         treeRoot.activate();
 
         treeModel = new DefaultTreeModel(treeRoot.getTreeNode(), false);
@@ -286,12 +294,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             }
         });
 
-        treeNavigator.setCellRenderer(new DefaultTreeCellRenderer(){
+        treeNavigator.setCellRenderer(new DefaultTreeCellRenderer() {
             public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                           boolean sel, boolean expanded, boolean leaf, int row,
-                                                          boolean hasFocus){
+                                                          boolean hasFocus) {
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-                AbstractTreeEditPart treePart = (AbstractTreeEditPart)((DefaultMutableTreeNode)value).getUserObject();
+                AbstractTreeEditPart treePart = (AbstractTreeEditPart)((DefaultMutableTreeNode) value).getUserObject();
                 setText(treePart.getText());
                 setIcon(treePart.getImage());
                 return this;
@@ -301,10 +309,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         treeNavigator.expandPath(new TreePath(treeRoot.getTreeNode()));
     }
 
-    public void refresh() {
+    private void refresh() {
         root.refresh();
         treeRoot.refresh();
-        refreshVisual();
     }
 
     public void contentsChanged() {
@@ -313,9 +320,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         try {
             contentProvider.getFile().refresh(false, true);
-            diagram = (T)contentProvider.getContent();
+            diagramRef.set((T)contentProvider.getContent());
             build();
-            selectModel(diagram);
+            selectModel(diagramRef.get());
             commandStack.clear();
         } catch (Exception e) {
             e.printStackTrace();
@@ -339,9 +346,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private void updateTooltip(Point location) {
         Figure f = findFigureAt(location);
-        if (f == null || f == root.getFigure())
+        if(f == null || f == root.getFigure())
             unitPanel.setToolTipText(null);
-        else {
+        else{
             unitPanel.setToolTipText(f.getToolTipText());
         }
     }
@@ -352,27 +359,19 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         return selected == null ? rootFigure : selected;
     }
 
-    private void updateHover(Figure underPoint, Point location, Command cmd) {
+    private void updateHover(Figure underPoint, Point location, Command cmd, boolean showInsertionFeedback) {
         underPoint = underPoint == null ? root.getFigure() : underPoint;
 
         if(lastHover != null && lastHover != underPoint) {
             lastHover.getPart().getContentPane().setInsertionPoint(null);
         }
 
-        if(cmd != null && underPoint != lastSelected) {
-            Figure contentPane = underPoint.getPart().getContentPane();
-            boolean toolbarLayout = contentPane.getLayoutManager() instanceof ToolbarLayout;
-            //When moving figure arround, we don't show insertion feedback if it is not toobar layout
-            //I know it is not very elegant, but I don't have better solution for now
-            if(toolbarLayout || !toolbarLayout && newModel != null) {
-                Point localLocation = new Point(location);
-                contentPane.translateToRelative(localLocation);
-                contentPane.translateFromParent(localLocation);
-                contentPane.setInsertionPoint(localLocation);
-            }
+        if(cmd != null && showInsertionFeedback) {
+            Point localLocation = toLocalPoint(underPoint, location);
+            underPoint.getPart().getContentPane().setInsertionPoint(localLocation);
         }
 
-        K:lastHoverlocation = location;
+        lastHoverLocation = location;
         unitPanel.repaint();
         lastHover = underPoint;
     }
@@ -384,7 +383,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         lastHover.getPart().getContentPane().setInsertionPoint(null);
         unitPanel.repaint();
         lastHover = null;
-        lastHoverlocation = null;
+        lastHoverLocation = null;
         repaint();
     }
 
@@ -416,7 +415,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         curHandle = next;
     }
 
-    private void updatePropertySelection(Object model){
+    private void updatePropertySelection(Object model) {
         if(model == null)
             return;
 
@@ -442,7 +441,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private void updateTreeSelection(Object model) {
         triggedByFigure = true;
-        AbstractTreeEditPart treePart = treeRoot.findEditPart(model);
+        AbstractTreeEditPart treePart = (AbstractTreeEditPart)treeRoot.findEditPart(model);
         if(treePart == null) {
             treeNavigator.clearSelection();
             return;
@@ -468,7 +467,10 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void adjustEditPanel() {
-        if(lastSelected == null)
+        if (lastSelected == null)
+            return;
+
+        if (lastSelected == root.getFigure())
             return;
 
         Point pos = lastSelected.getLocation();
@@ -481,14 +483,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private boolean triggedByFigure = false;
 
     public void selectModel(Object selectedNode) {
-        Figure selected = root.getContext().findFigure(selectedNode);
+        Figure selected = root.findFigure(selectedNode);
+        selected.setSelected(true);
         updateFigureSelection(selected);
         updateTreeSelection(selectedNode);
         updatePropertySelection(selectedNode);
 
         if(selected == null) {
             gotoNext(ready);
-        } else {
+        }else {
             lastHit = null;
             gotoNext(figureSelected);
         }
@@ -497,7 +500,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void selectTreeNode() {
-        if (inProcessing.get())
+        if(inProcessing.get())
             return;
 
         if(triggedByFigure) {
@@ -511,13 +514,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         AbstractTreeEditPart treePart = (AbstractTreeEditPart)treeNode.getUserObject();
 
-        Figure selected = treePart.getContext().findFigure(treePart.getModel());
+        Figure selected = root.findFigure(treePart.getModel());
         updateFigureSelection(selected);
         updatePropertySelection(treePart.getModel());
 
         if(selected == null) {
             gotoNext(ready);
-        } else {
+        }else {
             lastHit = null;
             gotoNext(figureSelected);
         }
@@ -545,7 +548,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private boolean expandSelected(TreePath parent, TreeNode selectedNode) {
         // Traverse children
-        TreeNode node = (TreeNode) parent.getLastPathComponent();
+        TreeNode node = (TreeNode)parent.getLastPathComponent();
 
         if(selectedNode == node) {
             treeNavigator.setSelectionPath(parent);
@@ -553,25 +556,25 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         if (node.getChildCount() >= 0) {
-            for (Enumeration e = node.children(); e.hasMoreElements(); ) {
-                TreeNode n = (TreeNode) e.nextElement();
+            for(Enumeration e = node.children(); e.hasMoreElements(); ) {
+                TreeNode n = (TreeNode)e.nextElement();
                 TreePath path = parent.pathByAddingChild(n);
                 if(expandSelected(path, selectedNode)) {
                     // Expansion or collapse must be done bottom-up
                     treeNavigator.expandPath(parent);
-                    return  true;
+                    return true;
                 }
             }
         }
         return false;
     }
 
-    private void adjust(JScrollBar scrollBar, int start, int length ) {
-        if (scrollBar.getValue() > start || scrollBar.getValue() + scrollBar.getVisibleAmount() < start + length)
+    private void adjust(JScrollBar scrollBar, int start, int length) {
+        if(scrollBar.getValue() > start || scrollBar.getValue() + scrollBar.getVisibleAmount() < start + length)
             scrollBar.setValue(start - 100);
     }
 
-    private void showContexMenu(int x, int y) {
+    private void showContextMenu(int x, int y) {
         contextMenuBuilder.buildDisplayMenu(lastSelected.getPart()).show(unitPanel, x, y);
     }
 
@@ -597,10 +600,20 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void postExecute(Object model) {
-        save();
-        selectModel(model);
-        inProcessing.set(false);
         refresh();
+        save();
+
+        AbstractGraphicalEditPart part = root.findEditPart(model);
+        model = part == null ? diagramRef.get() : model;
+
+        Figure selected = root.findFigure(model);
+        if (selected == null || !selected.isSelectable())
+            model = diagramRef.get();
+
+        selectModel(model);
+        clearHover();
+        inProcessing.set(false);
+        refreshVisual();
     }
 
     private void undo() {
@@ -628,7 +641,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private class UnitPanel extends JPanel {
         @Override
         protected void paintChildren(Graphics g) {
-            root.getFigure().layout();
+            if(inProcessing.get())
+                return;
+
             root.getFigure().paint(g);
             curHandle.paint(g);
         }
@@ -636,11 +651,11 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         @Override
         public Dimension getPreferredSize() {
             if(root == null)
-                return new Dimension(500,800);
+                return new Dimension(500, 800);
 
             Dimension size = root.getFigure().getPreferredSize();
             root.getFigure().setSize(size);
-            size.height+=100;
+            size.height += 100;
             return size;
         }
     }
@@ -652,6 +667,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         public void enter() {}
         public void leave() {}
         public void paint(Graphics g) {}
+
         public String id;
 
         public InteractionHandle(String id) {
@@ -673,44 +689,66 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
             refreshVisual();
         }
+
         public void mouseMoved(MouseEvent e) {
             updateTooltip(e.getPoint());
         }
+
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
             lastHit = new Point(e.getPoint());
+            isRightButton = e.getButton() == MouseEvent.BUTTON3;
             gotoNext(figureSelected);
         }
     };
 
+    private Point toLocalPoint(Figure target, Point location) {
+        Point point = new Point(location);
+        Figure contentPane = target.getPart().getContentPane();
+        contentPane.translateToRelative(point);
+        contentPane.translateFromParent(point);
+        return point;
+    }
     private InteractionHandle figureSelected = new InteractionHandle("figureSelected") {
         private boolean moved;
         private Point delta;
 
-        private Command getCommand(Figure underPoint, Point p) {
-            p = new Point(p);
-            p.translate(delta.x, delta.y);
-            if(underPoint.getPart() != lastSelected.getPart().getParent() && underPoint != lastSelected)
-                return getAddCommand(underPoint, p);
-            else
-                return getMoveCommand(underPoint, p);
+        private boolean isApplicable() {
+            if(lastSelected.getPart().getModel() == diagramRef.get())
+                return false;
+
+            if(lastSelected instanceof Connection)
+                return false;
+
+            return true;
         }
-        private Command getAddCommand(Figure underPoint, Point p) {
-            underPoint.getPart().getContentPane().translateToRelative(p);
-            AbstractGraphicalEditPart newParentPart = underPoint.getPart();
-            if(newParentPart == null || !newParentPart.getContentPane().containsPoint(p))
+        private boolean isAddCommand(Point p, Figure underPoint) {
+            Point pos = new Point(p);
+            lastSelected.translateToRelative(pos);
+            return !lastSelected.containsPoint(pos) && underPoint.getPart() != lastSelected.getPart().getParent() && underPoint != lastSelected;
+        }
+
+        private Command getCommand(boolean isAdd, Figure target, Point p) {
+            AbstractGraphicalEditPart part = lastSelected.getPart();
+            AbstractGraphicalEditPart parentPart = target.getPart();
+            EditPolicy policy = parentPart.getEditPolicy();
+
+            Point localPoint = toLocalPoint(parentPart.getFigure(), p);
+            if(policy == null)
                 return null;
 
-            return newParentPart.getEditPolicy().getAddCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
+            Rectangle constrain = new Rectangle(localPoint.x, localPoint.y, lastSelected.getWidth(), lastSelected.getHeight());
+            return isAdd ? policy.getAddCommand(part, constrain) : policy.getMoveCommand(part, constrain);
         }
-        private Command getMoveCommand(Figure underPoint, Point p) {
-            lastSelected.translateToRelative(p);
-            AbstractGraphicalEditPart parentPart = (AbstractGraphicalEditPart)lastSelected.getPart().getParent();
-            if(parentPart == null || !parentPart.getContentPane().containsPoint(p))
-                return null;
 
-            return parentPart.getEditPolicy().getMoveCommand(lastSelected.getPart(), new Rectangle(p.x, p.y, lastSelected.getWidth(), lastSelected.getHeight()));
+        private Figure getTarget(boolean isAdd, Figure underPoint) {
+            return isAdd ? underPoint.getPart().getFigure() : ((AbstractGraphicalEditPart)lastSelected.getPart().getParent()).getFigure();
         }
+
+        private boolean showInsertionFeedback(Figure target, Command cmd) {
+            return cmd != null && target.getPart().getEditPolicy().isInsertable(cmd);
+        }
+
         public void enter() {
             moved = false;
             Point pos = lastSelected.getLocation();
@@ -723,86 +761,106 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             delta.x = pos.x - lastHit.x;
             delta.y = pos.y - lastHit.y;
         }
+
         public void mouseMoved(MouseEvent e) {
             updateTooltip(e.getPoint());
         }
+
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
             lastHit = new Point(e.getPoint());
+            isRightButton = e.getButton() == MouseEvent.BUTTON3;
             enter();
         }
-        public void mouseDragged(MouseEvent e) {
-            moved = true;
-            Point p = e.getPoint();
-            if(lastSelected.getPart().getModel() == diagram)
-                return;
 
-            if(lastSelected instanceof Connection)
+        public void mouseDragged(MouseEvent e) {
+            Point p = e.getPoint();
+            if(isRightButton || !isApplicable())
                 return;
 
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, p, getCommand(underPoint, p));
+            boolean isAdd = isAddCommand(p, underPoint);
+            Figure target = getTarget(isAdd, underPoint);
+            Command cmd = getCommand(isAdd, target, p);
+            moved = cmd != null;
+
+            updateHover(target, p, cmd, showInsertionFeedback(target, cmd));
         }
+
         public void mouseReleased(MouseEvent e) {
-            // Drag and drop
-            if (moved && lastSelected != null && lastHover != null) {
+            if(isPopupTrigger(e))
+                showContextMenu(e.getX(), e.getY());
+            else if(moved && lastHover != null && isApplicable()) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
-                Command moveCmd = getCommand(underPoint, p);
-                //updateHover(underPoint, p, moveCmd);
+                boolean isAdd = isAddCommand(p, underPoint);
+                Figure target = getTarget(isAdd, underPoint);
+                Command cmd = getCommand(isAdd, target, p);
                 clearHover();
-                execute(moveCmd);
+                execute(cmd);
             }
 
-            if (isPopupTrigger(e))
-                showContexMenu(e.getX(), e.getY());
             moved = false;
         }
+
         public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() == 2) {
+            if(e.getClickCount() == 2) {
                 lastSelected.getPart().performAction();
             }
         }
+
         public void keyPressed(KeyEvent e) {
             if(e.getKeyCode() == KeyEvent.VK_DELETE) {
-                Command deleteCmd = lastSelected.getPart().getEditPolicy().getDeleteCommand();
-                if(deleteCmd == null)
+                EditPolicy policy = lastSelected.getPart().getEditPolicy();
+                if(policy == null)
+                    return;
+
+                Command deleteCmd = policy.getDeleteCommand();
+                if (deleteCmd == null)
                     return;
 
                 execute(deleteCmd);
             }
         }
+
         public void paint(Graphics g) {
             if(!moved)
                 return;
 
-            lastHoverlocation.translate(delta.x, delta.y);
-            lastSelected.paintDragFeedback(g, lastHoverlocation);
+            lastHoverLocation.translate(delta.x, delta.y);
+            lastSelected.paintDragFeedback(g, lastHoverLocation);
         }
     };
 
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
-            p = new Point(p);
-            Figure contentPane = underPoint.getPart().getContentPane();
-            contentPane.translateToRelative(p);
-            contentPane.translateFromParent(p);
-            return underPoint.getPart().getEditPolicy().getCreateCommand(newModel, p);
+            EditPolicy policy = underPoint.getPart().getEditPolicy();
+            if(policy == null) return null;
+
+            final Point point = toLocalPoint(underPoint, p);
+            return policy.getCreateCommand(newModel, point);
         }
+
+        private boolean showInsertionFeedback(Figure underPoint, Command cmd) {
+            AbstractGraphicalEditPart parentPart = underPoint.getPart();
+            return parentPart.getEditPolicy() != null && parentPart.getEditPolicy().isInsertable(cmd);
+        }
+
         public void mouseMoved(MouseEvent e) {
             Point p = e.getPoint();
             Figure underPoint = findFigureAt(p);
-            updateHover(underPoint, p, getCreateCommand(underPoint, p));
+            Command cmd = getCreateCommand(underPoint, p);
+            updateHover(underPoint, p, cmd, showInsertionFeedback(underPoint, cmd));
         }
+
         public void mousePressed(MouseEvent e) {
             Point p = e.getPoint();
             Figure underPoint = findFigureAt(p);
             Command createCommand = getCreateCommand(underPoint, p);
-            updateHover(underPoint, p, createCommand);
             execute(createCommand);
-
             gotoNext(ready);
         }
+
         public void keyPressed(KeyEvent e) {
             if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
                 gotoNext(ready);
@@ -812,27 +870,34 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private InteractionHandle connectionCreated = new InteractionHandle("connectionCreated") {
         public void mouseMoved(MouseEvent e) {
             Figure f = findFigureAt(e.getPoint());
-            showSourceFeedback(f, f.getPart().getEditPolicy().isSelectableSource(newModel));
+            showSourceFeedback(f, isSelectableSource(f));
         }
+
         public void mousePressed(MouseEvent e) {
             eraseSourceFeedback();
             Figure f = findFigureAt(e.getPoint());
-            if(f.getPart().getEditPolicy().isSelectableSource(newModel)) {
+            if(isSelectableSource(f)) {
                 sourcePart = f.getPart();
                 gotoNext(sourceSelected);
-            } else {
+            }else {
                 gotoNext(ready);
             }
         }
+
         public void keyPressed(KeyEvent e) {
             if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 eraseSourceFeedback();
                 gotoNext(ready);
             }
         }
+
+        private boolean isSelectableSource(Figure f) {
+            return f.getPart().getEditPolicy() == null ? false : f.getPart().getEditPolicy().isSelectableSource(newModel);
+        }
     };
 
     private Figure lastSelectableSource;
+
     private void showSourceFeedback(Figure f, boolean isSelectableSource) {
         if(f == null || f == lastSelectableSource) {
             repaint();
@@ -857,49 +922,57 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private InteractionHandle sourceSelected = new InteractionHandle("sourceSelected") {
         private Connection conn;
+
         public void enter() {
             conn = new Connection();
             conn.setSourcePart(sourcePart);
             conn.relocateTargetFeedback(sourcePart.getFigure());
         }
+
         public void mouseMoved(MouseEvent e) {
-            lastHoverlocation = e.getPoint();
-            Figure f = findFigureAt(lastHoverlocation);
+            lastHoverLocation = e.getPoint();
+            Figure f = findFigureAt(lastHoverLocation);
             boolean isSelectableTarget = getCommand(f) != null;
-            conn.relocateTargetFeedback(isSelectableTarget ? f : lastHoverlocation);
+            conn.relocateTargetFeedback(isSelectableTarget ? f : new Point(lastHoverLocation));
             showTargetFeedback(f, isSelectableTarget);
         }
+
         public void mousePressed(MouseEvent e) {
             Figure f = findFigureAt(e.getPoint());
             eraseTargetFeedback();
             execute(getCommand(f));
             gotoNext(ready);
         }
+
         public void keyPressed(KeyEvent e) {
             if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 eraseTargetFeedback();
                 gotoNext(ready);
             }
         }
+
         public void paint(Graphics graphics) {
             conn.paintCreationFeedback(graphics);
         }
 
-        private Command getCommand(Figure f) {
-            return f.getPart().getEditPolicy().getCreateConnectionCommand(newModel, sourcePart);
+        private Command getCommand(Figure underPoint) {
+            EditPolicy policy = underPoint.getPart().getEditPolicy();
+            if(policy == null) return null;
+
+            return policy.getCreateConnectionCommand(newModel, sourcePart);
         }
     };
 
     private Figure lastSelectableTarget;
 
     private void showTargetFeedback(Figure f, boolean isSelectableTarget) {
-        if (f == null || f == lastSelectableTarget) {
+        if(f == null || f == lastSelectableTarget) {
             repaint();
             return;
         }
 
         eraseTargetFeedback();
-        if (isSelectableTarget) {
+        if(isSelectableTarget) {
             f.getPart().showTargetFeedback();
             lastSelectableTarget = f;
         }
@@ -916,9 +989,11 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private InteractionHandle sourceEndpointSelected = new InteractionHandle("sourceEndpointSelected") {
         private Endpoint endpoint;
+
         public void enter() {
             endpoint = (Endpoint)lastSelected;
         }
+
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
             if(lastSelected == endpoint)
@@ -927,13 +1002,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             endpoint = null;
             gotoNext(figureSelected);
         }
+
         public void mouseDragged(MouseEvent e) {
-            lastHoverlocation = e.getPoint();
+            lastHoverLocation = e.getPoint();
             Figure f = findFigureAt(e.getPoint());
             boolean isSelectableSource = getCommand(f) != null;
-            endpoint.getParentConnection().relocateSourceFeedback(isSelectableSource ? f : lastHoverlocation);
+            endpoint.getParentConnection().relocateSourceFeedback(isSelectableSource ? f : lastHoverLocation);
             showSourceFeedback(f, isSelectableSource);
         }
+
         public void mouseReleased(MouseEvent e) {
             Figure f = findFigureAt(e.getPoint());
             endpoint.getParentConnection().clearFeedback();
@@ -941,17 +1018,23 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             execute(getCommand(f));
             gotoNext(ready);
         }
-        private Command getCommand(Figure f) {
+
+        private Command getCommand(Figure underPoint) {
+            EditPolicy policy = underPoint.getPart().getEditPolicy();
+            if(policy == null) return null;
+
             Connection connection = ((Endpoint)lastSelected).getParentConnection();
-            return f.getPart().getEditPolicy().getReconnectSourceCommand(connection.getConnectionPart());
+            return policy.getReconnectSourceCommand(connection.getConnectionPart());
         }
     };
 
     private InteractionHandle targetEndpointSelected = new InteractionHandle("targetEndpointSelected") {
         private Endpoint endpoint;
+
         public void enter() {
             endpoint = (Endpoint)lastSelected;
         }
+
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
             if(lastSelected == endpoint)
@@ -960,13 +1043,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             endpoint = null;
             gotoNext(figureSelected);
         }
+
         public void mouseDragged(MouseEvent e) {
-            lastHoverlocation = e.getPoint();
+            lastHoverLocation = e.getPoint();
             Figure f = findFigureAt(e.getPoint());
             boolean isSelectableTarget = getCommand(f) != null;
-            endpoint.getParentConnection().relocateTargetFeedback(isSelectableTarget ? f: lastHoverlocation);
+            endpoint.getParentConnection().relocateTargetFeedback(isSelectableTarget ? f : new Point(lastHoverLocation));
             showTargetFeedback(f, isSelectableTarget);
         }
+
         public void mouseReleased(MouseEvent e) {
             Figure f = findFigureAt(e.getPoint());
             endpoint.getParentConnection().clearFeedback();
@@ -974,9 +1059,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             execute(getCommand(f));
             gotoNext(ready);
         }
-        private Command getCommand(Figure f) {
-            Connection connection = ((Endpoint)lastSelected).getParentConnection();
-            return f.getPart().getEditPolicy().getReconnectTargetCommand(connection.getConnectionPart());
+
+        private Command getCommand(Figure underPoint) {
+            EditPolicy policy = underPoint.getPart().getEditPolicy();
+            if(policy == null) return null;
+
+            Connection connection = ((Endpoint) lastSelected).getParentConnection();
+            return policy.getReconnectTargetCommand(connection.getConnectionPart());
         }
     };
     private InteractionHandle curHandle = ready;

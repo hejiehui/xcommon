@@ -39,6 +39,12 @@ public class EditPolicy {
     public Command getAddCommand(AbstractGraphicalEditPart child, Rectangle constraint) {return null;}
 
     /**
+     * Will receiving component show insertion feedback for create/move/add command.
+     * Usually true for container, false for non-container
+     */
+    public boolean isInsertable(Command cmd) {return true;}
+
+    /**
      * Change size and/or location
      */
     public Command getChangeCommand(Rectangle constraint) {return null;}

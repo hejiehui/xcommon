@@ -14,17 +14,16 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     public static final int SELECTED = 1;
 
     private Figure figure;
-    private int flags;
     private List<AbstractGraphicalEditPart> childEditParts = new ArrayList<>();
     private List<AbstractConnectionEditPart> sourceConnEditParts = new ArrayList<>();
     private List<AbstractConnectionEditPart> targteConnEditParts = new ArrayList<>();
-    private int selected;
+    private boolean selected;
 
     private EditPolicy editPolicy;
 
     protected abstract Figure createFigure();
     protected EditPolicy createEditPolicy() {
-        return new EditPolicy();
+        return null;
     }
 
     /**
@@ -61,6 +60,8 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     protected void addChildPartVisual(EditPart childEditPart, int index) {
+        //Make sure parent figure is ready when adding child figure
+        getFigure();
         if(childEditPart instanceof AbstractConnectionEditPart) {
             addConnectionVisual((AbstractConnectionEditPart)childEditPart, index);
         }else {
@@ -91,10 +92,14 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     public final EditPolicy getEditPolicy() {
-        if (editPolicy == null) {
-            editPolicy = createEditPolicy();
+        if(editPolicy != null)
+            return editPolicy;
+
+        editPolicy = createEditPolicy();
+
+        if(editPolicy != null)
             editPolicy.setHost(this);
-        }
+
         return editPolicy;
     }
 
@@ -107,11 +112,29 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     public final AbstractGraphicalEditPart findEditPart(Object model) {
-        return getContext().findEditPart(model);
+        EditPart part = super.findEditPart(model);
+        if(part != null) return (AbstractGraphicalEditPart)part;
+
+        part = findEditPart(getSourceConnections(), model);
+        if(part != null) return (AbstractGraphicalEditPart)part;
+
+        return (AbstractGraphicalEditPart)findEditPart(getTargetConnections(), model);
     }
 
-    public final int getSelected() {
+    public Figure findFigure(Object model) {
+        if(model != null && model == getModel())
+            return getFigure();
+
+        AbstractGraphicalEditPart part = findEditPart(model);
+        return part == null ? null : part.getFigure();
+    }
+
+    public final boolean isSelected() {
         return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public void showSourceFeedback() {
@@ -139,17 +162,36 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
     public void refresh() {
+        //Make sure figure is ready when refreshing
+        getFigure();
         super.refresh();
         refreshSourceConnections();
         refreshTargetConnections();
     }
 
+    protected void refreshConnections(List parts, List models, EditPartHandler handler) {
+        refreshModelPart(parts, models, handler);
+        for(Object obj: parts) {
+            EditPart childPart = (EditPart)obj;
+            childPart.refresh();
+        }
+    }
+
     protected void refreshSourceConnections() {
-        refreshModelPart(getSourceConnections(), getModelSourceConnections(), sourceConnectionHandler);
+        refreshConnections(getSourceConnections(), getModelSourceConnections(), sourceConnectionHandler);
     }
 
     protected void refreshTargetConnections() {
-        refreshModelPart(getTargetConnections(), getModelTargetConnections(), targetConnectionHandler);
+        refreshConnections(getTargetConnections(), getModelTargetConnections(), targetConnectionHandler);
+    }
+
+    protected EditPart createOrFindPart(Object model) {
+        EditPart childEditPart = getContext().findEditPart(model);
+        if(childEditPart != null)
+            return childEditPart;
+
+        childEditPart = getEditPartFactory().createEditPart(getContext(), this, model);
+        return childEditPart;
     }
 
     private EditPartHandler sourceConnectionHandler = new EditPartHandler() {

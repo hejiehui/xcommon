@@ -43,6 +43,10 @@ public interface ColorConstants  {
 
     Color GREEN = green;
 
+    Color darkGreen     = new Color(0, 127, 0);
+
+    Color DARK_GREEN = darkGreen;
+
     Color magenta   = Color.magenta;
 
     Color MAGENTA = magenta;

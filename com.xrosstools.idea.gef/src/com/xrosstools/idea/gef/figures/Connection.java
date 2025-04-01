@@ -42,20 +42,21 @@ public class Connection extends Figure {
         children.put(child, locator);
     }
 
-    @Override
-    public void layout() {
-        layoutEndpoints();
-        layout(points);
+    private boolean isValid() {
+        if(sourcePart != null)
+            return true;
+
+        AbstractConnectionEditPart part = getConnectionPart();
+        return part.getSource() != null && part.getTarget() != null;
     }
 
-    public void layout(PointList pointList) {
-        if(router != null)
-            router.route(this);
-        for(Map.Entry<Figure, ConnectionLocator> childEntry: children.entrySet()) {
-            childEntry.getKey().setLocation(childEntry.getValue().getLocation(pointList));
-            childEntry.getKey().setSize(childEntry.getKey().getPreferredSize());
-            childEntry.getKey().layout();
-        }
+    @Override
+    public void layout() {
+        if(!isValid())
+            return;
+
+        layoutEndpoints();
+        layout(points);
     }
 
     /**
@@ -64,55 +65,61 @@ public class Connection extends Figure {
     public void layoutEndpoints() {
         points.removeAllPoints();
 
-        Point start = getSourceReferencePoint();
-        Point end = getTargetReferencePoint();
+        Object source = getSource();
+        Object target = getTarget();
 
-        points.addPoint(getSourcePoint(end));
-        points.addPoint(getTargetPoint(start));
+        Point endRef = getReferencePoint(source);
+        Point startRef = getReferencePoint(target);
+
+        points.addPoint(getLinkPoint(source, startRef, true));
+        points.addPoint(getLinkPoint(target, endRef, false));
     }
 
-    private Point getSourceReferencePoint() {
-        if(feedbackTarget == null || showSourceFeedback == false)
-            return getConnectionPart().getSourceFigure().getCenter();
+    public void layout(PointList pointList) {
+        if(router != null)
+            router.route(this);
 
-        return getReferencePoint();
+        Figure parent = getParent() == null ? sourcePart.getFigure() :getParent();
+        translateToRelative(parent, points);
+        for(Map.Entry<Figure, ConnectionLocator> childEntry: children.entrySet()) {
+            Figure figure = childEntry.getKey();
+            figure.setLocation(childEntry.getValue().getLocation(pointList));
+            figure.setSize(figure.getPreferredSize());
+            figure.layout();
+        }
+
+        translateToAbsolute(parent, points);
     }
 
-    private Point getTargetReferencePoint() {
-        if(feedbackTarget == null || showSourceFeedback == true)
-            return getConnectionPart().getTargetFigure().getCenter();
+    private Point getReferencePoint(Object target) {
+        if(target instanceof Point)
+            return new Point((Point)target);
 
-        return getReferencePoint();
+        Figure figure = (Figure)target;
+        Point center = figure.getCenter();
+        figure.translateToAbsolute(center);
+        return center;
     }
 
-    private Point getReferencePoint() {
-        return feedbackTarget instanceof Point ? (Point)feedbackTarget : ((Figure)feedbackTarget).getCenter();
-    }
+    private Point getLinkPoint(Object target, Point refPoint, boolean isSource) {
+        if(target instanceof Point)
+            return new Point((Point)target);
 
-    private Point getSourcePoint(Point end) {
-        if(feedbackTarget == null || (feedbackTarget != null && showSourceFeedback == false))
-            return getConnectionPart().getSourceAnchor().getLocation(end);
+        Figure figure = (Figure)target;
+        AbstractAnchor anchor;
 
-        return getAnchorLocation(end);
-    }
+        if(sourcePart == null)
+            anchor = isSource ?
+                    figure.getPart().getSourceConnectionAnchor(getConnectionPart()) :
+                    figure.getPart().getTargetConnectionAnchor(getConnectionPart());
+        else
+            //Because there is no connection party yet
+            anchor = new ChopboxAnchor(figure);
 
-    private Point getTargetPoint(Point start) {
-        if(feedbackTarget == null || (feedbackTarget != null && showSourceFeedback == true))
-            return getConnectionPart().getTargetAnchor().getLocation(start);
-
-        return getAnchorLocation(start);
-    }
-
-    private Point getAnchorLocation(Point referencePoint) {
-        if(feedbackTarget instanceof Point)
-            return (Point)feedbackTarget;
-
-        Figure figure = (Figure)feedbackTarget;
-        AbstractAnchor anchor = showSourceFeedback ?
-                figure.getPart().getSourceConnectionAnchor(getConnectionPart()) :
-                figure.getPart().getTargetConnectionAnchor(getConnectionPart());
-
-        return anchor.getLocation(referencePoint);
+        figure.translateToRelative(refPoint);
+        Point anchorPoint = anchor.getLocation(refPoint);
+        figure.translateToAbsolute(anchorPoint);
+        return anchorPoint;
     }
 
     public void setSourcePart(AbstractGraphicalEditPart sourcePart) {
@@ -120,7 +127,7 @@ public class Connection extends Figure {
     }
 
     public Figure findFigureAt(int x, int y) {
-        if(feedbackTarget != null)
+        if(hasFeedback())
             return null;
 
         for(Figure child: children.keySet()) {
@@ -140,9 +147,19 @@ public class Connection extends Figure {
     @Override
     public final void painLink(Graphics graphics) {}
 
-    @Override
+    public void paint(Graphics graphics) {
+        if(!isValid())
+            return;
+
+        super.paint(graphics);
+    }
+
+        @Override
     public void paintComponent(Graphics graphics) {
         Stroke s = setLineWidth(graphics, getLineWidth());
+
+        Figure parent = getParent() == null ? sourcePart.getFigure() :getParent();
+        translateToRelative(parent, points);
 
         graphics.drawPolyline(points.getXPoints(), points.getYPoints(), points.getPoints());
 
@@ -159,21 +176,8 @@ public class Connection extends Figure {
         sourceFigure.getParent().translateToAbsolute(zero);
         graphics.translate(zero.x, zero.y);
 
+        layout();
 
-        points.removeAllPoints();
-
-        Point start, end;
-        if(feedbackTarget instanceof Point) {
-            start = new ChopboxAnchor(sourceFigure).getLocation((Point) feedbackTarget);
-            end = (Point)feedbackTarget;
-        } else {
-            start = new ChopboxAnchor(sourceFigure).getLocation(((Figure)feedbackTarget).getCenter());
-            end = new ChopboxAnchor((Figure)feedbackTarget).getLocation(sourceFigure.getCenter());
-        }
-        points.addPoint(start);
-        points.addPoint(end);
-
-        layout(points);
         paintComponent(graphics);
         paintChildren(graphics);
 
@@ -196,10 +200,10 @@ public class Connection extends Figure {
         if(feedbackTarget instanceof Point)
             return false;
 
-        if(showSourceFeedback == true && feedbackTarget == getConnectionPart().getSourceFigure())
+        if(showSourceFeedback == true && feedbackTarget == getConnectionPart().getTargetFigure())
             return true;
 
-        return showSourceFeedback == false && feedbackTarget == getConnectionPart().getTargetFigure();
+        return showSourceFeedback == false && feedbackTarget == getConnectionPart().getSourceFigure();
     }
 
     public void relocateSourceFeedback(Object lastHoverlocation) {
@@ -222,12 +226,7 @@ public class Connection extends Figure {
             return;
         }
 
-        if (feedbackTarget instanceof Point) {
-            Point feedbackLocation = new Point((Point)feedbackTarget);
-            (getConnectionPart() == null ? sourcePart.getFigure() : getConnectionPart().getSourceFigure()).translateToRelative(feedbackLocation);
-            this.feedbackTarget = feedbackLocation;
-        }else
-            this.feedbackTarget = feedbackTarget;
+        this.feedbackTarget = feedbackTarget;
     }
 
     @Override
@@ -270,5 +269,19 @@ public class Connection extends Figure {
             p.translate(-Endpoint.SIZE/2, -Endpoint.SIZE/2);
             return p;
         }
+    }
+
+    private Object getSource() {
+        if(hasFeedback() && showSourceFeedback)
+            return feedbackTarget;
+        else
+            return sourcePart == null ? getConnectionPart().getSourceFigure() : sourcePart.getFigure();
+    }
+
+    private Object getTarget() {
+        if(hasFeedback() && !showSourceFeedback)
+            return feedbackTarget;
+        else
+            return getConnectionPart().getTargetFigure();
     }
 }

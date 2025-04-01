@@ -11,6 +11,12 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 public abstract class ContextMenuProvider {
+    public static final ContextMenuProvider DEFAULT_PROVIDER = new ContextMenuProvider() {
+        public JPopupMenu buildContextMenu(Object selected) {
+            return new JPopupMenu();
+        }
+    };
+
     private static final JMenuItem SEPARATOR = new JMenuItem();
 
     private CommandExecutor executor;

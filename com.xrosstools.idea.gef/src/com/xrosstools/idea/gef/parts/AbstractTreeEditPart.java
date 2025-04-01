@@ -50,7 +50,12 @@ public abstract class AbstractTreeEditPart extends AbstractEditPart {
 
     public abstract Icon getImage();
 
-    public final AbstractTreeEditPart findEditPart(Object model) {
-        return getContext().findTreeEditPart(model);
+    protected EditPart createOrFindPart(Object model) {
+        EditPart childEditPart = getContext().findTreeEditPart(model);
+        if(childEditPart != null)
+            return childEditPart;
+
+        childEditPart = getEditPartFactory().createEditPart(getContext(), this, model);
+        return childEditPart;
     }
 }

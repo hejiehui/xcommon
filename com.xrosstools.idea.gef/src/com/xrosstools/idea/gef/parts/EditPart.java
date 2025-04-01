@@ -21,6 +21,8 @@ public interface EditPart extends PropertyChangeListener {
 
     EditPartFactory getEditPartFactory();
 
+    EditPart findEditPart(Object model);
+
     void setContext(EditContext editContext);
 
     EditContext getContext();

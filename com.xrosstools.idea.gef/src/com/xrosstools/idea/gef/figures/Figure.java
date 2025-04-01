@@ -1,23 +1,25 @@
 package com.xrosstools.idea.gef.figures;
 
 import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
+import com.xrosstools.idea.gef.routers.PointList;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Figure implements ImageObserver {
-    private static final int SELECTION_GAP = 2;
-    private static final Color SELECTION_LINE_COLOR = Color.lightGray;
+    public static final int SELECTION_GAP = 2;
+    public static final Color SELECTION_LINE_COLOR = Color.lightGray;
 
     private JComponent rootPane;
     private AbstractGraphicalEditPart part;
     private Figure parent;
     private LayoutManager layout;
 
-    //The location are all relative to parent
+    //The location is relative to parent
     private Rectangle bounds = new Rectangle();
     private int lineWidth = 1;
     private Dimension preferredSize;
@@ -119,7 +121,7 @@ public class Figure implements ImageObserver {
         return bounds.width - getMarginWidth();
     }
 
-    public int getInnerrHeight() {
+    public int getInnerHeight() {
         return bounds.height - getMarginHeight();
     }
 
@@ -128,11 +130,12 @@ public class Figure implements ImageObserver {
     }
 
     public boolean isSelected() {
-        return selected;
+        return part != null && part.isSelected();
     }
 
     public void setSelected(boolean selected) {
-        this.selected = selected;
+        if(part != null)
+            part.setSelected(selected);
     }
 
     public void setShowSourceFeedback(boolean showSourceFeedback) {
@@ -319,6 +322,20 @@ public class Figure implements ImageObserver {
         }
     }
 
+    public static void translateToRelative(Figure figure, PointList points) {
+        for (int i = 0; i < points.size(); i++) {
+            Point p = points.get(i);
+            figure.translateToRelative(p);
+        }
+    }
+
+    public static void translateToAbsolute(Figure figure, PointList points) {
+        for (int i = 0; i < points.size(); i++) {
+            Point p = points.get(i);
+            figure.translateToAbsolute(p);
+        }
+    }
+
     public Point getInsertionPoint() {
         return insertionPoint;
     }
@@ -336,19 +353,37 @@ public class Figure implements ImageObserver {
             layout.layoutContainer(this);
         }
 
+        check();
         for(Connection conn: connections) {
             conn.layout();
         }
     }
 
+    private void check() {
+        HashSet<Object> objs =new HashSet<>();
+        for(Connection conn: connections) {
+            Object model = conn.getConnectionPart().getModel();
+            if(objs.contains(model))
+                return;
+            objs.add(model);
+        }
+    }
+
+    private void check(Figure newConn) {
+        for(Connection conn: connections) {
+            Object model = conn.getConnectionPart().getModel();
+            if(newConn.getPart().getModel() == model)
+                return;
+        }
+    }
+
+    /**
+     * @param child Child figure should not be connection.
+     */
     public  void add(Figure child) {
         child.setParent(this);
-        if(child instanceof Connection)
-            connections.add((Connection)child);
-        else
-            components.add(child);
+        components.add(child);
         child.setRootPane(rootPane);
-//        layout();
     }
 
     public void setConstraint(Figure child, Object constraint) {
@@ -356,17 +391,16 @@ public class Figure implements ImageObserver {
             throw new IllegalArgumentException("Figure must be a child");
         if (layout != null)
             layout.setConstraint(child, constraint);
-//        revalidate();
     }
 
     public  void add(Figure child, int index) {
         child.setParent(this);
-        if(child instanceof Connection)
-            connections.add(index, (Connection)child);
-        else
+        if(child instanceof Connection) {
+            check(child);
+            connections.add(index, (Connection) child);
+        }else
             components.add(index, child);
         child.setRootPane(rootPane);
-//        layout();
     }
 
     public  void remove(Figure child) {
@@ -374,20 +408,14 @@ public class Figure implements ImageObserver {
             connections.remove(child);
         else
             components.remove(child);
-        layout();
     }
 
     public int getComponentCount() {
         return components.size();
     }
 
-    public void invalidate() {
-        layout();
-        repaint();
-    }
-
+    @Deprecated
     public void repaint() {
-//        rootPane.repaint(x, y, width, height);
     }
 
     public void paint(Graphics graphics) {
@@ -396,7 +424,6 @@ public class Figure implements ImageObserver {
 
         layout();
         paintComponent(graphics);
-        paintInsertionFeedback(graphics);
         paintChildren(graphics);
         painLink(graphics);
 
@@ -407,12 +434,14 @@ public class Figure implements ImageObserver {
             paintSourceFeedback(graphics);
 
         if(showTargetFeedback)
-            paintTagetFeedback(graphics);
+            paintTargetFeedback(graphics);
+
+        paintInsertionFeedback(graphics);
     }
 
     public void paintSelection(Graphics graphics) {
         //For root figure, no need to show selection
-        if(parent == null)
+        if(parent == null || part == null)
             return;
 
         Stroke s = setLineWidth(graphics, 2);
@@ -429,7 +458,7 @@ public class Figure implements ImageObserver {
         paintSelection(graphics);
     }
 
-    public void paintTagetFeedback(Graphics graphics) {
+    public void paintTargetFeedback(Graphics graphics) {
         paintSelection(graphics);
     }
 
@@ -448,14 +477,14 @@ public class Figure implements ImageObserver {
             layout.paintInsertionFeedback(this, insertionPoint, graphics);
     }
 
-    public Stroke setLineWidth(Graphics graphics, int size) {
+    public static Stroke setLineWidth(Graphics graphics, int size) {
         Graphics2D g2 = (Graphics2D)graphics;
         Stroke s = g2.getStroke();
         g2.setStroke(new BasicStroke(size));
         return s;
     }
 
-    public void restore(Graphics graphics, Stroke s) {
+    public static void restore(Graphics graphics, Stroke s) {
         if(s == null) return;
         Graphics2D g2 = (Graphics2D)graphics;
         g2.setStroke(s);

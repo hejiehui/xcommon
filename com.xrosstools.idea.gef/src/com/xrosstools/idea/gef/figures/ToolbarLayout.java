@@ -1,6 +1,9 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
+
 import java.awt.*;
+import java.util.List;
 
 public class ToolbarLayout implements LayoutManager {
     /** Constant to specify components to be aligned in the center */
@@ -66,6 +69,10 @@ public class ToolbarLayout implements LayoutManager {
     public Dimension preferredLayoutSize(Figure parent) {
         synchronized (parent) {
             int count = parent.getComponentCount();
+
+            if(count == 0)
+                return new Dimension(parent.getMarginWidth(), parent.getMarginHeight());
+
             int width = 0;
             int height = 0;
             for(Figure c: parent.getComponents()) {
@@ -147,60 +154,95 @@ public class ToolbarLayout implements LayoutManager {
             return;
 
         int insertionIndex = getInsertionIndex(parent, insertionPoint);
-        int insertionX = insertionPoint.x;
-        int insertionY = insertionPoint.y;
+        int insertionX = 0;
+        int insertionY = 0;
+        int width = 0;
+        int height = 0;
         boolean vertical = !isHorizontal();
 
-        if(parent.getComponentCount() == 0)
-            return;
+        List<AbstractGraphicalEditPart> parts = parent.getPart().getChildren();
+        if(parts.size() == 0) {
+            if (vertical) {
+                insertionY = parent.getInnerHeight() / 2;
+                width = parent.getInnerWidth();
+            } else {
+                insertionX = parent.getInnerWidth() / 2;
+                height = parent.getInnerHeight();
+            }
+        }else {
+            // Except the last one, all the insertion line refer to the next child
+            Figure child = insertionIndex < parts.size() ?
+                    getContainer(parent, parts.get(insertionIndex)) :
+                    getContainer(parent, parts.get(insertionIndex - 1));
 
-        if(insertionIndex == 0) {
-            Figure child = parent.getComponents().get(0);
-            if(vertical)
-                insertionY = parent.getInsets().top/2;
-            else
-                insertionX = parent.getInsets().left/2;;
-        } else if (insertionIndex < parent.getComponentCount()) {
-            Figure child = parent.getComponents().get(insertionIndex);
-            if(vertical)
-                insertionY = parent.getInnerY() + child.getY() - gap / 2;
-            else
-                insertionX = parent.getInnerX() + child.getX() - gap / 2;
-        } else {
-            Figure child = parent.getComponents().get(insertionIndex -1);
-            if (vertical)
-                insertionY = parent.getHeight() - parent.getInsets().bottom/2;
-            else
-                insertionX = parent.getWidth() - parent.getInsets().right/2;;
+            insertionX = child.getX();
+            insertionY = child.getY();
+
+            int delta = 0;
+            if(insertionIndex == 0) // The insertion line before first child
+                delta = Figure.SELECTION_GAP + (vertical ? parent.getInsets().top : parent.getInsets().left);
+            else if(insertionIndex < parts.size()) // The insertion line in the middle
+                delta = gap/2;
+            else { // The insertion line after last child
+                delta = -Figure.SELECTION_GAP -(vertical ? parent.getInsets().bottom : parent.getInsets().right);
+                if(vertical)
+                    insertionY += child.getHeight();
+                else
+                    insertionX += child.getWidth();
+            }
+
+            if(vertical) {
+                insertionY -= delta;
+                width = child.getWidth();
+            }else {
+                insertionX -= delta;
+                height = child.getHeight();
+            }
         }
 
-        if(vertical)
-            gef.drawLine(parent.getInnerX(), insertionY, parent.getInnerX() + parent.getInnerWidth(), insertionY);
-        else
-            gef.drawLine(insertionX, parent.getInnerY(), insertionX, parent.getInnerY() + parent.getInnerrHeight());
+        insertionX += parent.getInnerX();
+        insertionY += parent.getInnerY();
+
+        Stroke s = Figure.setLineWidth(gef, 2);
+        Color oldColor = gef.getColor();
+        gef.setColor(Figure.SELECTION_LINE_COLOR);
+
+        gef.drawLine(insertionX, insertionY, insertionX + width, insertionY + height);
+
+        gef.setColor(oldColor);
+        Figure.restore(gef, s);
     }
 
     public int getInsertionIndex(Figure parent, Point insertionPoint) {
         if(insertionPoint == null)
-            return 0;
+            return -1;
 
         int insertionIndex = 0;
 
         /* for two element, t
           | 0 X | 1 X | 2
            */
-        for (Figure child : parent.getComponents()) {
+        for (AbstractGraphicalEditPart part : parent.getPart().getChildren()) {
+            Point referLocation = getContainer(parent, part).getCenter();
             if (isHorizontal()) {
-                if (child.getX() > insertionPoint.x)
+                if (referLocation.getX() > insertionPoint.x)
                     break;
             } else {
-                if (child.getY() > insertionPoint.y)
+                if (referLocation.getY() > insertionPoint.y)
                     break;
             }
             insertionIndex++;
         }
 
         return insertionIndex;
+    }
+
+    private Figure getContainer(Figure parent, AbstractGraphicalEditPart part) {
+        Figure figure = part.getFigure();
+        while(figure.getParent() != parent)
+            figure = figure.getParent();
+
+        return figure;
     }
 
 }

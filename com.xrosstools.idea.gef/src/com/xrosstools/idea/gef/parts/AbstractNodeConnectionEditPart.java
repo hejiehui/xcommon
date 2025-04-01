@@ -7,10 +7,8 @@ public abstract class AbstractNodeConnectionEditPart extends AbstractConnectionE
         return new NodeConnectionEditPolicy();
     }
 
-    public void setSelected(int value) {
-        if (value == AbstractGraphicalEditPart.SELECTED)
-            getFigure().setLineWidth(2);
-        else
-            getFigure().setLineWidth(1);
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        getFigure().setLineWidth(selected ? 2 : 1);
     }
 }

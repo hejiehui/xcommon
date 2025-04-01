@@ -35,12 +35,13 @@ public class Endpoint extends Figure {
 
     @Override
     public boolean isSelectable() {
-        return true;
+        //If connection has no edit policy, then end point should not be selectable
+        return getPart() != null && getPart().getEditPolicy() != null;
     }
 
     @Override
     public void paint(Graphics graphics) {
-        if(getParentConnection().isSelected())
+        if(isSelectable() && getParentConnection().isSelected())
             graphics.fill3DRect(getX(), getY(), SIZE, SIZE, true);
     }
 }

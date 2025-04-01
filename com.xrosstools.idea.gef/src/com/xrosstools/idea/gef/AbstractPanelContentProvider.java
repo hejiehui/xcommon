@@ -38,6 +38,16 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
     }
 
     @Override
+    public ContextMenuProvider getContextMenuProvider() {
+        return ContextMenuProvider.DEFAULT_PROVIDER;
+    }
+
+    @Override
+    public ContextMenuProvider getOutlineContextMenuProvider() {
+        return ContextMenuProvider.DEFAULT_PROVIDER;
+    }
+
+    @Override
     public void preBuildRoot(){}
 
     @Override
@@ -91,7 +101,7 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         return new AnActionAdapter(tooltip, tooltip, icon, action);
     }
 
-    private static class AnActionAdapter extends AnAction {
+    public static class AnActionAdapter extends AnAction {
         private ActionListener listener;
         public AnActionAdapter(@Nullable String text, @Nullable String description, @Nullable Icon icon, @Nullable ActionListener listener) {
             super(text, description, icon);
@@ -102,6 +112,10 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
             //TODO in the future, we need to construct action event from anActionEvent.
             listener.actionPerformed(null);
+        }
+
+        public ActionListener getListener() {
+            return listener;
         }
     }
 

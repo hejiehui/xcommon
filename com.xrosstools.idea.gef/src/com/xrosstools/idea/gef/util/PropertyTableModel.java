@@ -76,8 +76,10 @@ public class PropertyTableModel extends AbstractTableModel {
             return (String)value;
 
         IPropertyDescriptor descriptor = getDescriptor(rowIndex);
-
-        return descriptor.getDisplayText(value);
+        if(descriptor == null || descriptor instanceof TextPropertyDescriptor)
+            return value == null ? "": value.toString();
+        else
+            return descriptor.getDisplayText(value);
     }
 
     public boolean isSame(IPropertySource anotherSource) {
