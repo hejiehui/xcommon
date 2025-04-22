@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef;
 
-import com.fasterxml.jackson.databind.ser.std.AtomicReferenceSerializer;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
@@ -27,7 +26,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -57,7 +58,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private Object newModel;
     private AbstractGraphicalEditPart sourcePart;
 
-    private PanelContentProvider contentProvider;
+    private PanelContentProvider<T> contentProvider;
+    private List<ContentChangeListener<T>> listeners = new ArrayList<>();
 
     private CommandStack commandStack = new CommandStack();
     private AtomicBoolean inProcessing = new AtomicBoolean(false);
@@ -241,6 +243,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void build() {
+        contentChanged(diagramRef.get());
+
         EditContext editContext = new EditContext(this);
         EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
         EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
@@ -311,13 +315,22 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         try {
             contentProvider.getFile().refresh(false, true);
-            diagramRef.set((T)contentProvider.getContent());
+            diagramRef.set(contentProvider.getContent());
             build();
             selectModel(diagramRef.get());
             commandStack.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void register(ContentChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void contentChanged(T content) {
+        for(ContentChangeListener<T> listener: listeners)
+            listener.contentChanged(content);
     }
 
     private void save() {
@@ -728,7 +741,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             if(policy == null)
                 return null;
 
-            Rectangle constrain = new Rectangle(localPoint.x, localPoint.y, lastSelected.getWidth(), lastSelected.getHeight());
+            Rectangle constrain = new Rectangle(localPoint.x + delta.x, localPoint.y + delta.y, lastSelected.getWidth(), lastSelected.getHeight());
             return isAdd ? policy.getAddCommand(part, constrain) : policy.getMoveCommand(part, constrain);
         }
 

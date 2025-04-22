@@ -10,6 +10,8 @@ public abstract class AbstractTreeEditPart extends AbstractEditPart {
     private DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(this);
     private List<AbstractTreeEditPart> childEditParts = new ArrayList<>();
 
+    public AbstractTreeEditPart(){}
+
     public AbstractTreeEditPart(Object model) {
         setModel(model);
     }

@@ -5,7 +5,7 @@ import com.xrosstools.idea.gef.util.PropertyEntrySource;
 
 import java.util.List;
 
-public class Diagram<T extends Node> extends PropertyEntrySource implements NodeContainer<T> {
+public class Diagram<T> extends PropertyEntrySource implements NodeContainer<T> {
     private ListPropertyEntry<T> children = new ListPropertyEntry<>(PROP_CHILDREN, PROP_CHILD, getListeners());
 
     public List<T> getChildren() {
@@ -42,5 +42,9 @@ public class Diagram<T extends Node> extends PropertyEntrySource implements Node
 
     public T get(int index) {
         return children.getElement(index);
+    }
+
+    public void move(int newIndex, T child) {
+        children.move(newIndex, child);
     }
 }

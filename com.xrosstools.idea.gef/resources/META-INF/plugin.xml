@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.2.3</version>
+  <version>1.3.0</version>
   <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.3.0</em> Support OrderedContainerEditPolicy and optimize tree part creation and GenerateFactoryAction.<br>
       <em>1.2.3</em> Optimize undo/redo, toolbar layout, insertion feedback, connection selection feedback and connection refresh.<br>
       <em>1.2.2</em> Fix NPE in palette, optimize assign/change/open implementation and code display.<br>
       <em>1.2.0</em> Support common model, action, command, parts, properties, policies and reference.<br>

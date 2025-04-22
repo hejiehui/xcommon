@@ -31,6 +31,16 @@ public class ListPropertyEntry<T> extends PropertyEntry<List<T>> {
         firePropertyChange(childName, null, element);
     }
 
+    public void move(int newIndex, T element){
+        int index = get().indexOf(element);
+        if(index < newIndex)
+            newIndex-=1;
+
+        remove(element);
+        add(newIndex, element);
+        firePropertyChange(childName, index, newIndex);
+    }
+
     public T remove(int index) {
         T oldValue = get().remove(index);
         firePropertyChange(childName, oldValue, null);
@@ -38,6 +48,9 @@ public class ListPropertyEntry<T> extends PropertyEntry<List<T>> {
     }
 
     public void remove(T element) {
+        if(!contains(element))
+            return;
+
         get().remove(element);
         firePropertyChange(childName, element, null);
     }

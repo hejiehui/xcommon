@@ -19,12 +19,18 @@ import java.beans.PropertyChangeListener;
 public abstract class AbstractPanelContentProvider<T extends IPropertySource> implements PanelContentProvider<T>, PropertyChangeListener {
     private VirtualFile virtualFile;
     private EditorPanel editorPanel;
+
+    public AbstractPanelContentProvider(VirtualFile virtualFile) {
+        this.virtualFile = virtualFile;
+    }
+
     public VirtualFile getFile() {
         return virtualFile;
     }
 
-    public AbstractPanelContentProvider(VirtualFile virtualFile) {
-        this.virtualFile = virtualFile;
+     public <K extends ContentChangeListener> K register(K listener) {
+        editorPanel.register(listener);
+        return listener;
     }
 
     @Override

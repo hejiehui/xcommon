@@ -11,12 +11,18 @@ import java.util.List;
 public abstract class NodeTreePart extends AbstractTreeEditPart {
     private boolean outputsAsChildren;
 
+    @Deprecated
     public NodeTreePart(Object model) {
         this(model, false);
     }
 
+    @Deprecated
     public NodeTreePart(Object model, boolean outputsAsChildren) {
         super(model);
+        this.outputsAsChildren = outputsAsChildren;
+    }
+
+    public NodeTreePart(boolean outputsAsChildren) {
         this.outputsAsChildren = outputsAsChildren;
     }
 

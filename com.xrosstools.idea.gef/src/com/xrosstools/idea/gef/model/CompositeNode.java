@@ -1,19 +1,19 @@
 package com.xrosstools.idea.gef.model;
 
+import com.xrosstools.idea.gef.util.ListPropertyEntry;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CompositeNode<T extends Node> extends Node implements NodeContainer<T> {
-    private List<T> children = new ArrayList<>();
+    private ListPropertyEntry<T> children = new ListPropertyEntry<>(PROP_CHILDREN, PROP_CHILD, getListeners());
 
     public List<T> getChildren() {
-        return children;
+        return children.get();
     }
 
-    public void setChildren(List<T> children) {
-        Object oldValue = this.children;
-        this.children = children;
-        firePropertyChange(PROP_CHILDREN, oldValue, children);
+    public void setChildren(List<T> _children) {
+        children.set(_children);
     }
 
     public boolean isEmpty() {
@@ -26,25 +26,25 @@ public class CompositeNode<T extends Node> extends Node implements NodeContainer
 
     public void addChild(T child) {
         children.add(child);
-        firePropertyChange(PROP_CHILD, null, child);
     }
 
     public void addChild(int index, T child) {
         children.add(index, child);
-        firePropertyChange(PROP_CHILD, null, child);
     }
 
     public void removeChild(int index) {
-        Object oldValue = children.remove(index);
-        firePropertyChange(PROP_CHILD, oldValue, null);
+        children.remove(index);
     }
 
     public void removeChild(T child) {
-        if(children.remove(child))
-            firePropertyChange(PROP_CHILD, child, null);
+        children.remove(child);
     }
 
     public T get(int index) {
-        return children.get(index);
+        return children.getElement(index);
+    }
+
+    public void move(int newIndex, T child) {
+        children.move(newIndex, child);
     }
 }

@@ -1,28 +1,24 @@
 package com.xrosstools.idea.gef.commands;
 
-import com.xrosstools.idea.gef.model.Node;
 import com.xrosstools.idea.gef.model.NodeContainer;
 
-import java.awt.*;
-
-public class CreateNodeCommand extends Command {
+public class CreateOrderedNodeCommand extends Command {
     private NodeContainer nodeContainer;
-    private Node node;
-    private Point location;
-    
-    public CreateNodeCommand init(
+    private Object node;
+    private int index;
+
+    public CreateOrderedNodeCommand init(
             NodeContainer nodeContainer,
-            Node node,
-    		Point location){
-    	this.nodeContainer = nodeContainer;
-    	this.node = node;
-    	this.location = location;
-    	return this;
+            Object node,
+            int index){
+        this.nodeContainer = nodeContainer;
+        this.node = node;
+        this.index = index;
+        return this;
     }
 
     public void execute() {
-        node.setLocation(location);
-        nodeContainer.addChild(node);
+        nodeContainer.addChild(index, node);
         postExecute();
     }
 
@@ -43,12 +39,12 @@ public class CreateNodeCommand extends Command {
         return nodeContainer;
     }
 
-    public Node getNode() {
+    public Object getNode() {
         return node;
     }
 
-    public Point getLocation() {
-        return location;
+    public int getIndex() {
+        return index;
     }
 
     public void postExecute() {}

@@ -18,6 +18,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
+import com.xrosstools.idea.gef.commands.Command;
 
 import java.awt.event.ActionEvent;
 
@@ -183,5 +184,13 @@ public abstract class AbstractCodeGenerator extends Action {
         VirtualFile dir = file.isDirectory() ? file : file.getParent();
         PsiDirectory psiDir = PsiManager.getInstance(project).findDirectory(dir);
         return psiDir == null ? "" : JavaDirectoryService.getInstance().getPackage(psiDir).getQualifiedName();
+    }
+
+    public boolean isEmpty(String value) {
+        return value == null || value.trim().length() == 0;
+    }
+
+    public Command createCommand() {
+        return null;
     }
 }

@@ -7,12 +7,14 @@ import com.xrosstools.idea.gef.model.NodeContainer;
 public class DeleteNodeCommand extends Command {
     private NodeContainer nodeContainer;
     private Node node;
+    private int index;
     
     public DeleteNodeCommand init(
             NodeContainer diagram,
             Node node){
     	this.nodeContainer = diagram;
     	this.node = node;
+        index = nodeContainer.inexOf(node);
     	return this;
     }
     
@@ -39,7 +41,7 @@ public class DeleteNodeCommand extends Command {
     }
 
     public void undo() {
-        nodeContainer.addChild(node);
+        nodeContainer.addChild(index, node);
 
         for(Object conn: node.getOutputs()){
             NodeConnection path = (NodeConnection)conn;

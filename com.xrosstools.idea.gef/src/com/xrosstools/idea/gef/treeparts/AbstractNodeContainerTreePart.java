@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractNodeContainerTreePart extends AbstractTreeEditPart {
+    @Deprecated
     public AbstractNodeContainerTreePart(Object model) {
         super(model);
     }
+
+    public AbstractNodeContainerTreePart(){}
 
     public List getModelChildren() {
         List children = new ArrayList();

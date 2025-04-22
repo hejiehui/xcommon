@@ -33,7 +33,8 @@ public class PropertySourceXmlRegister<T> {
     }
 
     public void readProperties(T key, Node node, IPropertySource source) {
-        get(key).readProperties(node, source);
+        if(contains(key))
+            get(key).readProperties(node, source);
     }
 
     public void writeProperties(Document doc, T key, Element element, IPropertySource source) {
