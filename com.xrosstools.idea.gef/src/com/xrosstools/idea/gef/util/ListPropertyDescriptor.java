@@ -47,9 +47,9 @@ public class ListPropertyDescriptor extends PropertyDescriptor {
         ctrl.removeAllItems();
         values = provider.get();
         for(Object v: values)
-            ctrl.addItem(v);
+            ctrl.addItem(getDisplayText(v));
 
-        ctrl.setSelectedItem(value);
+        ctrl.setSelectedItem(getDisplayText(value));
         ctrl.addItemListener(e -> {
             if(e.getStateChange() == ItemEvent.SELECTED)
                 ctrl.transferFocusUpCycle();
@@ -59,7 +59,7 @@ public class ListPropertyDescriptor extends PropertyDescriptor {
     }
 
     public Object getCellEditorValue() {
-        return ctrl.getSelectedItem();
+        return convertToProperty((String) ctrl.getSelectedItem());
     }
 
     @Override

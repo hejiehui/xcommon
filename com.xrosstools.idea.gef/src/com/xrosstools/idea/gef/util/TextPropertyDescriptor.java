@@ -7,7 +7,6 @@ import java.awt.event.KeyEvent;
 public class TextPropertyDescriptor extends PropertyDescriptor{
     private JTextField editor;
 
-    @Deprecated
     public TextPropertyDescriptor(Object propertyId, Object label) {
         this();
         setId(propertyId);

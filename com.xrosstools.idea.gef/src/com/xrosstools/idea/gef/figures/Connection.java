@@ -236,6 +236,10 @@ public class Connection extends Figure {
         this.router = router;
     }
 
+    public ConnectionRouter getRouter() {
+        return router;
+    }
+
     public PointList getPoints() {
         return points;
     }
@@ -271,14 +275,14 @@ public class Connection extends Figure {
         }
     }
 
-    private Object getSource() {
+    public Object getSource() {
         if(hasFeedback() && showSourceFeedback)
             return feedbackTarget;
         else
             return sourcePart == null ? getConnectionPart().getSourceFigure() : sourcePart.getFigure();
     }
 
-    private Object getTarget() {
+    public Object getTarget() {
         if(hasFeedback() && !showSourceFeedback)
             return feedbackTarget;
         else

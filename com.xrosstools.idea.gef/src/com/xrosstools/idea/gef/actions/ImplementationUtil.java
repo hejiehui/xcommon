@@ -111,7 +111,6 @@ public class ImplementationUtil implements ImplementationMessages {
             return implementation.split(SEPARATOR)[0] + SEPARATOR + methodName;
     }
 
-
     public static void buildImplementationMenu(Project project, JPopupMenu menu, IPropertySource source, String propertyName, boolean allowMethod) {
         String implementation = (String)source.getPropertyValue(propertyName);
         if(isEmpty(implementation))

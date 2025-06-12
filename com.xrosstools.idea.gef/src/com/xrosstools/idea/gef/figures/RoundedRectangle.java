@@ -25,6 +25,17 @@ public class RoundedRectangle extends Figure {
 
     @Override
     public void paintComponent(Graphics graphics) {
+        Color oldColor = graphics.getColor();
+
+        if(getBackgroundColor() != null) {
+            graphics.setColor(getBackgroundColor());
+            graphics.fillRoundRect(getX(), getY(), getWidth(),getHeight(), arcWidth, arcHeight);
+        }
+
+        if(getForegroundColor() != null) {
+            graphics.setColor(getForegroundColor());
+        }
         graphics.drawRoundRect(getX(), getY(), getWidth(),getHeight(), arcWidth, arcHeight);
+        graphics.setColor(oldColor);
     }
 }

@@ -49,6 +49,7 @@ public class PropertyTableModel extends AbstractTableModel {
             row.propertyName = d.getId();
             row.propertyDescriptor = d;
             row.label = d.getLabel() == null ? d.getId() : d.getLabel();
+            row.categoryName = catName;
             rows.add(row);
         }
 
@@ -118,18 +119,30 @@ public class PropertyTableModel extends AbstractTableModel {
         if(columnIndex == 0) {
             return row.isCategory ? (showCatName ? row.categoryName : "") : ("        " + row.label);
         } else {
-            return isCellEditable(rowIndex, columnIndex) ?
-                    source.getPropertyValue(internalRows.get(rowIndex).propertyName) :
-                    null;
+            if(!isCellEditable(rowIndex, columnIndex))
+                return null;
+
+            if(row.categoryName == DEFAULT)
+                return source.getPropertyValue(internalRows.get(rowIndex).propertyName);
+            else
+                return source.getPropertyValue(row.categoryName, internalRows.get(rowIndex).propertyName);
         }
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        String propertyName = (internalRows.get(rowIndex).propertyName).toString();
-        Object oldValue = source.getPropertyValue(propertyName);
+        TableRow row = internalRows.get(rowIndex);
 
-        if(aValue != oldValue)
-            executor.execute(new PropertyChangeCommand(source, propertyName, oldValue, aValue));
+        String propertyName = row.propertyName.toString();
+        Object oldValue = getValueAt(rowIndex, columnIndex);
+
+        if(aValue == oldValue)
+            return;
+
+        PropertyChangeCommand command = row.categoryName == DEFAULT ?
+                new PropertyChangeCommand(source, propertyName, oldValue, aValue) :
+                new PropertyChangeCommand(source, row.categoryName, propertyName, oldValue, aValue);
+
+        executor.execute(command);
     }
 }

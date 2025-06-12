@@ -37,6 +37,19 @@ public class XmlHelper {
 		return nl;
 	}
 
+	public static List<Node> getValidChildNodes(Node node, String name) {
+		List<Node> nl = new ArrayList();
+		if(node == null)
+			return nl;
+
+		NodeList nodeList = node.getChildNodes();
+		for(int i = 0; i < nodeList.getLength(); i++){
+			if(isValidNode(nodeList.item(i), name))
+				nl.add(nodeList.item(i));
+		}
+		return nl;
+	}
+
 
 	public static int getIntAttribute(Node node, String attributeName, int defaultValue) {
 		String value = getAttribute(node, attributeName);

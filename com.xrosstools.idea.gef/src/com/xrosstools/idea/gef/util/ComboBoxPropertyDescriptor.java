@@ -13,7 +13,6 @@ public class ComboBoxPropertyDescriptor extends PropertyDescriptor {
     private ComboBox ctrl = new ComboBox();
     private Supplier<String[]> provider;
 
-    @Deprecated
     public ComboBoxPropertyDescriptor(String propertyId, String label, String[] values) {
         this(label, () -> values);
         setId(propertyId);

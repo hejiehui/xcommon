@@ -1,9 +1,10 @@
 package com.xrosstools.idea.gef.model;
 
 import com.xrosstools.idea.gef.util.PropertyEntry;
+import com.xrosstools.idea.gef.util.PropertyEntrySource;
 import com.xrosstools.idea.gef.util.PropertySource;
 
-public class NodeConnection<S extends Node, T extends Node> extends PropertySource implements ModelProperties {
+public class NodeConnection<S extends Node, T extends Node> extends PropertyEntrySource implements ModelProperties {
     private PropertyEntry<S> source = new PropertyEntry<>(PROP_SOURCE, getListeners());
     private PropertyEntry<T> target = new PropertyEntry<>(PROP_TARGET, getListeners());
 

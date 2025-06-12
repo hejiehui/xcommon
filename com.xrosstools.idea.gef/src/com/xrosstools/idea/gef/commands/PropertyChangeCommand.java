@@ -4,6 +4,7 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 
 public class PropertyChangeCommand extends Command {
     private IPropertySource source;
+    private String category;
     private String propertyName;
     private Object oldValue;
     private Object newValue;
@@ -19,8 +20,16 @@ public class PropertyChangeCommand extends Command {
         this.newValue = newValue;
     }
 
+    public PropertyChangeCommand(IPropertySource source, String category, String propertyName, Object oldValue, Object newValue) {
+        this(source, propertyName, oldValue, newValue);
+        this.category = category;
+    }
+
     public void execute() {
-        this.source.setPropertyValue(propertyName, newValue);
+        if(category == null)
+            this.source.setPropertyValue(propertyName, newValue);
+        else
+            this.source.setPropertyValue(category, propertyName, newValue);
     }
 
     public String getLabel() {
@@ -32,6 +41,9 @@ public class PropertyChangeCommand extends Command {
     }
 
     public void undo() {
-        this.source.setPropertyValue(propertyName, oldValue);
+        if(category == null)
+            this.source.setPropertyValue(propertyName, oldValue);
+        else
+            this.source.setPropertyValue(category, propertyName, oldValue);
     }
 }
