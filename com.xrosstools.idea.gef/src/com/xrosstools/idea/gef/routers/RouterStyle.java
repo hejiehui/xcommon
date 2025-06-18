@@ -7,7 +7,9 @@ public enum RouterStyle {
 	VERTICAL_RIGHT_ANGLE,
 	HORIZONTAL_RIGHT_ANGLE,
 	VERTICAL_LIGHTNING,
-	HORIZONTAL_LIGHTNING;
+	HORIZONTAL_LIGHTNING,
+	VERTICAL_HOMOLATERAL,
+	HORIZONTAL_HOMOLATERAL;
 
 	public static String[] getDisplayNames(RouterStyle...styls) {
 		String[] names = new String[styls.length];
@@ -32,6 +34,8 @@ public enum RouterStyle {
 			case HORIZONTAL_RIGHT_ANGLE: return new RightAngleRouter(false);
 			case VERTICAL_LIGHTNING: return new LightningRouter(true);
 			case HORIZONTAL_LIGHTNING: return new LightningRouter(false);
+			case VERTICAL_HOMOLATERAL: return new HomolateralRouter(true);
+			case HORIZONTAL_HOMOLATERAL: return new HomolateralRouter(false);
 			default: throw new IllegalArgumentException();
 		}
 	}
@@ -43,11 +47,13 @@ public enum RouterStyle {
 			case HORIZONTAL_RIGHT_ANGLE: return new RightAngleLocator(figure, false);
 			case VERTICAL_LIGHTNING: return new LightningLocator(figure, true);
 			case HORIZONTAL_LIGHTNING: return new LightningLocator(figure, false);
+			case VERTICAL_HOMOLATERAL: return new LightningLocator(figure, true);
+			case HORIZONTAL_HOMOLATERAL: return new LightningLocator(figure, false);
 			default: throw new IllegalArgumentException();
 		}
 	}
 
 	public boolean isVertical() {
-		return this == VERTICAL_LIGHTNING || this == VERTICAL_RIGHT_ANGLE;
+		return this == VERTICAL_LIGHTNING || this == VERTICAL_RIGHT_ANGLE || this == VERTICAL_HOMOLATERAL;
 	}
 }

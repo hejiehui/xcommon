@@ -477,6 +477,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         if (lastSelected == root.getFigure())
             return;
 
+        root.getFigure().layout();
+
         Point pos = lastSelected.getLocation();
         lastSelected.translateToAbsolute(pos);
 
@@ -546,7 +548,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         if(f instanceof Endpoint && f.getParent() instanceof Connection) {
-            gotoNext(((Endpoint)f).isConnectionSourceEndpoint() ? sourceEndpointSelected : targetEndpointSelected);
+            Endpoint endpoint = (Endpoint)f;
+            if(endpoint.isConnectionSourceEndpoint())
+                gotoNext(sourceEndpointSelected);
+            else if(endpoint.isConnectionTargetEndpoint())
+                gotoNext(targetEndpointSelected);
+            else if(endpoint.isConnectionAdjusterEndpoint())
+                gotoNext(adjusterEndpointSelected);
         }
     }
 
@@ -1072,5 +1080,42 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             return policy.getReconnectTargetCommand(connection.getConnectionPart());
         }
     };
+
+    private InteractionHandle adjusterEndpointSelected = new InteractionHandle("adjusterEndpointSelected") {
+        private Endpoint endpoint;
+
+        public void enter() {
+            endpoint = (Endpoint)lastSelected;
+        }
+
+        public void mousePressed(MouseEvent e) {
+            selectFigureAt(e.getPoint());
+            if(lastSelected == endpoint)
+                return;
+
+            endpoint = null;
+            gotoNext(figureSelected);
+        }
+
+        public void mouseDragged(MouseEvent e) {
+            endpoint.setAdjustment(e.getPoint());
+            repaint();
+        }
+
+        public void mouseReleased(MouseEvent e) {
+            endpoint.setAdjustment(e.getPoint());
+            execute(getCommand(e.getPoint()));
+            gotoNext(ready);
+        }
+
+        private Command getCommand(Point adjustment) {
+            EditPolicy policy = endpoint.getPart().getEditPolicy();
+            if(policy == null) return null;
+
+            Connection connection = ((Endpoint) lastSelected).getParentConnection();
+            return policy.getAdjustConnectionCommand(connection.getConnectionPart());
+        }
+    };
+
     private InteractionHandle curHandle = ready;
 }

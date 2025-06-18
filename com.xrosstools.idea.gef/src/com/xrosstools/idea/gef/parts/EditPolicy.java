@@ -56,4 +56,6 @@ public class EditPolicy {
     public Command getReconnectSourceCommand(AbstractConnectionEditPart connectionPart) {return null;}
 
     public Command getReconnectTargetCommand(AbstractConnectionEditPart connectionPart) {return null;}
+
+    public Command getAdjustConnectionCommand(AbstractConnectionEditPart connectionPart) {return null;}
 }

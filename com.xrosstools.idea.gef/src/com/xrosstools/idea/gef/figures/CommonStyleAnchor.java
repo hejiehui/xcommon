@@ -42,6 +42,12 @@ public class CommonStyleAnchor extends AbstractAnchor {
                 case VERTICAL_RIGHT_ANGLE:
                     anchor = new MidpointAnchor(owner, true);
                     break;
+                case VERTICAL_HOMOLATERAL:
+                    anchor = new HomolateralAnchor(owner, true, true);
+                    break;
+                case HORIZONTAL_HOMOLATERAL:
+                    anchor = new HomolateralAnchor(owner, true, false);
+                    break;
                 default:
                     anchor = new ChopboxAnchor(owner);
             }
@@ -63,6 +69,12 @@ public class CommonStyleAnchor extends AbstractAnchor {
                 case HORIZONTAL_RIGHT_ANGLE:
                 case VERTICAL_LIGHTNING:
                     anchor = new MidpointAnchor(owner, true);
+                    break;
+                case VERTICAL_HOMOLATERAL:
+                    anchor = new HomolateralAnchor(owner, false, true);
+                    break;
+                case HORIZONTAL_HOMOLATERAL:
+                    anchor = new HomolateralAnchor(owner, false, false);
                     break;
                 default:
                     anchor = new ChopboxAnchor(owner);
