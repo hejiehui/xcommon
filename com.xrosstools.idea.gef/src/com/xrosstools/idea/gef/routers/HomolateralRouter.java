@@ -9,9 +9,11 @@ import java.awt.*;
 public class HomolateralRouter extends AbstractRouter {
     private boolean vertical;
     private Endpoint adjuster;
+    private int distance = 100;
 
     public HomolateralRouter(boolean vertical) {
         this.vertical = vertical;
+        adjuster = new Endpoint(this);
     }
 
     @Override
@@ -19,13 +21,28 @@ public class HomolateralRouter extends AbstractRouter {
         return endpoint == adjuster;
     }
 
+    public int getDistance() {
+        if(adjuster != null)
+            adjuster.setAdjustment(null);
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        if(adjuster != null)
+            adjuster.setAdjustment(null);
+        this.distance = distance;
+    }
+
+    public void activate(Connection conn) {
+        conn.add(adjuster, new MidpointLocator(1).setFigure(adjuster));
+    }
+
+    public void deactivate(Connection conn) {
+        conn.remove(adjuster);
+    }
+
     @Override
     public void routeDifferentNode(Connection conn) {
-        if(adjuster == null) {
-            adjuster = new Endpoint(this);
-            conn.add(adjuster, new MidpointLocator(1).setFigure(adjuster));
-        }
-
         Point adj = adjuster.getAdjustment();
 
         PointList pl = conn.getPoints();
@@ -35,8 +52,6 @@ public class HomolateralRouter extends AbstractRouter {
 
         Point p1, p2;
         pl.addPoint(start);
-
-        int distance = 100;
 
         if(vertical) {
             //Loop back

@@ -213,14 +213,14 @@ public class PropertyEntrySource extends PropertySource {
     }
 
     protected <T> PropertyEntry<T> property(String propName, T value) {
-        return new PropertyEntry<>(propName, value);
+        return new PropertyEntry<>(propName, value).setListeners(getListeners());
     }
 
     protected <T> PropertyEntry<T> enumProperty(String propName, T value, T[] values) {
-        return new PropertyEntry<T>(propName, value).setDescriptor(new ListPropertyDescriptor(values));
+        return new PropertyEntry<T>(propName, value).setDescriptor(new ListPropertyDescriptor(values)).setListeners(getListeners());
     }
 
     protected <T> PropertyEntry<T> enumProperty(String propName, T value, Supplier<Object[]> optionSupplier) {
-        return new PropertyEntry<T>(propName, value).setDescriptor(new ListPropertyDescriptor(optionSupplier));
+        return new PropertyEntry<T>(propName, value).setDescriptor(new ListPropertyDescriptor(optionSupplier)).setListeners(getListeners());
     }
 }

@@ -42,6 +42,11 @@ public class Connection extends Figure {
         children.put(child, locator);
     }
 
+    public  void remove(Figure child) {
+        super.remove(child);
+        children.remove(child);
+    }
+
     private boolean isValid() {
         if(sourcePart != null)
             return true;

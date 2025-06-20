@@ -95,8 +95,9 @@ public class PropertyEntry<T> {
         return listeners;
     }
 
-    public void setListeners(PropertyChangeSupport listeners) {
+    public PropertyEntry<T> setListeners(PropertyChangeSupport listeners) {
         this.listeners = listeners;
+        return this;
     }
 
     public String getCategory() {

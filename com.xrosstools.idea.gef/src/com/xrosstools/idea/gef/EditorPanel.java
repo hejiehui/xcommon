@@ -1103,12 +1103,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         public void mouseReleased(MouseEvent e) {
-            endpoint.setAdjustment(e.getPoint());
-            execute(getCommand(e.getPoint()));
+            endpoint.setAdjustment(new Point(e.getPoint()));
+            execute(getCommand());
             gotoNext(ready);
         }
 
-        private Command getCommand(Point adjustment) {
+        private Command getCommand() {
             EditPolicy policy = endpoint.getPart().getEditPolicy();
             if(policy == null) return null;
 

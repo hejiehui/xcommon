@@ -10,6 +10,7 @@ import java.util.Map;
 public class CommonStyleRouter implements ConnectionRouter {
     private Map<RouterStyle, ConnectionRouter> routers = new HashMap<>();
     private RouterStyle style;
+    private ConnectionRouter curRouter;
 
     public CommonStyleRouter(RouterStyle style) {
         this.style = style;
@@ -17,23 +18,30 @@ public class CommonStyleRouter implements ConnectionRouter {
 
     @Override
     public boolean contains(Endpoint endpoint) {
-        return getConnectionRouter().contains(endpoint);
+        return getInternalRouter(endpoint.getParentConnection()).contains(endpoint);
     }
 
     @Override
     public void route(Connection conn) {
-        ConnectionRouter router = getConnectionRouter();
+        ConnectionRouter router = getInternalRouter(conn);
         router.route(conn);
     }
 
     @NotNull
-    private ConnectionRouter getConnectionRouter() {
+    public ConnectionRouter getInternalRouter(Connection conn) {
         ConnectionRouter router = routers.get(style);
         if(router == null) {
             router = style.create();
             routers.put(style, router);
+            router.activate(conn);
         }
-        return router;
+
+        if(curRouter != null && curRouter != router) {
+            curRouter.deactivate(conn);
+        }
+
+        curRouter = router;
+        return curRouter;
     }
 
     public RouterStyle getStyle() {
