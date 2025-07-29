@@ -39,7 +39,7 @@ public class PropertyEntrySource extends PropertySource {
             }
             entryMap.put(entry.getName(), entry);
         }
-        descriptor.setId(entry.getName());
+
         entry.setListeners(getListeners());
     }
 

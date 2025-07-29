@@ -66,6 +66,7 @@ public class PropertyEntry<T> {
 
     public PropertyEntry<T> setDescriptor(IPropertyDescriptor descriptor) {
         this.descriptor = descriptor;
+        descriptor.setId(getName());
         return this;
     }
 
