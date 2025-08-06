@@ -23,7 +23,7 @@ public class RenamePropertyCommand extends InputTextCommand {
 	public void execute() {
 		newName = getInputText();
 		oldEntry = properties.unregister(category, oldName);
-		newEntry = new PropertyEntry(newName, oldEntry.getType()).setCategory(category);
+		newEntry = new PropertyEntry(newName, oldEntry.get()).setCategory(category);
 		properties.register(newEntry);
 		newEntry.set(oldEntry.get());
 	}
