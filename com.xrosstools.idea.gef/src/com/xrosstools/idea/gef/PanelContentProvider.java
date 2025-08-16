@@ -7,7 +7,6 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
 
-//TODO remove extends from PropertyChangeListener in the future
 public interface PanelContentProvider<T extends IPropertySource>{
     VirtualFile getFile();
     void setEditorPanel(EditorPanel editorPanel);

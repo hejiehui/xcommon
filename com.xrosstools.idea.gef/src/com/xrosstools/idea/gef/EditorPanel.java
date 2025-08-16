@@ -3,6 +3,7 @@ package com.xrosstools.idea.gef;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -46,6 +47,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private AtomicReference<T> diagramRef = new AtomicReference<>();
     private ContextMenuProvider contextMenuBuilder;
     private ContextMenuProvider outlineContextMenuProvider;
+    private Extension extension;
 
     private Point lastHit;
     private DefaultTreeModel treeModel;
@@ -74,6 +76,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         contextMenuBuilder.setExecutor(this);
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
         outlineContextMenuProvider.setExecutor(this);
+
+        extension = getExtension();
 
         createVisual();
         registerListener();
@@ -143,13 +147,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         ActionManager actionManager = ActionManager.getInstance();
         ActionGroup actionGroup = contentProvider.createToolbar();
         createUndoRedo(actionGroup);
+
+        extension.extendToolbar(actionGroup);
+
         ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", actionGroup, true);
         return toolbar.getComponent();
     }
 
     private void createUndoRedo(ActionGroup group) {
         DefaultActionGroup actionGroup = (DefaultActionGroup)group;
-        if(((DefaultActionGroup) group).getChildrenCount() > 0) {
+        if(actionGroup.getChildrenCount() > 0) {
             actionGroup.addSeparator();
         }
 
@@ -221,6 +228,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         btn.setContentAreaFilled(false);
         btn.addActionListener(e -> reset());
         return btn;
+    }
+
+    private Extension getExtension() {
+        ExtensionPointName<Extension> ep = ExtensionPointName.create("com.xrosstools.idea.gef.xrossExtension");
+        Extension extension = ep.getExtensionList().size() == 1 ? ep.getExtensionList().get(0) : new ExtensionAdapter();
+
+        extension.setEditPanel(this);
+
+        return extension;
     }
 
     private void reset() {
@@ -443,7 +459,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         return new PropertyTableModel(model, this);
     }
 
-    private void updateTreeSelection(Object model) {
+    public void updateTreeSelection(Object model) {
         triggedByFigure = true;
         AbstractTreeEditPart treePart = (AbstractTreeEditPart)treeRoot.findEditPart(model);
         if(treePart == null) {
@@ -1118,4 +1134,29 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     };
 
     private InteractionHandle curHandle = ready;
+
+    /** Accessors for extension **/
+    public T getModel() {
+        return diagramRef.get();
+    }
+
+    public JPanel getUnitPanel() {
+        return unitPanel;
+    }
+
+    public AbstractGraphicalEditPart getRoot() {
+        return root;
+    }
+
+    public AbstractTreeEditPart getTreeRoot() {
+        return treeRoot;
+    }
+
+    public Tree getTreeNavigator() {
+        return treeNavigator;
+    }
+
+    public JBTable getTableProperties() {
+        return tableProperties;
+    }
 }

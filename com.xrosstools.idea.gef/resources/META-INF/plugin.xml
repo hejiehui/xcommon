@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.4.1</version>
+  <version>1.5.0</version>
   <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.5.0</em> Support toolbar extension.<br>
       <em>1.4.1</em> Fix rename property bug.<br>
       <em>1.4.0</em> Support rhombus figure, reference utility.<br>
       <em>1.3.0</em> Support OrderedContainerEditPolicy and optimize tree part creation and GenerateFactoryAction.<br>
@@ -43,5 +44,9 @@
   <!-- uncomment to enable plugin in all products-->
   <depends>com.intellij.modules.lang</depends>
   <depends>com.intellij.modules.java</depends>
+
+  <extensionPoints>
+    <extensionPoint name="xrossExtension" interface="com.xrosstools.idea.gef.Extension"/>
+  </extensionPoints>
 
 </idea-plugin>
