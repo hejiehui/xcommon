@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef.actions;
 
-import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.ide.util.ClassFilter;
 import com.intellij.ide.util.PackageChooserDialog;
@@ -107,7 +106,7 @@ public abstract class AbstractCodeGenerator extends Action {
         );
     }
 
-    public String getFileName(Project project, String title, String defaultName) {
+    public static String getFileName(Project project, String title, String defaultName) {
         return Messages.showInputDialog(
                 project,
                 "Enter file name:",

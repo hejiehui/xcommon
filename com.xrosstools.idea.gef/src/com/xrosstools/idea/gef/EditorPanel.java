@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -1136,6 +1137,10 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private InteractionHandle curHandle = ready;
 
     /** Accessors for extension **/
+    public VirtualFile getFile() {
+        return contentProvider.getFile();
+    }
+
     public T getModel() {
         return diagramRef.get();
     }
