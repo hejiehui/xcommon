@@ -1,8 +1,6 @@
 package com.xrosstools.idea.gef;
 
-import com.intellij.openapi.actionSystem.ActionGroup;
+import com.xrosstools.idea.gef.extensions.ToolbarExtension;
 
-public interface Extension {
-    void setEditPanel(EditorPanel panel);
-    void extendToolbar(ActionGroup toolbar);
-}
+@Deprecated
+public interface Extension extends ToolbarExtension {}

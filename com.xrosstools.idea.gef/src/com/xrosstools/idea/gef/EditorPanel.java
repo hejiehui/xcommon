@@ -3,7 +3,6 @@ package com.xrosstools.idea.gef;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
@@ -13,6 +12,8 @@ import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
+import com.xrosstools.idea.gef.extensions.ExtensionManager;
+import com.xrosstools.idea.gef.extensions.ToolbarExtension;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Endpoint;
 import com.xrosstools.idea.gef.figures.Figure;
@@ -48,7 +49,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private AtomicReference<T> diagramRef = new AtomicReference<>();
     private ContextMenuProvider contextMenuBuilder;
     private ContextMenuProvider outlineContextMenuProvider;
-    private Extension extension;
+    private ToolbarExtension extension;
 
     private Point lastHit;
     private DefaultTreeModel treeModel;
@@ -78,7 +79,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
         outlineContextMenuProvider.setExecutor(this);
 
-        extension = getExtension();
+        extension = ExtensionManager.createToolbarExtension(this);
 
         createVisual();
         registerListener();
@@ -229,15 +230,6 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         btn.setContentAreaFilled(false);
         btn.addActionListener(e -> reset());
         return btn;
-    }
-
-    private Extension getExtension() {
-        ExtensionPointName<Extension> ep = ExtensionPointName.create("com.xrosstools.idea.gef.xrossExtension");
-        Extension extension = ep.getExtensionList().size() == 1 ? ep.getExtensionList().get(0) : new ExtensionAdapter();
-
-        extension.setEditPanel(this);
-
-        return extension;
     }
 
     private void reset() {

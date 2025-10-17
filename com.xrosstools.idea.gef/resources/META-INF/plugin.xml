@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.5.0</version>
+  <version>1.6.0</version>
   <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.6.0</em> Support create model extension.<br>
       <em>1.5.0</em> Support toolbar extension.<br>
       <em>1.4.1</em> Fix rename property bug.<br>
       <em>1.4.0</em> Support rhombus figure, reference utility.<br>
@@ -47,6 +48,8 @@
 
   <extensionPoints>
     <extensionPoint name="xrossExtension" interface="com.xrosstools.idea.gef.Extension"/>
+    <extensionPoint name="generateModelExtension" interface="com.xrosstools.idea.gef.extensions.GenerateModelExtension"/>
+    <extensionPoint name="toolbarExtension" interface="com.xrosstools.idea.gef.extensions.ToolbarExtension"/>
   </extensionPoints>
 
 </idea-plugin>
