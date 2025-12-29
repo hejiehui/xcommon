@@ -18,11 +18,14 @@ import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Endpoint;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.*;
+import com.xrosstools.idea.gef.tools.ExportPngAction;
+import com.xrosstools.idea.gef.tools.RedoAction;
+import com.xrosstools.idea.gef.tools.SearchModelAction;
+import com.xrosstools.idea.gef.tools.UndoAction;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
 import com.xrosstools.idea.gef.util.SimpleTableRenderer;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
@@ -147,52 +150,39 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private JComponent createToolbar() {
         ActionManager actionManager = ActionManager.getInstance();
-        ActionGroup actionGroup = contentProvider.createToolbar();
-        createUndoRedo(actionGroup);
+        DefaultActionGroup actionGroup = (DefaultActionGroup)contentProvider.createToolbar();
+        createDefaultTools(actionGroup);
 
-        extension.extendToolbar(actionGroup);
+        actionGroup.addSeparator();
+
+        //Add customized tools
+        DefaultActionGroup extGroup = new DefaultActionGroup();
+        extension.extendToolbar(extGroup);
+        AnAction[] actions = extGroup.getChildActionsOrStubs();
+
+        for (AnAction action : actions) {
+            String actionId = action.getTemplatePresentation().getText();
+            if(actionId != null &&
+                    !SearchModelAction.NAME.equals(actionId) &&
+                    !ExportPngAction.NAME.equals(actionId))
+                actionGroup.add(action);
+        }
 
         ActionToolbar toolbar = actionManager.createActionToolbar("XrossToolsToolbar", actionGroup, true);
         return toolbar.getComponent();
     }
 
-    private void createUndoRedo(ActionGroup group) {
+    private void createDefaultTools(ActionGroup group) {
         DefaultActionGroup actionGroup = (DefaultActionGroup)group;
         if(actionGroup.getChildrenCount() > 0) {
             actionGroup.addSeparator();
         }
 
-        actionGroup.add(new AnAction("Undo", "Undo", GefIcons.Undo) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-                undo();
-            }
+        actionGroup.add(new UndoAction(this));
+        actionGroup.add(new RedoAction(this));
 
-            @Override
-            public void update(AnActionEvent e) {
-                super.update(e);
-                Presentation presentation = e.getPresentation();
-                presentation.setEnabled(commandStack.canUndo());
-                if(presentation.isEnabled())
-                    presentation.setText("Undo " + commandStack.getUndoCommandLabel());
-            }
-        });
-
-        actionGroup.add(new AnAction("Redo", "Redo", GefIcons.Redo) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-                redo();
-            }
-
-            @Override
-            public void update(AnActionEvent e) {
-                super.update(e);
-                Presentation presentation = e.getPresentation();
-                presentation.setEnabled(commandStack.canRedo());
-                if(presentation.isEnabled())
-                    presentation.setText("Redo " + commandStack.getRedoCommandLabel());
-            }
-        });
+        actionGroup.add(new SearchModelAction(this));
+        actionGroup.add(new ExportPngAction(this));
 
     }
 
@@ -637,13 +627,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         refreshVisual();
     }
 
-    private void undo() {
+    public void undo() {
         inProcessing.set(true);
         commandStack.undo();
         postExecute(commandStack.getCurModel());
     }
 
-    private void redo() {
+    public void redo() {
         inProcessing.set(true);
         commandStack.redo();
         postExecute(commandStack.getCurModel());
@@ -1155,5 +1145,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     public JBTable getTableProperties() {
         return tableProperties;
+    }
+
+    public CommandStack getCommandStack() {
+        return commandStack;
     }
 }

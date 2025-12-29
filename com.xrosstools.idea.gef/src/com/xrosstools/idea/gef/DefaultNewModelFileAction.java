@@ -22,7 +22,6 @@ public class DefaultNewModelFileAction extends AnAction {
     private String newFileName;
     private final String template;
     private GenerateModelExtension extension;
-    private boolean supportGenerateModel;
 
     public DefaultNewModelFileAction(
             String modelTypeName,
@@ -36,7 +35,6 @@ public class DefaultNewModelFileAction extends AnAction {
         this.newFileName = newFileName;
         this.template = CodeGenHelper.getTemplate(templatePath, this.getClass()).toString();
         extension = ExtensionManager.createNewModelFileExtension();
-        supportGenerateModel = extension.isGenerateModelSupported(modelTypeExt);
     }
 
     public String getTemplate() {
@@ -67,6 +65,7 @@ public class DefaultNewModelFileAction extends AnAction {
 
         final VirtualFile dir = selected;
 
+        boolean supportGenerateModel = extension.isGenerateModelSupported(modelTypeExt);
         NewModelFileDialog nameDescriptionDialog = new NewModelFileDialog(project, "Name: ", "New " + modelTypeName + " Model", icon, newFileName, supportGenerateModel);
         if (!nameDescriptionDialog.showAndGet())
             return;

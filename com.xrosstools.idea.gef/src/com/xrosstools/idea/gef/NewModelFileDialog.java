@@ -5,9 +5,6 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.uiDesigner.core.AbstractLayout;
-import com.intellij.util.ui.GridBag;
-import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
 import java.awt.*;
