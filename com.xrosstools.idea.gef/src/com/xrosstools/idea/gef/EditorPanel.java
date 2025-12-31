@@ -3,6 +3,8 @@ package com.xrosstools.idea.gef;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
@@ -32,6 +34,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -76,7 +79,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     public EditorPanel(PanelContentProvider<T> contentProvider) throws Exception {
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
-        diagramRef.set(contentProvider.getContent());
+        loadContent();
         contextMenuBuilder = contentProvider.getContextMenuProvider();
         contextMenuBuilder.setExecutor(this);
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
@@ -202,7 +205,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private JComponent createProperty() {
         tableProperties = new JBTable();
-        tableModel = createTableModel(diagramRef.get());
+        tableModel = createTableModel(getModel());
         tableProperties.setModel(tableModel);
 
         JScrollPane scrollPane = new JBScrollPane(tableProperties);
@@ -242,15 +245,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void build() {
-        contentChanged(diagramRef.get());
+        contentChanged(getModel());
 
         EditContext editContext = new EditContext(this);
         EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
         EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
 
-        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, diagramRef.get());
+        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, getModel());
         root.activate();
-        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, diagramRef.get());
+        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, getModel());
         treeRoot.activate();
 
         treeModel = new DefaultTreeModel(treeRoot.getTreeNode(), false);
@@ -314,12 +317,24 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         try {
             contentProvider.getFile().refresh(false, true);
-            diagramRef.set(contentProvider.getContent());
+            loadContent();
             build();
-            selectModel(diagramRef.get());
+            selectModel(getModel());
             commandStack.clear();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private void loadContent() {
+        try {
+            diagramRef.set(contentProvider.getContent());
+        } catch (Throwable e) {
+            try {
+                Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + VfsUtilCore.loadText(contentProvider.getFile()), "Can not load content change");
+            } catch (Throwable e1) {
+            }
+            throw new IllegalArgumentException("Can not load content", e);
         }
     }
 
@@ -615,11 +630,11 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         save();
 
         AbstractGraphicalEditPart part = root.findEditPart(model);
-        model = part == null ? diagramRef.get() : model;
+        model = part == null ? getModel() : model;
 
         Figure selected = root.findFigure(model);
         if (selected == null || !selected.isSelectable())
-            model = diagramRef.get();
+            model = getModel();
 
         selectModel(model);
         clearHover();
@@ -725,7 +740,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         private Point delta;
 
         private boolean isApplicable() {
-            if(lastSelected.getPart().getModel() == diagramRef.get())
+            if(lastSelected.getPart().getModel() == getModel())
                 return false;
 
             if(lastSelected instanceof Connection)

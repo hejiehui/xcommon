@@ -91,7 +91,7 @@ public class DefaultNewModelFileAction extends AnAction {
                     newFile.setBinaryContent(templateStr.getBytes(StandardCharsets.UTF_8));
                     FileEditorManager.getInstance(project).openFile(newFile, true);
                 } catch (Throwable e) {
-                    throw new IllegalStateException("Can not save document " + name, e);
+                    throw new IllegalArgumentException("Can not create document: " + name, e);
                 }
             }
         });
