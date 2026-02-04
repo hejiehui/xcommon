@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.xrosstools.idea.gef</id>
   <name>Xross Tools Graphic Edit Framework</name>
-  <version>1.7.0</version>
+  <version>1.9.0</version>
   <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,8 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <em>1.9.0</em> Support stream mode for AI conversation.<br>
+      <em>1.8.0</em> Support template code generator and optimize package selecting.<br>
       <em>1.7.0</em> Support export PNG and search.<br>
       <em>1.6.0</em> Support create model extension.<br>
       <em>1.5.0</em> Support toolbar extension.<br>

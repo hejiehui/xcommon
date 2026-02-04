@@ -19,6 +19,10 @@ public abstract class Action implements ActionListener {
         this.executor = executor;
     }
 
+    public CommandExecutor getExecutor() {
+        return executor;
+    }
+
     public String getText() {
         return text;
     }

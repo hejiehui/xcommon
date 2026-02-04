@@ -1,0 +1,6 @@
+package !PACKAGE!;
+
+!IMPORTS!
+
+public class !CLASS_NAME! implements !INTERFACES! {
+!FIELDS!!METHODS!}

@@ -53,6 +53,8 @@ public class CodeGenHelper {
     }
 
     public static String toClassName(String label) {
+        label = label.replace('_', ' ');
+
         StringBuffer clazz = new StringBuffer();
         for(String s: label.split(" ")) {
             clazz.append(capitalize(s));

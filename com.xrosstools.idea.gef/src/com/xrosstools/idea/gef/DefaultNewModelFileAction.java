@@ -72,12 +72,13 @@ public class DefaultNewModelFileAction extends AnAction {
 
         String name = nameDescriptionDialog.getName();
         String description = nameDescriptionDialog.getDescription();
+        boolean streamMode = nameDescriptionDialog.isStreamMode();
 
         if (!canClose(dir, name))
             return;
 
         if(supportGenerateModel && (description != null && description.trim().length() > 0))
-            extension.generateModel(description, generated->createModelFile(project, dir, modelTypeExt, name, generated));
+            extension.generateModel(description, generated->createModelFile(project, dir, modelTypeExt, name, generated), streamMode);
         else
             createModelFile(project, dir, modelTypeExt, name, createTemplateFor(name));
     }

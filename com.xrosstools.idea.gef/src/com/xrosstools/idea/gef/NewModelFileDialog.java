@@ -2,6 +2,7 @@ package com.xrosstools.idea.gef;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.components.JBTextField;
@@ -18,6 +19,7 @@ public class NewModelFileDialog extends DialogWrapper {
     private final boolean showDescription;
     private JTextField nameField;
     private JTextArea descriptionArea;
+    private JBCheckBox modeCheckBox;
 
     public NewModelFileDialog(Project project,
                               String title,
@@ -93,6 +95,9 @@ public class NewModelFileDialog extends DialogWrapper {
 
         mainPanel.add(inputPanel, BorderLayout.CENTER);
 
+        modeCheckBox = new JBCheckBox("Stream mode");
+        mainPanel.add(modeCheckBox, BorderLayout.SOUTH);
+
         return mainPanel;
     }
 
@@ -102,5 +107,9 @@ public class NewModelFileDialog extends DialogWrapper {
 
     public String getDescription() {
         return descriptionArea == null ? null : descriptionArea.getText();
+    }
+
+    public boolean isStreamMode() {
+        return modeCheckBox.isSelected();
     }
 }

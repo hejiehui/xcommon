@@ -15,8 +15,10 @@ import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
+import com.intellij.psi.util.PsiUtil;
 import com.xrosstools.idea.gef.commands.Command;
 
 import java.awt.event.ActionEvent;
@@ -25,6 +27,8 @@ public abstract class AbstractCodeGenerator extends Action {
     private static final String JAVA = ".java";
     private Project project;
     private String title;
+    private String packageName;
+    private String className;
 
     public String getDefaultPackage() {
         return null;
@@ -35,6 +39,10 @@ public abstract class AbstractCodeGenerator extends Action {
     }
 
     public abstract String getContent(String packageName, String fileName);
+
+    public Command createCommand(String fullClassName) {
+        return null;
+    }
 
     public AbstractCodeGenerator(Project project, String title) {
         this.project = project;
@@ -59,8 +67,8 @@ public abstract class AbstractCodeGenerator extends Action {
         final String fileName = _fileName.endsWith(JAVA) ? _fileName : _fileName + JAVA;
 
         //3. Generate file
-        String className = fileName.replace(JAVA, "");
-        String packageName = getPackageName(project, targetDir);
+        className = fileName.replace(JAVA, "");
+        packageName = getPackageName(project, targetDir);
         final String fileContent = getContent(packageName, className);
         if(fileContent == null) return;
 
@@ -79,7 +87,10 @@ public abstract class AbstractCodeGenerator extends Action {
                 return;
         }
 
-        //4. Write to file
+        //5. execute command if any
+        super.actionPerformed(e);
+
+        //6. Write to file
         ApplicationManager.getApplication().invokeLater(() ->
                 WriteCommandAction.runWriteCommandAction(project, () -> {
                     PsiFile file;
@@ -152,15 +163,12 @@ public abstract class AbstractCodeGenerator extends Action {
             Object[] selectedElements = projectView.getCurrentProjectViewPane().getSelectedElements();
             if (selectedElements != null && selectedElements.length > 0) {
                 PsiElement element = (PsiElement) selectedElements[0];
-                VirtualFile file;
-                if (element instanceof PsiFile)
-                    file = ((PsiFile)element).getVirtualFile();
-                else if (element instanceof PsiClass)
-                    file = ((PsiClass)element).getContainingFile().getVirtualFile();
-                else
-                    file = element instanceof PsiDirectory ? ((PsiDirectory)element).getVirtualFile() : null;
-
-                return file.isDirectory() ? file : file.getParent();
+                if (element instanceof PsiJavaDirectoryImpl) {
+                    PsiPackage psiPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) element);
+                    if ( psiPackage != null)
+                        defaultPackage = psiPackage.getQualifiedName();
+                } else if (element instanceof PsiClass)
+                    defaultPackage = PsiUtil.getPackageName(((PsiClass)element));
             }
         }
 
@@ -190,6 +198,6 @@ public abstract class AbstractCodeGenerator extends Action {
     }
 
     public Command createCommand() {
-        return null;
+        return createCommand(String.format("%s.%s", packageName, className));
     }
 }
