@@ -18,6 +18,8 @@ build/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+/.ai/
+/.run/
 /.intellijPlatform/
 
 ### Eclipse ###
@@ -44,5 +46,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-/.ai/
-/.run/
