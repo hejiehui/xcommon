@@ -1,0 +1,19 @@
+<idea-plugin>
+  <id>com.xrosstools.idea.gef</id>
+  <vendor email="he_jiehui@163.com" url="https://www.xrosstools.com">Xross Tools</vendor>
+
+  <description><![CDATA[
+      Xross Tools idea IDEA Graphic Edit Framework. i.e. <em>Xross Tools IDEA GEF</em>.<br>
+      It provides common UI widgets and controls for building graphic editors. Inspired by Eclipse GEF and the usage is alike.
+    ]]></description>
+
+  <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.java</depends>
+
+  <extensionPoints>
+    <extensionPoint name="xrossExtension" interface="com.xrosstools.idea.gef.Extension"/>
+    <extensionPoint name="generateModelExtension" interface="com.xrosstools.idea.gef.extensions.GenerateModelExtension"/>
+    <extensionPoint name="toolbarExtension" interface="com.xrosstools.idea.gef.extensions.ToolbarExtension"/>
+  </extensionPoints>
+
+</idea-plugin>
