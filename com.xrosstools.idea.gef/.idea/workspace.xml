@@ -5,371 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fad77563-21c4-410e-b460-518df6eedf43" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/AbstractDiagramEditorProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/AbstractPanelContentProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/ContentChangeListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/ContextMenuProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/DefaultNewModelFileAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/DiagramEditor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/EditorPanel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/Extension.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/ExtensionAdapter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/GefIcons.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/NewModelFileDialog.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/PanelContentProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/AbstractCodeGenerator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/Action.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/AssignImplementationAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/BaseDialogAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/ChangeImplementationAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/ChangeMethodAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/CodeDisplayer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/CodeGenHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/CommandAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/CommandExecutor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/ImplementationMessages.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/ImplementationUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/InputTextCommandAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/OpenImplementationAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/RemoveImplementationAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/codegen/AbstractOptionalGeneratorAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/codegen/CodeGenOptionsDialog.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/codegen/GeneratorFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/codegen/ImplementationGenerator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/codegen/SimpleCodeGenAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/actions/codegen/SimpleImplGenerator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/AbstractAdjustConnectionCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/AddNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/AddOrderedNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/Command.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CommandChain.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CommandListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CommandStack.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CreateConnectionCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CreateNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CreateOrderedNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/CreatePropertyCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/DeleteConnectionCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/DeleteFromContainerCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/DeleteNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/InputTextCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/MoveNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/MoveOrderedNodeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/PropertyChangeCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/ReconnectSourceCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/ReconnectTargetCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/RemovePropertyCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/commands/RenamePropertyCommand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/extensions/ExtensionManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/extensions/GenerateModelExtension.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/extensions/GenerateModelExtensionAdapter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/extensions/ToolbarExtension.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/extensions/ToolbarExtensionAdapter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/AbstractAnchor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/ArrowDecoration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/BorderLayout.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/ChopboxAnchor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/ColorConstants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/CommonStyleAnchor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/Connection.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/Endpoint.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/Figure.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/FreeformLayout.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/HomolateralAnchor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/IconFigure.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/Label.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/LayoutManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/MidpointAnchor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/PositionConstants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/RectangleFigure.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/Rhombus.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/RotatableDecoration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/RoundedRectangle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/Text.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/figures/ToolbarLayout.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/model/CompositeNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/model/Diagram.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/model/ModelProperties.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/model/Node.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/model/NodeConnection.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/model/NodeContainer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractCompositeNodeEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractConnectionEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractDiagramEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractGraphicalEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractNodeConnectionEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractNodeContainerEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractNodeEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/AbstractTreeEditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/EditContext.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/EditPart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/EditPartFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/EditPartHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/parts/EditPolicy.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/policies/NodeConnectionEditPolicy.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/policies/NodeContainerEditPolicy.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/policies/NodeEditPolicy.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/policies/OrderedContainerEditPolicy.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/AbstractReferenceContributor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/AttributeClassReference.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/AttributeClassReferenceProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/AttributeMethodReference.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/AttributeMethodReferenceProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/TagClassReference.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/TagClassReferenceProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/TagMethodReference.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/references/TagMethodReferenceProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/AbstractLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/AbstractRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/BendpointConnectionRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/CommonStyleLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/CommonStyleRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/ConnectionLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/ConnectionRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/DefaultLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/DefaultRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/HomolateralLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/HomolateralRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/LightningLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/LightningRoute.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/LightningRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/MidpointLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/PointList.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/RightAngleLocator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/RightAngleRouter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/routers/RouterStyle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/tools/ExportPngAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/tools/RedoAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/tools/SearchModelAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/tools/UndoAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/treeparts/AbstractNodeContainerTreePart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/treeparts/CollectionTreePart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/treeparts/NodeTreePart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/treeparts/PropertyEntryTreePart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/ComboBoxPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/ConfigMenuProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/ConfigXmlAccessor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/DataTypeEnum.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/DataTypePropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/DoublePropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/FloatPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/IPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/IPropertySource.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/IntegerPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/ListPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/ListPropertyEntry.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/LongPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/NumberPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertyEntry.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertyEntrySource.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertySource.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertySourceXmlAccessor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertySourceXmlRegister.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/PropertyTableModel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/RouterStylePropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/SimpleTableCellEditor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/SimpleTableRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/StringPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/TextPropertyDescriptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/xrosstools/idea/gef/util/XmlHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/pluginIcon.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/export_pdf.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/redo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/search.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/undo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/template/CodeTemplate.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/com.xrosstools.idea.gef.iml" beforeDir="false" afterPath="$PROJECT_DIR$/com.xrosstools.idea.gef.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/com.xrosstools.idea.gef.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/META-INF/plugin.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/icons/export_pdf.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/icons/redo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/icons/search.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/icons/undo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/template/CodeTemplate.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/AbstractDiagramEditorProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/AbstractPanelContentProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/ContentChangeListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/ContextMenuProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/DefaultNewModelFileAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/DiagramEditor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/EditorPanel.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/Extension.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/ExtensionAdapter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/GefIcons.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/NewModelFileDialog.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/PanelContentProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/AbstractCodeGenerator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/Action.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/AssignImplementationAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/BaseDialogAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/ChangeImplementationAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/ChangeMethodAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/CodeDisplayer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/CodeGenHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/CommandAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/CommandExecutor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/ImplementationMessages.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/ImplementationUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/InputTextCommandAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/OpenImplementationAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/RemoveImplementationAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/codegen/AbstractOptionalGeneratorAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/codegen/CodeGenOptionsDialog.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/codegen/GeneratorFactory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/codegen/ImplementationGenerator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/codegen/SimpleCodeGenAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/actions/codegen/SimpleImplGenerator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/AbstractAdjustConnectionCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/AddNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/AddOrderedNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/Command.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CommandChain.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CommandListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CommandStack.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CreateConnectionCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CreateNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CreateOrderedNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/CreatePropertyCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/DeleteConnectionCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/DeleteFromContainerCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/DeleteNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/InputTextCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/MoveNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/MoveOrderedNodeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/PropertyChangeCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/ReconnectSourceCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/ReconnectTargetCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/RemovePropertyCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/commands/RenamePropertyCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/extensions/ExtensionManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/extensions/GenerateModelExtension.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/extensions/GenerateModelExtensionAdapter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/extensions/ToolbarExtension.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/extensions/ToolbarExtensionAdapter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/AbstractAnchor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/ArrowDecoration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/BorderLayout.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/ChopboxAnchor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/ColorConstants.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/CommonStyleAnchor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/Connection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/Endpoint.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/Figure.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/FreeformLayout.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/HomolateralAnchor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/IconFigure.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/Label.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/LayoutManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/MidpointAnchor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/PositionConstants.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/RectangleFigure.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/Rhombus.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/RotatableDecoration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/RoundedRectangle.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/Text.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/figures/ToolbarLayout.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/model/CompositeNode.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/model/Diagram.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/model/ModelProperties.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/model/Node.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/model/NodeConnection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/model/NodeContainer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractCompositeNodeEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractConnectionEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractDiagramEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractGraphicalEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractNodeConnectionEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractNodeContainerEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractNodeEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/AbstractTreeEditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/EditContext.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/EditPart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/EditPartFactory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/EditPartHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/parts/EditPolicy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/policies/NodeConnectionEditPolicy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/policies/NodeContainerEditPolicy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/policies/NodeEditPolicy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/policies/OrderedContainerEditPolicy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/AbstractReferenceContributor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/AttributeClassReference.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/AttributeClassReferenceProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/AttributeMethodReference.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/AttributeMethodReferenceProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/TagClassReference.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/TagClassReferenceProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/TagMethodReference.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/references/TagMethodReferenceProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/AbstractLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/AbstractRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/BendpointConnectionRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/CommonStyleLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/CommonStyleRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/ConnectionLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/ConnectionRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/DefaultLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/DefaultRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/HomolateralLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/HomolateralRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/LightningLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/LightningRoute.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/LightningRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/MidpointLocator.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/PointList.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/RightAngleLocator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/RightAngleRouter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/routers/RouterStyle.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/tools/ExportPngAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/tools/RedoAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/tools/SearchModelAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/tools/UndoAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/treeparts/AbstractNodeContainerTreePart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/treeparts/CollectionTreePart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/treeparts/NodeTreePart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/treeparts/PropertyEntryTreePart.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/ComboBoxPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/ConfigMenuProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/ConfigXmlAccessor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/DataTypeEnum.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/DataTypePropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/DoublePropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/FloatPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/IPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/IPropertySource.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/IntegerPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/ListPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/ListPropertyEntry.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/LongPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/NumberPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertyEntry.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertyEntrySource.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertySource.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertySourceXmlAccessor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertySourceXmlRegister.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/PropertyTableModel.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/RouterStylePropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/SimpleTableCellEditor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/SimpleTableRenderer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/StringPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/TextPropertyDescriptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/xrosstools/idea/gef/util/XmlHelper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/com.xrosstools.idea.gef.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/messages/MyMessageBundle.properties" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -455,33 +95,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.com.xrosstools.idea.gef [buildPlugin].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.com.xrosstools.idea.gef [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.com.xrosstools.idea.gef [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.com.xrosstools.idea.gef [verifyPlugin].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/赫杰辉/Documents/GitHub/xcommon/com.xrosstools.idea.gef&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Facets&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.32873562&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.com.xrosstools.idea.gef [buildPlugin].executor": "Run",
+    "Gradle.com.xrosstools.idea.gef [build].executor": "Run",
+    "Gradle.com.xrosstools.idea.gef [clean].executor": "Run",
+    "Gradle.com.xrosstools.idea.gef [verifyPlugin].executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/赫杰辉/Documents/GitHub/xcommon/com.xrosstools.idea.gef",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.32873562",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\赫杰辉\Documents\GitHub\xcommon\com.xrosstools.idea.gef\src\main\java" />
       <recent name="C:\Users\赫杰辉\Documents\GitHub\xcommon\com.xrosstools.idea.gef\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.com.xrosstools.idea.gef [buildPlugin]">
+  <component name="RunManager" selected="Gradle.com.xrosstools.idea.gef [clean]">
     <configuration name="com.xrosstools.idea.gef [buildPlugin]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -615,8 +255,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.com.xrosstools.idea.gef [buildPlugin]" />
         <item itemvalue="Gradle.com.xrosstools.idea.gef [clean]" />
+        <item itemvalue="Gradle.com.xrosstools.idea.gef [buildPlugin]" />
         <item itemvalue="Gradle.com.xrosstools.idea.gef [build]" />
         <item itemvalue="Gradle.com.xrosstools.idea.gef [verifyPlugin]" />
         <item itemvalue="Gradle.com.xrosstools.idea.gef [runWithLocalPlugins]" />
@@ -690,7 +330,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/build.gradle.kts</url>
-          <line>88</line>
+          <line>89</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>

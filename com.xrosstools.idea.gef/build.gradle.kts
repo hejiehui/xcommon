@@ -29,6 +29,7 @@ dependencies {
 
 intellijPlatform {
     instrumentCode = true
+    buildSearchableOptions = false
 
     pluginConfiguration {
         name = "Xross Tools Graphic Edit Framework"
