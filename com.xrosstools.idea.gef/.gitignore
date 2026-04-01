@@ -21,6 +21,7 @@ out/
 /.ai/
 /.run/
 /.intellijPlatform/
+/.idea/inspectionProfiles/
 
 ### Eclipse ###
 .apt_generated
