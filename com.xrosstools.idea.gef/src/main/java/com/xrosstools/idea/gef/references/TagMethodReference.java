@@ -2,37 +2,40 @@ package com.xrosstools.idea.gef.references;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.XmlElementFactory;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.IncorrectOperationException;
 import com.xrosstools.idea.gef.actions.ImplementationUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class TagMethodReference extends PsiReferenceBase implements PsiReference {
+public class TagMethodReference extends PsiReferenceBase<XmlTag> {
     private String className;
     private String methodName;
-    public TagMethodReference(PsiElement element, String className, String methodName, TextRange range) {
-        super(element, range);
+
+    public TagMethodReference(XmlTag tag, String className, String methodName, TextRange range) {
+        super(tag, range);
         this.className = className;
         this.methodName = methodName;
     }
 
-    @NotNull
     @Override
-    public PsiElement resolve() {
-        return ImplementationUtil.findMethod(getElement().getProject(), className, methodName);
+    public @Nullable PsiElement resolve() {
+        return ImplementationUtil.findMethod(myElement.getProject(), className, methodName);
     }
 
-    public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
-        String newValue = getElement().getText().replace(methodName, newElementName);
-        XmlTag newTag = XmlElementFactory.getInstance(getElement().getProject()).createTagFromText(newValue);
-        getElement().replace(newTag);
-        return newTag;
+    public PsiElement handleElementRename(@NotNull String newMethodName) throws IncorrectOperationException {
+        String oldBody = myElement.getValue().getText();
+
+        String newBody = oldBody.replace(ImplementationUtil.SEPARATOR + methodName,
+        ImplementationUtil.SEPARATOR + newMethodName);
+        myElement.getValue().setText(newBody);
+        this.methodName = newMethodName;
+        return myElement;
     }
 
-    public Object[] getVariants() {
+    public Object @NotNull [] getVariants() {
         return new Object[0];
     }
 }

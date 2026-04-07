@@ -12,24 +12,32 @@ import org.jetbrains.annotations.NotNull;
 public class TagMethodReferenceProvider extends PsiReferenceProvider {
     @NotNull
     @Override
-    public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext processingContext) {
-        String text = ((XmlTag)element).getValue().getTrimmedText();
-
-        PsiElement target = TagClassReferenceProvider.findTextElement(element);
-
-        String methodName = ImplementationUtil.getMethodName(text);
-        String className = ImplementationUtil.getClassName(text);
-
-        //We only support rename non default method
-        if(ImplementationUtil.DEFAULT_METHOD.equals(methodName) || methodName == null || methodName.trim().length() == 0 || ImplementationUtil.findMethod(element.getProject(), className, methodName) == null) {
+    public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext processingContext) {
+        if (!(element instanceof XmlTag)) {
             return PsiReference.EMPTY_ARRAY;
         }
 
-        int start = 0 + className.length() + ImplementationUtil.SEPARATOR.length();
-        TextRange property = new TextRange(start, start + methodName.length()).shiftRight(target.getStartOffsetInParent());
+        XmlTag tag = (XmlTag) element;
+        String bodyText = tag.getValue().getText(); // 原始标签体文本（含空白）
+        String methodName = ImplementationUtil.getMethodName(bodyText);
+        String className = ImplementationUtil.getClassName(bodyText);
 
-        PsiReference methodRef = new TagMethodReference(element, className, methodName, property);
+        //We only support rename non default method
+        if(ImplementationUtil.DEFAULT_METHOD.equals(methodName) ||
+                methodName == null || methodName.trim().isEmpty() ||
+                ImplementationUtil.findMethod(element.getProject(), className, methodName) == null) {
+            return PsiReference.EMPTY_ARRAY;
+        }
 
-        return new PsiReference[]{methodRef};
+        // 计算方法名在标签体中的起始位置
+        int methodStartInBody = bodyText.lastIndexOf(methodName);
+
+        // 计算标签体在整个标签文本中的起始偏移
+        int bodyStartInTag = tag.getText().indexOf(bodyText);
+        int methodStartInTag = bodyStartInTag + methodStartInBody;
+
+        TextRange range = new TextRange(methodStartInTag, methodStartInTag + methodName.length());
+
+        return new PsiReference[]{new TagMethodReference(tag, className, methodName, range)};
     }
 }

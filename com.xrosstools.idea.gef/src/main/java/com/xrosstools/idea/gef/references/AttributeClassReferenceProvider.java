@@ -10,19 +10,21 @@ import com.xrosstools.idea.gef.actions.ImplementationUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class AttributeClassReferenceProvider extends PsiReferenceProvider {
-    @NotNull
     @Override
-    public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext processingContext) {
-        String text = ((XmlAttributeValue)element).getValue();
-        String className = ImplementationUtil.getClassName(text);
+    public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext processingContext) {
+        if (!(element instanceof XmlAttributeValue)) {
+            return PsiReference.EMPTY_ARRAY;
+        }
+        XmlAttributeValue attrValue = (XmlAttributeValue) element;
+        String valueText = attrValue.getValue();  // 不带引号的属性值
+        String className = ImplementationUtil.getClassName(valueText);
 
         if(ImplementationUtil.findClass(element.getProject(), className) == null)
             return PsiReference.EMPTY_ARRAY;
 
         int start = 1;
-        TextRange property = new TextRange(start, start + className.length()).shiftRight(element.getStartOffsetInParent());
-        PsiReference classRef = new AttributeClassReference(element.getParent(), property);
+        TextRange range  = new TextRange(start, start + className.length());
 
-        return new PsiReference[]{classRef};
+        return new PsiReference[]{new AttributeClassReference(attrValue, className, range )};
     }
 }

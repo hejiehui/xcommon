@@ -15,20 +15,23 @@ public class TagClassReferenceProvider extends PsiReferenceProvider {
     @NotNull
     @Override
     public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext processingContext) {
-        XmlTagValue value = ((XmlTag)element).getValue();
-        String text = value.getText();
+        if (!(element instanceof XmlTag)) {
+            return PsiReference.EMPTY_ARRAY;
+        }
 
-        PsiElement target = findTextElement(element);
+        XmlTag tag = (XmlTag) element;
+        String text = tag.getValue().getText();
         String className = ImplementationUtil.getClassName(text);
 
-        if(ImplementationUtil.findClass(element.getProject(), className) == null)
+        if (className == null || className.isEmpty()) {
             return PsiReference.EMPTY_ARRAY;
+        }
+        if (ImplementationUtil.findClass(element.getProject(), className) == null) {
+            return PsiReference.EMPTY_ARRAY;
+        }
 
-        int start = 0;
-        TextRange property = new TextRange(start, start + className.length());
-        PsiReference classRef = new TagClassReference(target, className, property);
-
-        return new PsiReference[]{classRef};
+        // 直接返回附着在 XmlTag 上的引用，范围是整个标签体文本
+        return new PsiReference[]{new TagClassReference(tag, className)};
     }
 
     public static PsiElement findTextElement(PsiElement element) {

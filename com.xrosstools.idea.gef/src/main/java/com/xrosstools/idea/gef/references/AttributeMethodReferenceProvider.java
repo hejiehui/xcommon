@@ -13,20 +13,22 @@ public class AttributeMethodReferenceProvider extends PsiReferenceProvider {
     @NotNull
     @Override
     public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext processingContext) {
-        String text = ((XmlAttributeValue)element).getValue();
-
-        String methodName = ImplementationUtil.getMethodName(text);
-        String className = ImplementationUtil.getClassName(text);
+        XmlAttributeValue attrValue = (XmlAttributeValue) element;
+        String valueText = attrValue.getValue();
+        String className = ImplementationUtil.getClassName(valueText);
+        String methodName = ImplementationUtil.getMethodName(valueText);
 
         //We only support rename non default method
-        if(ImplementationUtil.DEFAULT_METHOD.equals(methodName) || methodName == null || methodName.trim().length() == 0 || ImplementationUtil.findMethod(element.getProject(), className, methodName) == null) {
+        if(ImplementationUtil.DEFAULT_METHOD.equals(methodName) ||
+                methodName == null || methodName.trim().isEmpty() ||
+                ImplementationUtil.findMethod(element.getProject(), className, methodName) == null) {
             return PsiReference.EMPTY_ARRAY;
         }
 
         // +1 because of the initial " in attribute value
         int start = className.length() + ImplementationUtil.SEPARATOR.length() + 1;
-        TextRange property = new TextRange(start, start + methodName.length());
-        PsiReference methodRef = new AttributeMethodReference(element, className, methodName, property);
+        TextRange range  = new TextRange(start, start + methodName.length());
+        PsiReference methodRef = new AttributeMethodReference(attrValue, className, methodName, range );
 
         return new PsiReference[]{methodRef};
     }
