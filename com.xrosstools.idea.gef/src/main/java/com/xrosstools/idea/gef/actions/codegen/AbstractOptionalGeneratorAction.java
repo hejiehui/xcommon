@@ -64,10 +64,14 @@ public abstract class AbstractOptionalGeneratorAction extends AbstractCodeGenera
     }
 
     @Override
+    public boolean additionalOptions() {
+        selectedOptions = CodeGenOptionsDialog.showDialog(getText(), getOptionMessage(source, classType), getOptions(source, classType));
+        return true;
+    }
+
+    @Override
     public String getContent(String packageName, String fileName) {
         StringBuffer codeBuf = getTemplate();
-
-        selectedOptions = CodeGenOptionsDialog.showDialog(getText(), getOptionMessage(source, classType), getOptions(source, classType));
 
         Set<String> imports = new LinkedHashSet<>();
         Set<String> interfaces = new LinkedHashSet<>();

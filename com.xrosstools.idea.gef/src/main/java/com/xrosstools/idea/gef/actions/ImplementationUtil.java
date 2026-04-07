@@ -2,8 +2,13 @@ package com.xrosstools.idea.gef.actions;
 
 import com.intellij.ide.util.TreeClassChooser;
 import com.intellij.ide.util.TreeClassChooserFactory;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Computable;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
@@ -11,11 +16,13 @@ import com.intellij.psi.PsiModifier;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.OpenSourceUtil;
 import com.xrosstools.idea.gef.util.IPropertySource;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static com.xrosstools.idea.gef.ContextMenuProvider.*;
 
@@ -35,12 +42,7 @@ public class ImplementationUtil implements ImplementationMessages {
     }
 
     public static PsiClass findClass(Project project, String className) {
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(className, GlobalSearchScope.allScope(project));
-
-        if (psiClass == null)
-            return null;
-
-        return psiClass;
+        return JavaPsiFacade.getInstance(project).findClass(className, GlobalSearchScope.allScope(project));
     }
 
     public static PsiMethod findMethod(Project project, String className, String methodName) {
@@ -88,24 +90,26 @@ public class ImplementationUtil implements ImplementationMessages {
     }
 
     public static List<PsiMethod> getMethods(Project project, String currentImpl) {
-        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(currentImpl, scope);
+        return ApplicationManager.getApplication().runReadAction((Computable<List<PsiMethod>>) () -> {
+            GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+            PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(currentImpl, scope);
 
-        if (psiClass == null)
-            return Collections.emptyList();
+            if (psiClass == null)
+                return Collections.emptyList();
 
-        List<PsiMethod> methods = new ArrayList<>();
-        for (PsiMethod m : psiClass.getMethods()) {
-            if (m.isConstructor()) continue;
+            List<PsiMethod> methods = new ArrayList<>();
+            for (PsiMethod m : psiClass.getMethods()) {
+                if (m.isConstructor()) continue;
 
-            methods.add(m);
-        }
+                methods.add(m);
+            }
 
-        return methods;
+            return methods;
+        });
     }
 
     public static String replaceMethodName(String implementation, String methodName) {
-        if(DEFAULT_METHOD.equals(methodName) || methodName == null || methodName.trim().length() == 0)
+        if(DEFAULT_METHOD.equals(methodName) || methodName == null || methodName.trim().isEmpty())
             return implementation.split(SEPARATOR)[0];
         else
             return implementation.split(SEPARATOR)[0] + SEPARATOR + methodName;
@@ -125,12 +129,23 @@ public class ImplementationUtil implements ImplementationMessages {
 
             String className = getClassName(implementation);
             String methodName = getMethodName(implementation);
+
             JMenu methodMenu = new JMenu(REFERENCE_METHOD_MSG + methodName);
             methodMenu.add(createItem(new ChangeMethodAction(source, propertyName, DEFAULT_METHOD, false)));
-            for(PsiMethod m: getMethods(project, className)) {
+            for(PsiMethod m: loadMethodsSynchronously(project, className)) {
                 methodMenu .add(createItem(new ChangeMethodAction(source, propertyName, m.getName(), m.hasModifierProperty(PsiModifier.PRIVATE))));
             }
             menu.add(methodMenu);
         }
+    }
+
+    private static List<PsiMethod> loadMethodsSynchronously(Project project, String className) {
+        final List<PsiMethod>[] result = new List[1];
+        ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
+            // 后台线程执行
+            List<PsiMethod> methods = getMethods(project, className);
+            result[0] = methods;
+        }, "Loading methods", true, project);
+        return result[0];
     }
 }
