@@ -1,6 +1,8 @@
 package com.xrosstools.idea.gef;
 
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -54,55 +56,56 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
         return name;
     }
 
+    public void selectTopLevelElement(String idField, String name) {
+        panel.selectTopLevelElement(idField, name);
+    }
+
     private void refresh() {
         panel.contentsChanged();
     }
 
+    private void triggerRefresh() {
+        // 延迟刷新，避免在 PSI 写操作中直接修改 Document
+        ApplicationManager.getApplication().invokeLater(() -> {
+            VirtualFile file = contentProvider.getFile();
+            if (file != null && file.isValid()) {
+                refresh();
+            }
+        }, ModalityState.nonModal());
+    }
+
     @Override
     public void contentsChanged(VirtualFileEvent event) {
-        if(event.getFile() == contentProvider.getFile())
+        if(event.getFile().equals(contentProvider.getFile()))
             refresh();
     }
 
     @Override
     public void childReplaced(PsiTreeChangeEvent event) {
-        if(event.getFile() == null || event.getFile().getVirtualFile() != contentProvider.getFile())
+        if(event.getFile() == null || !event.getFile().getVirtualFile().equals(contentProvider.getFile()))
             return;
 
-        PsiElement oldChild = event.getOldChild();
-        PsiElement newChild = event.getNewChild();
-
-        if (oldChild instanceof PsiIdentifier && newChild instanceof PsiIdentifier) {
-            PsiIdentifier oldMethod = (PsiIdentifier) oldChild;
-            PsiIdentifier newMethod = (PsiIdentifier) newChild;
-
-            if (!oldMethod.getText().equals(newMethod.getText())) {
-                FileDocumentManager.getInstance().saveAllDocuments();
-            }
-        }
+        triggerRefresh();
     }
 
     public void childrenChanged(@NotNull PsiTreeChangeEvent event) {
-        if(event.getFile() == null || event.getFile().getVirtualFile() != contentProvider.getFile())
+        if(event.getFile() == null || !event.getFile().getVirtualFile().equals(contentProvider.getFile()))
             return;
 
-        FileDocumentManager.getInstance().saveAllDocuments();
+        triggerRefresh();
     }
 
     @Override
     public void propertyChanged(@NotNull PsiTreeChangeEvent event) {
-        if (PsiTreeChangeEvent.PROP_FILE_NAME.equals(event.getPropertyName())) {
-            PsiElement element = event.getElement();
-            if (element instanceof PsiNamedElement && element.isValid()) {
-                if(element instanceof PsiJavaFile) {
-                    PsiClass[] classes = ((PsiJavaFile)element).getClasses();
-                    if(classes.length > 0) {
-                        FileDocumentManager.getInstance().saveAllDocuments();
-                        refresh();
-                    }
-                }
-            }
-        }
+        if (!PsiTreeChangeEvent.PROP_FILE_NAME.equals(event.getPropertyName())) return;
+        PsiElement element = event.getElement();
+        if (!(element instanceof PsiNamedElement) || !element.isValid()) return;
+        if (!(element instanceof PsiJavaFile)) return;
+
+        PsiClass[] classes = ((PsiJavaFile)element).getClasses();
+        if(classes.length == 0) return;
+
+        triggerRefresh();
     }
 
     @Override

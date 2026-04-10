@@ -504,6 +504,18 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private boolean triggedByFigure = false;
 
+    public void selectTopLevelElement(String idField, String name) {
+        if(idField == null || name == null)
+            return;
+
+        for(Object child: treeRoot.getChildren()) {
+            Object model = ((AbstractTreeEditPart)child).getModel();
+            if(model instanceof IPropertySource)
+                if (name.equals(((IPropertySource) model).getPropertyValue(idField)))
+                    selectModel(model);
+        }
+    }
+
     public void selectModel(Object selectedNode) {
         Figure selected = root.findFigure(selectedNode);
         selected.setSelected(true);

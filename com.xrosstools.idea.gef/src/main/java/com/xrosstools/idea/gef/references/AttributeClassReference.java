@@ -12,10 +12,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class AttributeClassReference extends PsiReferenceBase<XmlAttributeValue> {
     private String className;
+    private String packageName;
 
     public AttributeClassReference(XmlAttributeValue attrValue, String className, TextRange range) {
         super(attrValue, range);
         this.className = className;
+        int lastDot = className.lastIndexOf(".");
+        if (lastDot > 0) {
+            packageName = className.substring(0, lastDot);
+        } else {
+            packageName = "";  // 没有包名的情况
+        }
     }
 
     @NotNull
@@ -28,10 +35,12 @@ public class AttributeClassReference extends PsiReferenceBase<XmlAttributeValue>
     public PsiElement handleElementRename(@NotNull String newClassName) throws IncorrectOperationException {
         XmlAttribute attribute = (XmlAttribute)myElement.getParent();
 
+        String newQualifiedName = packageName.isEmpty() ? newClassName : packageName + '.' + newClassName;
+
         String oldValue = myElement.getValue();
-        String newValue = oldValue.replace(className, newClassName);
+        String newValue = oldValue.replace(className, newQualifiedName);
         attribute.setValue(newValue);
-        this.className = newClassName;
+        this.className = newQualifiedName;
         return myElement;
     }
 

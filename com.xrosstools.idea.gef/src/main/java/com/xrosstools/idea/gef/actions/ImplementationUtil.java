@@ -3,35 +3,34 @@ package com.xrosstools.idea.gef.actions;
 import com.intellij.ide.util.TreeClassChooser;
 import com.intellij.ide.util.TreeClassChooserFactory;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifier;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.OpenSourceUtil;
 import com.xrosstools.idea.gef.util.IPropertySource;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static com.xrosstools.idea.gef.ContextMenuProvider.*;
 
+/**
+ * To avoid Slow Operation is prohibited in EDT:
+ * For method that returns value, do time-consuming job without backend thread. E.g. findClass
+ * For void method do time-consuming job in backend thread. E.g. openImpl
+ */
 public class ImplementationUtil implements ImplementationMessages {
     public static final String SEPARATOR = "::";
     public static final String DEFAULT_METHOD = "#default";
+    public static final String PROPERTY_KEY_PREFIX = "PROP_KEY";
 
     public static boolean isEmpty(String value) {
-        return value == null || value.trim().length() == 0;
+        return value == null || value.trim().isEmpty();
     }
 
     public static String getClassName(String implementation) {
@@ -41,8 +40,44 @@ public class ImplementationUtil implements ImplementationMessages {
         return implementation.contains(SEPARATOR) ? implementation.split(SEPARATOR)[1] : DEFAULT_METHOD;
     }
 
+    public static String replaceMethodName(String implementation, String methodName) {
+        if(DEFAULT_METHOD.equals(methodName) || methodName == null || methodName.trim().isEmpty())
+            return implementation.split(SEPARATOR)[0];
+        else
+            return implementation.split(SEPARATOR)[0] + SEPARATOR + methodName;
+    }
+
     public static PsiClass findClass(Project project, String className) {
-        return JavaPsiFacade.getInstance(project).findClass(className, GlobalSearchScope.allScope(project));
+        return ApplicationManager.getApplication().runReadAction((Computable<PsiClass>) () -> {
+            return JavaPsiFacade.getInstance(project).findClass(className, GlobalSearchScope.allScope(project));
+        });
+    }
+
+    public static List<PsiMethod> getMethods(Project project, String currentImpl) {
+        PsiClass psiClass = findClass(project, currentImpl);
+
+        if (psiClass == null)
+            return Collections.emptyList();
+
+        List<PsiMethod> methods = new ArrayList<>();
+        for (PsiMethod m : psiClass.getMethods()) {
+            if (m.isConstructor()) continue;
+
+            methods.add(m);
+        }
+
+        return methods;
+    }
+
+    public static List<PsiMethod> getMethodsInEDT(Project project, String currentImpl) {
+        final List<PsiMethod>[] result = new List[1];
+        ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
+            // 后台线程执行
+            result[0] = ApplicationManager.getApplication().runReadAction((Computable<List<PsiMethod>>) () -> {
+                return getMethods(project, currentImpl);
+            });
+        }, "Loading Methods", true, project);
+        return result[0];
     }
 
     public static PsiMethod findMethod(Project project, String className, String methodName) {
@@ -59,22 +94,24 @@ public class ImplementationUtil implements ImplementationMessages {
         String className = getClassName(implementation);
         String methodName = getMethodName(implementation);
 
-        GlobalSearchScope scope = GlobalSearchScope.allScope (project);
-
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(className, scope);
-        if (null == psiClass) {
-            Messages.showErrorDialog("Can not open " + className, "Error");
-        }else {
-            if(DEFAULT_METHOD.equals(methodName))
-                OpenSourceUtil.navigate(psiClass);
-            else {
-                PsiMethod[] methods = psiClass.findMethodsByName(methodName, false);
-                if(methods.length != 0)
-                    OpenSourceUtil.navigate(methods[0]);
-                else
-                    Messages.showErrorDialog(String.format("Can't find \"%s\" for class %s", methodName, className), "Method not found");
-            }
-        }
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            PsiClass psiClass = findClass(project, className);
+            ApplicationManager.getApplication().invokeLater(() -> {
+                if (null == psiClass) {
+                    Messages.showErrorDialog("Can not open " + className, "Error");
+                }else {
+                    if(DEFAULT_METHOD.equals(methodName))
+                        OpenSourceUtil.navigate(psiClass);
+                    else {
+                        PsiMethod[] methods = psiClass.findMethodsByName(methodName, false);
+                        if(methods.length != 0)
+                            OpenSourceUtil.navigate(methods[0]);
+                        else
+                            Messages.showErrorDialog(String.format("Can't find \"%s\" for class %s", methodName, className), "Method not found");
+                    }
+                }
+            });
+        });
     }
 
     public static String assignImpl(Project project, String currentImpl) {
@@ -89,32 +126,6 @@ public class ImplementationUtil implements ImplementationMessages {
         return selected.getQualifiedName();
     }
 
-    public static List<PsiMethod> getMethods(Project project, String currentImpl) {
-        return ApplicationManager.getApplication().runReadAction((Computable<List<PsiMethod>>) () -> {
-            GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-            PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(currentImpl, scope);
-
-            if (psiClass == null)
-                return Collections.emptyList();
-
-            List<PsiMethod> methods = new ArrayList<>();
-            for (PsiMethod m : psiClass.getMethods()) {
-                if (m.isConstructor()) continue;
-
-                methods.add(m);
-            }
-
-            return methods;
-        });
-    }
-
-    public static String replaceMethodName(String implementation, String methodName) {
-        if(DEFAULT_METHOD.equals(methodName) || methodName == null || methodName.trim().isEmpty())
-            return implementation.split(SEPARATOR)[0];
-        else
-            return implementation.split(SEPARATOR)[0] + SEPARATOR + methodName;
-    }
-
     public static void buildImplementationMenu(Project project, JPopupMenu menu, IPropertySource source, String propertyName, boolean allowMethod) {
         String implementation = (String)source.getPropertyValue(propertyName);
         if(isEmpty(implementation))
@@ -124,28 +135,57 @@ public class ImplementationUtil implements ImplementationMessages {
             menu.add(createItem(new RemoveImplementationAction(source, propertyName)));
             menu.add(createItem(new OpenImplementationAction(project, propertyName, implementation)));
 
-            if(!allowMethod)
-                return;
-
-            String className = getClassName(implementation);
-            String methodName = getMethodName(implementation);
-
-            JMenu methodMenu = new JMenu(REFERENCE_METHOD_MSG + methodName);
-            methodMenu.add(createItem(new ChangeMethodAction(source, propertyName, DEFAULT_METHOD, false)));
-            for(PsiMethod m: loadMethodsSynchronously(project, className)) {
-                methodMenu .add(createItem(new ChangeMethodAction(source, propertyName, m.getName(), m.hasModifierProperty(PsiModifier.PRIVATE))));
-            }
-            menu.add(methodMenu);
+            if(allowMethod)
+                buildReferenceMethodMenu(project, menu, source, propertyName, implementation);
         }
     }
 
-    private static List<PsiMethod> loadMethodsSynchronously(Project project, String className) {
-        final List<PsiMethod>[] result = new List[1];
+    public static void buildReferenceMethodMenu(Project project, JPopupMenu menu, IPropertySource source, String propertyName, String implementation) {
+        String className = getClassName(implementation);
+        String methodName = getMethodName(implementation);
+
+        JMenu methodMenu = new JMenu(REFERENCE_METHOD_MSG + methodName);
+        methodMenu.add(createItem(new ChangeMethodAction(source, propertyName, DEFAULT_METHOD, false)));
+        for(PsiMethod m: getMethodsInEDT(project, className)) {
+            methodMenu .add(createItem(new ChangeMethodAction(source, propertyName, m.getName(), m.hasModifierProperty(PsiModifier.PRIVATE))));
+        }
+        menu.add(methodMenu);
+    }
+
+    public static List<String> getPropertyKeysInEDT(Project project, String implementation) {
+        final List<String>[] result = new List[1];
         ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
             // 后台线程执行
-            List<PsiMethod> methods = getMethods(project, className);
-            result[0] = methods;
-        }, "Loading methods", true, project);
+            result[0] = ApplicationManager.getApplication().runReadAction((Computable<List<String>>) () -> {
+                return getPropertyKeys(project, implementation);
+            });
+        }, "Loading Predefined Keys", true, project);
         return result[0];
+    }
+
+    public static List<String> getPropertyKeys(Project project, String implementation) {
+        List<String> propKeys = new ArrayList<>();
+        if (isEmpty(implementation))
+            return propKeys;
+
+        String className = getClassName(implementation);
+        PsiClass type = findClass(project, className);
+
+        if (null == type) return propKeys;
+
+        for (PsiField f : type.getFields()) {
+            if (f.getNameIdentifier().getText().startsWith(PROPERTY_KEY_PREFIX) && f.getType().getPresentableText().equals("String")) {
+                String text = f.getText();
+                int start = text.indexOf('"');
+                if (start <= 0)
+                    continue;
+
+                int end = text.indexOf('"', start + 1);
+                text = text.substring(start + 1, end);
+                propKeys.add(text);
+            }
+        }
+
+        return propKeys;
     }
 }
