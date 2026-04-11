@@ -12,6 +12,7 @@ public interface PanelContentProvider<T extends IPropertySource>{
     void setEditorPanel(EditorPanel editorPanel);
     EditorPanel getEditorPanel();
 
+    //Read from virtual file
     T getContent() throws Exception;
     void saveContent() throws Exception;
     ContextMenuProvider getContextMenuProvider();
@@ -26,4 +27,9 @@ public interface PanelContentProvider<T extends IPropertySource>{
 
     void createConnection(Object connModel);
     void createModel(Object model);
+
+    //text is from PSI system to get latest change quickly
+    default T getContent(String text) throws Exception {
+        return getContent();
+    }
 }

@@ -21,10 +21,12 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
     private String name;
     private PanelContentProvider<T> contentProvider;
     private EditorPanel panel;
+    private Project project;
 
     public DiagramEditor(Project project, String name, PanelContentProvider<T> contentProvider) {
         this.name = name;
         this.contentProvider = contentProvider;
+        this.project = project;
         PsiManager.getInstance(project).addPsiTreeChangeListener(this);
         VirtualFileManager.getInstance().addVirtualFileListener(this);
     }
@@ -61,17 +63,8 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
     }
 
     private void refresh() {
-        panel.contentsChanged();
-    }
-
-    private void triggerRefresh() {
-        // 延迟刷新，避免在 PSI 写操作中直接修改 Document
-        ApplicationManager.getApplication().invokeLater(() -> {
-            VirtualFile file = contentProvider.getFile();
-            if (file != null && file.isValid()) {
-                refresh();
-            }
-        }, ModalityState.nonModal());
+        if(panel != null)
+            panel.contentsChanged(project);
     }
 
     @Override
@@ -85,14 +78,14 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
         if(event.getFile() == null || !event.getFile().getVirtualFile().equals(contentProvider.getFile()))
             return;
 
-        triggerRefresh();
+        refresh();
     }
 
     public void childrenChanged(@NotNull PsiTreeChangeEvent event) {
         if(event.getFile() == null || !event.getFile().getVirtualFile().equals(contentProvider.getFile()))
             return;
 
-        triggerRefresh();
+        refresh();
     }
 
     @Override
@@ -105,7 +98,7 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
         PsiClass[] classes = ((PsiJavaFile)element).getClasses();
         if(classes.length == 0) return;
 
-        triggerRefresh();
+        refresh();
     }
 
     @Override

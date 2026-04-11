@@ -3,9 +3,15 @@ package com.xrosstools.idea.gef;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -34,7 +40,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -313,19 +318,35 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         treeRoot.refresh();
     }
 
-    public void contentsChanged() {
+    //Triggered by PSI change, i.e. rename method or class
+    public void contentsChanged(Project project) {
         if(inProcessing.get() || saving.get())
             return;
 
-        try {
-            contentProvider.getFile().refresh(false, true);
-            loadContent();
-            build();
-            selectModel(getModel());
-            commandStack.clear();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        VirtualFile vf = getFile();
+        if (vf == null || !vf.isValid()) return;
+        WriteAction.run(() -> getFile().refresh(false, false));
+
+        // 获取 PSI 文件
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(vf);
+        if (psiFile == null) return;
+
+        // 在 read action 中安全读取 PSI 内容
+        ApplicationManager.getApplication().runReadAction(() -> {
+            Document doc = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+            if (doc == null) return;
+
+            String latestContent = doc.getText();
+            try {
+                diagramRef.set(contentProvider.getContent(latestContent));
+                build();
+                selectModel(getModel());
+                commandStack.clear();
+            } catch (Exception e) {
+                Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + latestContent, "Failed to refresh model from PSI");
+                throw new IllegalArgumentException(e);
+            }
+        });
     }
 
     private void loadContent() {
