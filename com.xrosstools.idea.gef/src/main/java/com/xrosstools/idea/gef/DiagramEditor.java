@@ -1,11 +1,8 @@
 package com.xrosstools.idea.gef;
 
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.*;
 import com.intellij.psi.*;
@@ -15,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 
 public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapter implements FileEditor, FileEditorManagerListener, VirtualFileListener {
     private String name;
@@ -38,7 +34,7 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
             return panel;
 
         try{
-            panel = new EditorPanel<>(contentProvider);
+            panel = new EditorPanel<>(project, contentProvider);
         }catch(Throwable e) {
             throw new IllegalArgumentException(e);
         }
@@ -62,30 +58,40 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
         panel.selectTopLevelElement(idField, name);
     }
 
-    private void refresh() {
-        if(panel != null)
-            panel.contentsChanged(project);
-    }
-
     @Override
     public void contentsChanged(VirtualFileEvent event) {
         if(event.getFile().equals(contentProvider.getFile()))
-            refresh();
+            if(panel != null)
+                panel.virtualFileChanged();
+    }
+
+    private void psiChanged() {
+        if(panel != null)
+            panel.psiChanged();
     }
 
     @Override
     public void childReplaced(PsiTreeChangeEvent event) {
         if(event.getFile() == null || !event.getFile().getVirtualFile().equals(contentProvider.getFile()))
             return;
+        PsiElement oldChild = event.getOldChild();
+        PsiElement newChild = event.getNewChild();
 
-        refresh();
+        if (oldChild instanceof PsiIdentifier && newChild instanceof PsiIdentifier) {
+            PsiIdentifier oldMethod = (PsiIdentifier) oldChild;
+            PsiIdentifier newMethod = (PsiIdentifier) newChild;
+
+            if (!oldMethod.getText().equals(newMethod.getText())) {
+                psiChanged();
+            }
+        }
     }
 
     public void childrenChanged(@NotNull PsiTreeChangeEvent event) {
         if(event.getFile() == null || !event.getFile().getVirtualFile().equals(contentProvider.getFile()))
             return;
 
-        refresh();
+        psiChanged();
     }
 
     @Override
@@ -98,7 +104,7 @@ public class DiagramEditor<T extends IPropertySource> extends PsiTreeChangeAdapt
         PsiClass[] classes = ((PsiJavaFile)element).getClasses();
         if(classes.length == 0) return;
 
-        refresh();
+        psiChanged();
     }
 
     @Override

@@ -15,6 +15,7 @@ public interface PanelContentProvider<T extends IPropertySource>{
     //Read from virtual file
     T getContent() throws Exception;
     void saveContent() throws Exception;
+
     ContextMenuProvider getContextMenuProvider();
     ContextMenuProvider getOutlineContextMenuProvider();
     void buildPalette(JPanel palette);
@@ -28,8 +29,11 @@ public interface PanelContentProvider<T extends IPropertySource>{
     void createConnection(Object connModel);
     void createModel(Object model);
 
-    //text is from PSI system to get latest change quickly
-    default T getContent(String text) throws Exception {
-        return getContent();
+    default T convert(String text) throws Exception {
+        return null;
+    }
+
+    default String convert(T diagram) throws Exception {
+        return null;
     }
 }

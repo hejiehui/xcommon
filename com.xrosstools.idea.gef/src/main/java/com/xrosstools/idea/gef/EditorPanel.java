@@ -3,7 +3,6 @@ package com.xrosstools.idea.gef;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -73,6 +72,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private Object newModel;
     private AbstractGraphicalEditPart sourcePart;
 
+    private Project project;
     private PanelContentProvider<T> contentProvider;
     private List<ContentChangeListener<T>> listeners = new ArrayList<>();
 
@@ -81,7 +81,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private AtomicBoolean saving = new AtomicBoolean(false);
 
-    public EditorPanel(PanelContentProvider<T> contentProvider) throws Exception {
+    public EditorPanel(Project project, PanelContentProvider<T> contentProvider) throws Exception {
+        this.project = project;
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
         loadContent();
@@ -148,7 +149,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         int componentCount = palette.getComponentCount();
         for (int i = 0; i < componentCount; i++) {
             Component component = palette.getComponent(i);
-            if(component instanceof JButton && ((JButton) component).getActionListeners()[0] instanceof Action) {
+            if (component instanceof JButton && ((JButton) component).getActionListeners()[0] instanceof Action) {
                 ((Action) ((JButton) component).getActionListeners()[0]).setExecutor(this);
             }
         }
@@ -158,7 +159,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private JComponent createToolbar() {
         ActionManager actionManager = ActionManager.getInstance();
-        DefaultActionGroup actionGroup = (DefaultActionGroup)contentProvider.createToolbar();
+        DefaultActionGroup actionGroup = (DefaultActionGroup) contentProvider.createToolbar();
         createDefaultTools(actionGroup);
 
         actionGroup.addSeparator();
@@ -170,7 +171,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         for (AnAction action : actions) {
             String actionId = action.getTemplatePresentation().getText();
-            if(actionId != null &&
+            if (actionId != null &&
                     !SearchModelAction.NAME.equals(actionId) &&
                     !ExportPngAction.NAME.equals(actionId))
                 actionGroup.add(action);
@@ -183,8 +184,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void createDefaultTools(ActionGroup group) {
-        DefaultActionGroup actionGroup = (DefaultActionGroup)group;
-        if(actionGroup.getChildrenCount() > 0) {
+        DefaultActionGroup actionGroup = (DefaultActionGroup) group;
+        if (actionGroup.getChildrenCount() > 0) {
             actionGroup.addSeparator();
         }
 
@@ -289,8 +290,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         treeNavigator.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent evt) {
                 if (isPopupTrigger(evt)) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode)treeNavigator.getLastSelectedPathComponent();
-                    if(node == null)
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) treeNavigator.getLastSelectedPathComponent();
+                    if (node == null)
                         return;
 
                     outlineContextMenuProvider.buildDisplayMenu(node.getUserObject()).show(evt.getComponent(), evt.getX(), evt.getY());
@@ -303,7 +304,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
                                                           boolean sel, boolean expanded, boolean leaf, int row,
                                                           boolean hasFocus) {
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-                AbstractTreeEditPart treePart = (AbstractTreeEditPart)((DefaultMutableTreeNode) value).getUserObject();
+                AbstractTreeEditPart treePart = (AbstractTreeEditPart) ((DefaultMutableTreeNode) value).getUserObject();
                 setText(treePart.getText());
                 setIcon(treePart.getImage());
                 return this;
@@ -319,13 +320,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     //Triggered by PSI change, i.e. rename method or class
-    public void contentsChanged(Project project) {
-        if(inProcessing.get() || saving.get())
+    public void psiChanged() {
+        if (inProcessing.get() || saving.get())
             return;
 
         VirtualFile vf = getFile();
         if (vf == null || !vf.isValid()) return;
-        WriteAction.run(() -> getFile().refresh(false, false));
 
         // 获取 PSI 文件
         PsiFile psiFile = PsiManager.getInstance(project).findFile(vf);
@@ -337,11 +337,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             if (doc == null) return;
 
             String latestContent = doc.getText();
+
             try {
-                diagramRef.set(contentProvider.getContent(latestContent));
-                build();
-                selectModel(getModel());
-                commandStack.clear();
+                T diagram = contentProvider.convert(latestContent);
+                if (diagram == null) {
+                    //Fallback to VFS
+                    virtualFileChanged();
+                    return;
+                }
+                reloadDiagram(diagram);
             } catch (Exception e) {
                 Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + latestContent, "Failed to refresh model from PSI");
                 throw new IllegalArgumentException(e);
@@ -349,9 +353,34 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         });
     }
 
-    private void loadContent() {
+    //Triggered by VFS
+    public void virtualFileChanged() {
+        if (inProcessing.get() || saving.get())
+            return;
+
+        reloadDiagram(loadContent());
+//        WriteAction.run(() -> {
+//            //getFile().refresh(false, false);
+//            reloadDiagram(loadContent());
+//        });
+    }
+
+    private void reloadDiagram(T diagram) {
         try {
-            diagramRef.set(contentProvider.getContent());
+            diagramRef.set(diagram);
+            build();
+            selectModel(getModel());
+            commandStack.clear();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private T loadContent() {
+        try {
+            T diagram = contentProvider.getContent();
+            diagramRef.set(diagram);
+            return diagram;
         } catch (Throwable e) {
             try {
                 Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + VfsUtilCore.loadText(contentProvider.getFile()), "Can not load content change");
@@ -366,7 +395,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     public void contentChanged(T content) {
-        for(ContentChangeListener<T> listener: listeners)
+        for (ContentChangeListener<T> listener : listeners)
             listener.contentChanged(content);
     }
 
@@ -375,7 +404,20 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             try {
                 saving.set(true);
 
-                contentProvider.saveContent();
+                String contentStr = contentProvider.convert(diagramRef.get());
+                //Old plugin
+                if (contentStr == null) {
+                    contentProvider.saveContent();
+                } else {
+                    PsiFile psiFile = PsiManager.getInstance(project).findFile(getFile());
+                    Document doc = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+                    if (doc == null)
+                        contentProvider.saveContent();
+                    else {
+                        doc.setText(contentStr);
+                        PsiDocumentManager.getInstance(project).commitDocument(doc);
+                    }
+                }
 
                 saving.set(false);
             } catch (Throwable e) {
@@ -387,9 +429,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private void updateTooltip(Point location) {
         Figure f = findFigureAt(location);
-        if(f == null || f == root.getFigure())
+        if (f == null || f == root.getFigure())
             unitPanel.setToolTipText(null);
-        else{
+        else {
             unitPanel.setToolTipText(f.getToolTipText());
         }
     }
@@ -403,11 +445,11 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private void updateHover(Figure underPoint, Point location, Command cmd, boolean showInsertionFeedback) {
         underPoint = underPoint == null ? root.getFigure() : underPoint;
 
-        if(lastHover != null && lastHover != underPoint) {
+        if (lastHover != null && lastHover != underPoint) {
             lastHover.getPart().getContentPane().setInsertionPoint(null);
         }
 
-        if(cmd != null && showInsertionFeedback) {
+        if (cmd != null && showInsertionFeedback) {
             Point localLocation = toLocalPoint(underPoint, location);
             underPoint.getPart().getContentPane().setInsertionPoint(localLocation);
         }
@@ -418,7 +460,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void clearHover() {
-        if(lastHover == null)
+        if (lastHover == null)
             return;
 
         lastHover.getPart().getContentPane().setInsertionPoint(null);
@@ -430,23 +472,53 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private void registerListener() {
         unitPanel.addMouseMotionListener(new MouseAdapter() {
-            public void mouseDragged(MouseEvent e) {curHandle.mouseDragged(e);}
-            public void mouseMoved(MouseEvent e) {curHandle.mouseMoved(e);}
+            public void mouseDragged(MouseEvent e) {
+                curHandle.mouseDragged(e);
+            }
+
+            public void mouseMoved(MouseEvent e) {
+                curHandle.mouseMoved(e);
+            }
         });
 
         unitPanel.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {curHandle.mouseClicked(e);}
-            public void mousePressed(MouseEvent e) {curHandle.mousePressed(e);}
-            public void mouseReleased(MouseEvent e) {curHandle.mouseReleased(e);}
-            public void mouseEntered(MouseEvent e) {curHandle.mouseEntered(e);}
-            public void mouseExited(MouseEvent e) {curHandle.mouseExited(e);}
-            public void mouseWheelMoved(MouseWheelEvent e){curHandle.mouseWheelMoved(e);}
+            public void mouseClicked(MouseEvent e) {
+                curHandle.mouseClicked(e);
+            }
+
+            public void mousePressed(MouseEvent e) {
+                curHandle.mousePressed(e);
+            }
+
+            public void mouseReleased(MouseEvent e) {
+                curHandle.mouseReleased(e);
+            }
+
+            public void mouseEntered(MouseEvent e) {
+                curHandle.mouseEntered(e);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                curHandle.mouseExited(e);
+            }
+
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                curHandle.mouseWheelMoved(e);
+            }
         });
 
         unitPanel.addKeyListener(new KeyAdapter() {
-            public void keyTyped(KeyEvent e) {curHandle.keyTyped(e);}
-            public void keyPressed(KeyEvent e) {curHandle.keyPressed(e);}
-            public void keyReleased(KeyEvent e) {curHandle.keyReleased(e);}
+            public void keyTyped(KeyEvent e) {
+                curHandle.keyTyped(e);
+            }
+
+            public void keyPressed(KeyEvent e) {
+                curHandle.keyPressed(e);
+            }
+
+            public void keyReleased(KeyEvent e) {
+                curHandle.keyReleased(e);
+            }
         });
     }
 
@@ -457,10 +529,10 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void updatePropertySelection(Object model) {
-        if(model == null)
+        if (model == null)
             return;
 
-        if(!(model instanceof IPropertySource)) {
+        if (!(model instanceof IPropertySource)) {
             tableModel = null;
             tableProperties.setVisible(false);
             return;
@@ -482,8 +554,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     public void updateTreeSelection(Object model) {
         triggedByFigure = true;
-        AbstractTreeEditPart treePart = (AbstractTreeEditPart)treeRoot.findEditPart(model);
-        if(treePart == null) {
+        AbstractTreeEditPart treePart = (AbstractTreeEditPart) treeRoot.findEditPart(model);
+        if (treePart == null) {
             treeNavigator.clearSelection();
             return;
         }
@@ -526,12 +598,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private boolean triggedByFigure = false;
 
     public void selectTopLevelElement(String idField, String name) {
-        if(idField == null || name == null)
+        if (idField == null || name == null)
             return;
 
-        for(Object child: treeRoot.getChildren()) {
-            Object model = ((AbstractTreeEditPart)child).getModel();
-            if(model instanceof IPropertySource)
+        for (Object child : treeRoot.getChildren()) {
+            Object model = ((AbstractTreeEditPart) child).getModel();
+            if (model instanceof IPropertySource)
                 if (name.equals(((IPropertySource) model).getPropertyValue(idField)))
                     selectModel(model);
         }
@@ -544,9 +616,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         updateTreeSelection(selectedNode);
         updatePropertySelection(selectedNode);
 
-        if(selected == null) {
+        if (selected == null) {
             gotoNext(ready);
-        }else {
+        } else {
             lastHit = null;
             gotoNext(figureSelected);
         }
@@ -555,27 +627,27 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void selectTreeNode() {
-        if(inProcessing.get())
+        if (inProcessing.get())
             return;
 
-        if(triggedByFigure) {
+        if (triggedByFigure) {
             triggedByFigure = false;
             return;
         }
 
-        DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode)treeNavigator.getLastSelectedPathComponent();
-        if(treeNode == null)
+        DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treeNavigator.getLastSelectedPathComponent();
+        if (treeNode == null)
             return;
 
-        AbstractTreeEditPart treePart = (AbstractTreeEditPart)treeNode.getUserObject();
+        AbstractTreeEditPart treePart = (AbstractTreeEditPart) treeNode.getUserObject();
 
         Figure selected = root.findFigure(treePart.getModel());
         updateFigureSelection(selected);
         updatePropertySelection(treePart.getModel());
 
-        if(selected == null) {
+        if (selected == null) {
             gotoNext(ready);
-        }else {
+        } else {
             lastHit = null;
             gotoNext(figureSelected);
         }
@@ -591,36 +663,36 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         updateTreeSelection(model);
         updatePropertySelection(model);
 
-        if(f == null) {
+        if (f == null) {
             gotoNext(ready);
             return;
         }
 
-        if(f instanceof Endpoint && f.getParent() instanceof Connection) {
-            Endpoint endpoint = (Endpoint)f;
-            if(endpoint.isConnectionSourceEndpoint())
+        if (f instanceof Endpoint && f.getParent() instanceof Connection) {
+            Endpoint endpoint = (Endpoint) f;
+            if (endpoint.isConnectionSourceEndpoint())
                 gotoNext(sourceEndpointSelected);
-            else if(endpoint.isConnectionTargetEndpoint())
+            else if (endpoint.isConnectionTargetEndpoint())
                 gotoNext(targetEndpointSelected);
-            else if(endpoint.isConnectionAdjusterEndpoint())
+            else if (endpoint.isConnectionAdjusterEndpoint())
                 gotoNext(adjusterEndpointSelected);
         }
     }
 
     private boolean expandSelected(TreePath parent, TreeNode selectedNode) {
         // Traverse children
-        TreeNode node = (TreeNode)parent.getLastPathComponent();
+        TreeNode node = (TreeNode) parent.getLastPathComponent();
 
-        if(selectedNode == node) {
+        if (selectedNode == node) {
             treeNavigator.setSelectionPath(parent);
             return true;
         }
 
         if (node.getChildCount() >= 0) {
-            for(Enumeration e = node.children(); e.hasMoreElements(); ) {
-                TreeNode n = (TreeNode)e.nextElement();
+            for (Enumeration e = node.children(); e.hasMoreElements(); ) {
+                TreeNode n = (TreeNode) e.nextElement();
                 TreePath path = parent.pathByAddingChild(n);
-                if(expandSelected(path, selectedNode)) {
+                if (expandSelected(path, selectedNode)) {
                     // Expansion or collapse must be done bottom-up
                     treeNavigator.expandPath(parent);
                     return true;
@@ -631,7 +703,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void adjust(JScrollBar scrollBar, int start, int length) {
-        if(scrollBar.getValue() > start || scrollBar.getValue() + scrollBar.getVisibleAmount() < start + length)
+        if (scrollBar.getValue() > start || scrollBar.getValue() + scrollBar.getVisibleAmount() < start + length)
             scrollBar.setValue(start - 100);
     }
 
@@ -645,16 +717,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     public void execute(Command command) {
-        if(command == null || command.canExecute() == false)
+        if (command == null || command.canExecute() == false)
             return;
 
         Object model = newModel;
-        if(model == null)
+        if (model == null)
             model = lastSelected == null ? null : lastSelected.getPart().getModel();
         inProcessing.set(true);
         commandStack.execute(command, model);
 
-        if(newModel != null)
+        if (newModel != null)
             newModel = null;
 
         postExecute(model);
@@ -690,7 +762,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void updateVisual() {
-        if(inProcessing.get())
+        if (inProcessing.get())
             return;
 
         Dimension size = unitPanel.getPreferredSize();
@@ -702,7 +774,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private class UnitPanel extends JPanel {
         @Override
         protected void paintChildren(Graphics g) {
-            if(inProcessing.get())
+            if (inProcessing.get())
                 return;
 
             root.getFigure().paint(g);
@@ -711,7 +783,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         @Override
         public Dimension getPreferredSize() {
-            if(root == null)
+            if (root == null)
                 return new Dimension(500, 800);
 
             Dimension size = root.getFigure().getPreferredSize();
@@ -722,12 +794,23 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private class InteractionHandle extends MouseAdapter implements KeyListener {
-        public void keyTyped(KeyEvent e) {}
-        public void keyPressed(KeyEvent e) {}
-        public void keyReleased(KeyEvent e) {}
-        public void enter() {}
-        public void leave() {}
-        public void paint(Graphics g) {}
+        public void keyTyped(KeyEvent e) {
+        }
+
+        public void keyPressed(KeyEvent e) {
+        }
+
+        public void keyReleased(KeyEvent e) {
+        }
+
+        public void enter() {
+        }
+
+        public void leave() {
+        }
+
+        public void paint(Graphics g) {
+        }
 
         public String id;
 
@@ -738,7 +821,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private InteractionHandle ready = new InteractionHandle("ready") {
         public void enter() {
-            if(lastSelected != null) {
+            if (lastSelected != null) {
                 lastSelected.setSelected(false);
                 lastSelected = null;
             }
@@ -770,19 +853,21 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         contentPane.translateFromParent(point);
         return point;
     }
+
     private InteractionHandle figureSelected = new InteractionHandle("figureSelected") {
         private boolean moved;
         private Point delta;
 
         private boolean isApplicable() {
-            if(lastSelected.getPart().getModel() == getModel())
+            if (lastSelected.getPart().getModel() == getModel())
                 return false;
 
-            if(lastSelected instanceof Connection)
+            if (lastSelected instanceof Connection)
                 return false;
 
             return true;
         }
+
         private boolean isAddCommand(Point p, Figure underPoint) {
             Point pos = new Point(p);
             lastSelected.translateToRelative(pos);
@@ -795,7 +880,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             EditPolicy policy = parentPart.getEditPolicy();
 
             Point localPoint = toLocalPoint(parentPart.getFigure(), p);
-            if(policy == null)
+            if (policy == null)
                 return null;
 
             Rectangle constrain = new Rectangle(localPoint.x + delta.x, localPoint.y + delta.y, lastSelected.getWidth(), lastSelected.getHeight());
@@ -803,7 +888,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         private Figure getTarget(boolean isAdd, Figure underPoint) {
-            return isAdd ? underPoint.getPart().getFigure() : ((AbstractGraphicalEditPart)lastSelected.getPart().getParent()).getFigure();
+            return isAdd ? underPoint.getPart().getFigure() : ((AbstractGraphicalEditPart) lastSelected.getPart().getParent()).getFigure();
         }
 
         private boolean showInsertionFeedback(Figure target, Command cmd) {
@@ -816,7 +901,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
             lastSelected.translateToAbsolute(pos);
             delta = new Point();
 
-            if(lastHit == null)
+            if (lastHit == null)
                 return;
 
             delta.x = pos.x - lastHit.x;
@@ -836,7 +921,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         public void mouseDragged(MouseEvent e) {
             Point p = e.getPoint();
-            if(isRightButton || !isApplicable())
+            if (isRightButton || !isApplicable())
                 return;
 
             Figure underPoint = findFigureAt(p);
@@ -849,9 +934,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         public void mouseReleased(MouseEvent e) {
-            if(isPopupTrigger(e))
+            if (isPopupTrigger(e))
                 showContextMenu(e.getX(), e.getY());
-            else if(moved && lastHover != null && isApplicable()) {
+            else if (moved && lastHover != null && isApplicable()) {
                 Point p = e.getPoint();
                 Figure underPoint = findFigureAt(p);
                 boolean isAdd = isAddCommand(p, underPoint);
@@ -865,15 +950,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         public void mouseClicked(MouseEvent e) {
-            if(e.getClickCount() == 2) {
+            if (e.getClickCount() == 2) {
                 lastSelected.getPart().performAction();
             }
         }
 
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_DELETE) {
+            if (e.getKeyCode() == KeyEvent.VK_DELETE) {
                 EditPolicy policy = lastSelected.getPart().getEditPolicy();
-                if(policy == null)
+                if (policy == null)
                     return;
 
                 Command deleteCmd = policy.getDeleteCommand();
@@ -885,7 +970,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         public void paint(Graphics g) {
-            if(!moved)
+            if (!moved)
                 return;
 
             lastHoverLocation.translate(delta.x, delta.y);
@@ -896,7 +981,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private InteractionHandle modelCreated = new InteractionHandle("modelCreated") {
         private Command getCreateCommand(Figure underPoint, Point p) {
             EditPolicy policy = underPoint.getPart().getEditPolicy();
-            if(policy == null) return null;
+            if (policy == null) return null;
 
             final Point point = toLocalPoint(underPoint, p);
             return policy.getCreateCommand(newModel, point);
@@ -923,7 +1008,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
                 gotoNext(ready);
         }
     };
@@ -937,16 +1022,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         public void mousePressed(MouseEvent e) {
             eraseSourceFeedback();
             Figure f = findFigureAt(e.getPoint());
-            if(isSelectableSource(f)) {
+            if (isSelectableSource(f)) {
                 sourcePart = f.getPart();
                 gotoNext(sourceSelected);
-            }else {
+            } else {
                 gotoNext(ready);
             }
         }
 
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 eraseSourceFeedback();
                 gotoNext(ready);
             }
@@ -960,13 +1045,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private Figure lastSelectableSource;
 
     private void showSourceFeedback(Figure f, boolean isSelectableSource) {
-        if(f == null || f == lastSelectableSource) {
+        if (f == null || f == lastSelectableSource) {
             repaint();
             return;
         }
 
         eraseSourceFeedback();
-        if(isSelectableSource) {
+        if (isSelectableSource) {
             f.getPart().showSourceFeedback();
             lastSelectableSource = f;
         }
@@ -974,7 +1059,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void eraseSourceFeedback() {
-        if(lastSelectableSource != null) {
+        if (lastSelectableSource != null) {
             lastSelectableSource.getPart().eraseSourceFeedback();
             lastSelectableSource = null;
         }
@@ -1006,7 +1091,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
 
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 eraseTargetFeedback();
                 gotoNext(ready);
             }
@@ -1018,7 +1103,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         private Command getCommand(Figure underPoint) {
             EditPolicy policy = underPoint.getPart().getEditPolicy();
-            if(policy == null) return null;
+            if (policy == null) return null;
 
             return policy.getCreateConnectionCommand(newModel, sourcePart);
         }
@@ -1027,13 +1112,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     private Figure lastSelectableTarget;
 
     private void showTargetFeedback(Figure f, boolean isSelectableTarget) {
-        if(f == null || f == lastSelectableTarget) {
+        if (f == null || f == lastSelectableTarget) {
             repaint();
             return;
         }
 
         eraseTargetFeedback();
-        if(isSelectableTarget) {
+        if (isSelectableTarget) {
             f.getPart().showTargetFeedback();
             lastSelectableTarget = f;
         }
@@ -1041,7 +1126,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
     }
 
     private void eraseTargetFeedback() {
-        if(lastSelectableTarget != null) {
+        if (lastSelectableTarget != null) {
             lastSelectableTarget.getPart().eraseTargetFeedback();
             lastSelectableTarget = null;
             repaint();
@@ -1052,12 +1137,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         private Endpoint endpoint;
 
         public void enter() {
-            endpoint = (Endpoint)lastSelected;
+            endpoint = (Endpoint) lastSelected;
         }
 
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
-            if(lastSelected == endpoint)
+            if (lastSelected == endpoint)
                 return;
 
             endpoint = null;
@@ -1082,9 +1167,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         private Command getCommand(Figure underPoint) {
             EditPolicy policy = underPoint.getPart().getEditPolicy();
-            if(policy == null) return null;
+            if (policy == null) return null;
 
-            Connection connection = ((Endpoint)lastSelected).getParentConnection();
+            Connection connection = ((Endpoint) lastSelected).getParentConnection();
             return policy.getReconnectSourceCommand(connection.getConnectionPart());
         }
     };
@@ -1093,12 +1178,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         private Endpoint endpoint;
 
         public void enter() {
-            endpoint = (Endpoint)lastSelected;
+            endpoint = (Endpoint) lastSelected;
         }
 
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
-            if(lastSelected == endpoint)
+            if (lastSelected == endpoint)
                 return;
 
             endpoint = null;
@@ -1123,7 +1208,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         private Command getCommand(Figure underPoint) {
             EditPolicy policy = underPoint.getPart().getEditPolicy();
-            if(policy == null) return null;
+            if (policy == null) return null;
 
             Connection connection = ((Endpoint) lastSelected).getParentConnection();
             return policy.getReconnectTargetCommand(connection.getConnectionPart());
@@ -1134,12 +1219,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         private Endpoint endpoint;
 
         public void enter() {
-            endpoint = (Endpoint)lastSelected;
+            endpoint = (Endpoint) lastSelected;
         }
 
         public void mousePressed(MouseEvent e) {
             selectFigureAt(e.getPoint());
-            if(lastSelected == endpoint)
+            if (lastSelected == endpoint)
                 return;
 
             endpoint = null;
@@ -1159,7 +1244,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
         private Command getCommand() {
             EditPolicy policy = endpoint.getPart().getEditPolicy();
-            if(policy == null) return null;
+            if (policy == null) return null;
 
             Connection connection = ((Endpoint) lastSelected).getParentConnection();
             return policy.getAdjustConnectionCommand(connection.getConnectionPart());
@@ -1168,7 +1253,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
 
     private InteractionHandle curHandle = ready;
 
-    /** Accessors for extension **/
+    /**
+     * Accessors for extension
+     **/
     public VirtualFile getFile() {
         return contentProvider.getFile();
     }
