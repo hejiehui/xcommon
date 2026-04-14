@@ -39,7 +39,7 @@ intellijPlatform {
         }
 
         changeNotes = """
-            <em>1.9.2</em> Optimize AbstractCodeGenerator and fix model reference.<br>
+            <em>1.9.2</em> Solve all "slow operation is prohibited" issues, fix model reference, optimize model updating and saving on IDEA 2025.3.<br>
             <em>1.9.1</em> Fix new model dialog display bug when extension is not available.<br>
             <em>1.9.0</em> Support stream mode for AI conversation.<br>
             <em>1.8.0</em> Support template code generator and optimize package selecting.<br>

@@ -3,6 +3,7 @@ package com.xrosstools.idea.gef;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -85,7 +86,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         this.project = project;
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
-        loadContent();
+        diagramRef.set(loadDiagram());
         contextMenuBuilder = contentProvider.getContextMenuProvider();
         contextMenuBuilder.setExecutor(this);
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
@@ -319,53 +320,35 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         treeRoot.refresh();
     }
 
+    private boolean isRefreshAllowed() {
+        if (inProcessing.get() || saving.get())
+            return false;
+
+        return getFile() != null && getFile().isValid();
+    }
+
     //Triggered by PSI change, i.e. rename method or class
     public void psiChanged() {
-        if (inProcessing.get() || saving.get())
-            return;
-
-        VirtualFile vf = getFile();
-        if (vf == null || !vf.isValid()) return;
-
-        // 获取 PSI 文件
-        PsiFile psiFile = PsiManager.getInstance(project).findFile(vf);
-        if (psiFile == null) return;
+        if (!isRefreshAllowed()) return;
 
         // 在 read action 中安全读取 PSI 内容
         ApplicationManager.getApplication().runReadAction(() -> {
-            Document doc = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-            if (doc == null) return;
-
-            String latestContent = doc.getText();
-
-            try {
-                T diagram = contentProvider.convert(latestContent);
-                if (diagram == null) {
-                    //Fallback to VFS
-                    virtualFileChanged();
-                    return;
-                }
-                reloadDiagram(diagram);
-            } catch (Exception e) {
-                Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + latestContent, "Failed to refresh model from PSI");
-                throw new IllegalArgumentException(e);
-            }
+            reloadDiagram(loadDiagramFromPsi());
         });
     }
 
     //Triggered by VFS
     public void virtualFileChanged() {
-        if (inProcessing.get() || saving.get())
-            return;
-
-        reloadDiagram(loadContent());
-//        WriteAction.run(() -> {
-//            //getFile().refresh(false, false);
-//            reloadDiagram(loadContent());
-//        });
+        if (isRefreshAllowed()) return;
+        
+        WriteAction.run(() -> {
+            reloadDiagram(loadDiagramFromVfs());
+        });
     }
 
     private void reloadDiagram(T diagram) {
+        if(diagram == null) return;
+
         try {
             diagramRef.set(diagram);
             build();
@@ -376,17 +359,39 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Co
         }
     }
 
-    private T loadContent() {
+    private T loadDiagram() {
+        //Check PSI for latest change 
+        T diagram = loadDiagramFromPsi();
+        return diagram == null ? loadDiagramFromVfs() : diagram;
+    }
+
+    private T loadDiagramFromVfs() {
         try {
-            T diagram = contentProvider.getContent();
-            diagramRef.set(diagram);
-            return diagram;
+            getFile().refresh(false, false);
+            return contentProvider.getContent();
         } catch (Throwable e) {
             try {
                 Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + VfsUtilCore.loadText(contentProvider.getFile()), "Can not load content change");
             } catch (Throwable e1) {
             }
             throw new IllegalArgumentException("Can not load content", e);
+        }
+    }
+
+    private T loadDiagramFromPsi() {
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(getFile());
+        if(psiFile == null) return null;
+
+        Document doc = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+        if (doc == null) return null;
+
+        String latestContent = doc.getText();
+
+        try {
+            return contentProvider.convert(latestContent);
+        } catch (Exception e) {
+            Messages.showErrorDialog("Error: \n" + e.getMessage() + "\n" + latestContent, "Model Loading From PSI Failed");
+            throw new IllegalArgumentException(e);
         }
     }
 
