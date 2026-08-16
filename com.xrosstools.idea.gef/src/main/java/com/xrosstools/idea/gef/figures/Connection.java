@@ -1,5 +1,7 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.parts.AbstractConnectionEditPart;
 import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
 import com.xrosstools.idea.gef.routers.ConnectionLocator;
@@ -47,7 +49,8 @@ public class Connection extends Figure {
         children.remove(child);
     }
 
-    private boolean isValid() {
+    @Override
+    public boolean isVisible() {
         if(sourcePart != null)
             return true;
 
@@ -57,7 +60,7 @@ public class Connection extends Figure {
 
     @Override
     public void layout() {
-        if(!isValid())
+        if(!isVisible())
             return;
 
         layoutEndpoints();
@@ -153,7 +156,7 @@ public class Connection extends Figure {
     public final void painLink(Graphics graphics) {}
 
     public void paint(Graphics graphics) {
-        if(!isValid())
+        if(!isVisible())
             return;
 
         super.paint(graphics);
@@ -292,5 +295,29 @@ public class Connection extends Figure {
             return feedbackTarget;
         else
             return getConnectionPart().getTargetFigure();
+    }
+
+    @Override
+    public JsonObject getComponentModel() {
+        JsonObject result = new JsonObject();
+
+        JsonArray pointsArray = new JsonArray();
+        for (Point point : points.getInternalPoints()) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("x", point.getX());
+            obj.addProperty("y", point.getY());
+            pointsArray.add(obj);
+        }
+        result.add("points", pointsArray);
+
+        JsonArray nodesArray = new JsonArray();
+        for (Figure node : getChildren()) {
+            JsonObject obj = node.getGraphicModel();
+            nodesArray.add(obj);
+        }
+        result.add("children", nodesArray);
+
+
+        return result;
     }
 }

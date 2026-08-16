@@ -1,5 +1,7 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.google.gson.JsonObject;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -36,5 +38,13 @@ public class IconFigure extends Figure {
         return  image == null ?
             new Dimension(getMarginWidth(), getMarginHeight()) :
             new Dimension(image.getIconWidth() + getMarginWidth(), image.getIconHeight() + getMarginHeight());
+    }
+
+    public JsonObject getComponentModel() {
+        JsonObject componentModel = super.getComponentModel();
+
+        componentModel.addProperty("key", "flow");
+
+        return componentModel;
     }
 }

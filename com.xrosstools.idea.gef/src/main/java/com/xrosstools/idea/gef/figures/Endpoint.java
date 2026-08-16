@@ -64,11 +64,16 @@ public class Endpoint extends Figure {
 
     @Override
     public void paint(Graphics graphics) {
-        if(isSelectable() && getParentConnection().isSelected()) {
+        if(isVisible()) {
 //            if(isConnectionAdjusterEndpoint())
 //                graphics.fill3DRect(getX()-SIZE/2, getY()-SIZE/2, SIZE, SIZE, true);
 //            else
                 graphics.fill3DRect(getX(), getY(), SIZE, SIZE, true);
         }
+    }
+
+    @Override
+    public boolean isVisible() {
+        return isSelectable() && getParentConnection().isSelected();
     }
 }

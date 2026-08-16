@@ -1,5 +1,7 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.google.gson.JsonObject;
+
 import java.awt.*;
 
 public class Text extends Figure {
@@ -68,5 +70,14 @@ public class Text extends Figure {
         }
 
         return new Dimension(width, height);
+    }
+
+    public JsonObject getComponentModel() {
+        JsonObject componentModel = super.getComponentModel();
+
+        componentModel.addProperty("text", text);
+
+        return componentModel;
+
     }
 }

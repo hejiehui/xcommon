@@ -65,4 +65,8 @@ public class PointList {
     public void removeAllPoints() {
         points.clear();
     }
+
+    public List<Point> getInternalPoints() {
+        return points;
+    }
 }

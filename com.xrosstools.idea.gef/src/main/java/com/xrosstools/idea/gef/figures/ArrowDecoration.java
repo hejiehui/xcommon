@@ -1,5 +1,6 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.routers.PointList;
 
 import java.awt.*;
@@ -39,5 +40,14 @@ public class ArrowDecoration extends RotatableDecoration {
         g2d.rotate(getAngle(), getX(), getY());
 
         g2d.fill(poly);
+    }
+
+    public JsonObject getComponentModel() {
+        JsonObject componentModel = super.getComponentModel();
+
+        componentModel.addProperty("aWidth", aWidth);
+        componentModel.addProperty("aHeight", aHeight);
+
+        return componentModel;
     }
 }

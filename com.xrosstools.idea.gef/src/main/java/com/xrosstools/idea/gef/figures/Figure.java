@@ -1,5 +1,7 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
 import com.xrosstools.idea.gef.routers.PointList;
 
@@ -38,6 +40,7 @@ public class Figure implements ImageObserver {
     private String toolTipText;
     private boolean opaque;
     private Point insertionPoint;
+    private Point moveFeedbackLocation;
 
     public static boolean isUnderDarcula() {
         return UIManager.getLookAndFeel().getName().contains("Darcula");
@@ -344,6 +347,14 @@ public class Figure implements ImageObserver {
         this.insertionPoint = insertionPoint;
     }
 
+    public Point getMoveFeedbackLocation() {
+        return moveFeedbackLocation;
+    }
+
+    public void setMoveFeedbackLocation(Point moveFeedbackLocation) {
+        this.moveFeedbackLocation = moveFeedbackLocation;
+    }
+
     public int getInsertionIndex(Point location) {
         return layout.getInsertionIndex(this, location);
     }
@@ -419,7 +430,7 @@ public class Figure implements ImageObserver {
     }
 
     public void paint(Graphics graphics) {
-        if(visible == false)
+        if(!isVisible())
             return;
 
         layout();
@@ -435,6 +446,8 @@ public class Figure implements ImageObserver {
 
         if(showTargetFeedback)
             paintTargetFeedback(graphics);
+
+        paintDragFeedback(graphics);
 
         paintInsertionFeedback(graphics);
     }
@@ -462,9 +475,12 @@ public class Figure implements ImageObserver {
         paintSelection(graphics);
     }
 
-    public void paintDragFeedback(Graphics graphics, Point lastHoverlocation) {
+    public void paintDragFeedback(Graphics graphics) {
+        if(moveFeedbackLocation == null)
+            return;
+
         Point location = getLocation();
-        setLocation(lastHoverlocation);
+        setLocation(moveFeedbackLocation);
         graphics.setXORMode(getForegroundColor() == null ? Color.white : getForegroundColor());
         paintComponent(graphics);
         setLocation(location);
@@ -579,5 +595,58 @@ public class Figure implements ImageObserver {
 
     public void setMinSize(Dimension minSize) {
         this.minSize = minSize;
+    }
+
+    public JsonObject getGraphicModel() {
+        if(!isVisible())
+            return null;
+
+        layout();
+        JsonObject componentModel = getComponentModel();
+        componentModel.addProperty("type", getClass().getSimpleName());
+
+        JsonArray nodesArray = new JsonArray();
+        for (Figure node : getChildren()) {
+            JsonObject obj = node.getGraphicModel();
+            nodesArray.add(obj);
+        }
+        componentModel.add("children", nodesArray);
+
+        JsonArray connectionsArray = new JsonArray();
+        for (Connection conn : connections) {
+            JsonObject obj = conn.getGraphicModel();
+            connectionsArray.add(obj);
+        }
+        componentModel.add("connections", connectionsArray);
+
+        return componentModel;
+    }
+
+    public JsonObject getComponentModel() {
+        JsonObject componentModel = new JsonObject();
+        componentModel.addProperty("selected", isSelected());
+        componentModel.addProperty("showSourceFeedback", showSourceFeedback);
+        componentModel.addProperty("showTargetFeedback", showTargetFeedback);
+        componentModel.addProperty("foreground", foreground.getRGB());
+        componentModel.addProperty("background", background.getRGB());
+
+        //TODO implement later
+//        paintInsertionFeedback(graphics);
+
+        JsonObject boundsObj = new JsonObject();
+        boundsObj.addProperty("x", getX());
+        boundsObj.addProperty("y", getY());
+        boundsObj.addProperty("width", getWidth());
+        boundsObj.addProperty("height", getHeight());
+        componentModel.add("bounds", boundsObj);
+
+        JsonObject insetsObj = new JsonObject();
+
+        insetsObj.addProperty("top", insets.top);
+        insetsObj.addProperty("left", insets.left);
+        insetsObj.addProperty("right", insets.right);
+        insetsObj.addProperty("bottom", insets.bottom);
+        componentModel.add("insets", insetsObj);
+        return componentModel;
     }
 }
