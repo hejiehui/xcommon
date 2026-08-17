@@ -36,8 +36,6 @@ public class EditorInteraction<T> implements CommandExecutor {
     private CommandStack commandStack = new CommandStack();
     private AtomicBoolean inProcessing = new AtomicBoolean(false);
 
-    private AtomicBoolean saving = new AtomicBoolean(false);
-
     public EditorInteraction(EditorFacade editorFacade, ContextMenuProvider contextMenuBuilder) {
         this.editorFacade = editorFacade;
         this.contextMenuBuilder = contextMenuBuilder;
@@ -112,6 +110,10 @@ public class EditorInteraction<T> implements CommandExecutor {
                 curHandle.keyReleased(e);
             }
         });
+    }
+
+    public boolean isInProcessing() {
+        return inProcessing.get();
     }
 
     public void reset() {

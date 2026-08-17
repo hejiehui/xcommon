@@ -60,13 +60,10 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     private DefaultTreeModel treeModel;
     private PropertyTableModel tableModel;
     private Figure lastSelected;
-    private Point lastHoverLocation;
 
     private Project project;
     private PanelContentProvider<T> contentProvider;
     private List<ContentChangeListener<T>> listeners = new ArrayList<>();
-
-    private AtomicBoolean inProcessing = new AtomicBoolean(false);
 
     private AtomicBoolean saving = new AtomicBoolean(false);
 
@@ -306,7 +303,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     }
 
     private boolean isRefreshAllowed() {
-        if (inProcessing.get() || saving.get())
+        if (editorInteraction.isInProcessing() || saving.get())
             return false;
 
         return getFile() != null && getFile().isValid();
@@ -421,7 +418,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     private Figure feedbackFigure;
 
     public void updateRootFigure(Figure rootFigure) {
-        if (inProcessing.get())
+        if (editorInteraction.isInProcessing())
             return;
 
         this.rootFigure = rootFigure;
@@ -525,7 +522,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         if (treeNode == null)
             return;
 
-        if (inProcessing.get())
+        if (editorInteraction.isInProcessing())
             return;
 
         if (triggedByFigure) {
@@ -591,7 +588,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     private class UnitPanel extends JPanel {
         @Override
         protected void paintChildren(Graphics g) {
-            if (inProcessing.get())
+            if (editorInteraction.isInProcessing())
                 return;
 
             root.getFigure().paint(g);
