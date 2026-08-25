@@ -17,6 +17,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.xrosstools.idea.gef.actions.Action;
+import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
 import com.xrosstools.idea.gef.extensions.ExtensionManager;
@@ -641,5 +642,9 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
 
     public CommandStack getCommandStack() {
         return editorInteraction.getCommandStack();
+    }
+
+    public CommandExecutor getCommandExecutor() {
+        return editorInteraction;
     }
 }

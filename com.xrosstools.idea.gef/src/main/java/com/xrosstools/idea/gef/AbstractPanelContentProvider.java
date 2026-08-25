@@ -145,7 +145,7 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
 
     public ActionListener attachExecutor(ActionListener action) {
         if(action instanceof Action)
-            ((Action)action).setExecutor(editorPanel);
+            ((Action)action).setExecutor(editorPanel.getCommandExecutor());
         return action;
     }
 }

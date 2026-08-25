@@ -352,7 +352,11 @@ public class Figure implements ImageObserver {
     }
 
     public void setMoveFeedbackLocation(Point moveFeedbackLocation) {
+        if(moveFeedbackLocation == null)
+            return;
+
         this.moveFeedbackLocation = moveFeedbackLocation;
+        translateToRelative(moveFeedbackLocation);
     }
 
     public int getInsertionIndex(Point location) {

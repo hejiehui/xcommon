@@ -495,7 +495,7 @@ public class EditorInteraction<T> implements CommandExecutor {
         }
 
         public Figure getFeedback() {
-            if (moved) {
+            if (moved && lastHoverLocation != null) {
                 lastHoverLocation.translate(delta.x, delta.y);
                 lastSelected.setMoveFeedbackLocation(lastHoverLocation);
             } else {
