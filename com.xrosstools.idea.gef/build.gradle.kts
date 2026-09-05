@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.xrosstools"
-version = "1.9.2"
+version = "1.9.3-SNAPSHOT"
 
 val sandbox  : String by project
 

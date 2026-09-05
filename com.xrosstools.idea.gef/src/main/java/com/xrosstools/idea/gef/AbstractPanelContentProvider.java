@@ -59,7 +59,7 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
     @Override
     public void postBuildRoot(){}
 
-    //TODO to be removed i future
+    //TODO to be removed in the future
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
     }

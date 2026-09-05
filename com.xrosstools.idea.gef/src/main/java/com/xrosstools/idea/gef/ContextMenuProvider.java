@@ -22,7 +22,7 @@ public abstract class ContextMenuProvider {
 
     public abstract JPopupMenu buildContextMenu(Object selected);
 
-    protected JPopupMenu buildDisplayMenu(Object selected) {
+    public JPopupMenu buildDisplayMenu(Object selected) {
         JPopupMenu menu = buildContextMenu(selected);
         attachExecutor(menu);
         return menu;

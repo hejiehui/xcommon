@@ -20,6 +20,9 @@ import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
+import com.xrosstools.idea.gef.control.EditorInteraction;
+import com.xrosstools.idea.gef.control.KeyEventData;
+import com.xrosstools.idea.gef.control.MouseEventData;
 import com.xrosstools.idea.gef.extensions.ExtensionManager;
 import com.xrosstools.idea.gef.extensions.ToolbarExtension;
 import com.xrosstools.idea.gef.figures.Connection;
@@ -84,7 +87,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         extension = ExtensionManager.createToolbarExtension(this);
 
         createVisual();
-        editorInteraction.registerListener(unitPanel);
+        registerListener();
         build();
     }
 
@@ -179,10 +182,10 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
             actionGroup.addSeparator();
         }
 
-        actionGroup.add(new UndoAction(this));
-        actionGroup.add(new RedoAction(this));
+        actionGroup.add(new UndoAction(editorInteraction));
+        actionGroup.add(new RedoAction(editorInteraction));
 
-        actionGroup.add(new SearchModelAction(this));
+        actionGroup.add(new SearchModelAction(editorInteraction));
         actionGroup.add(new ExportPngAction(this));
 
     }
@@ -237,6 +240,89 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
 
     public DefaultTreeModel getTreeModel() {
         return treeModel;
+    }
+
+    private void registerListener() {
+        unitPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                editorInteraction.mousePressed(toMouseEventData(e));
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                editorInteraction.mouseReleased(toMouseEventData(e));
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                editorInteraction.mouseClicked(toMouseEventData(e));
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                editorInteraction.mouseEntered(toMouseEventData(e));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                editorInteraction.mouseExited(toMouseEventData(e));
+            }
+        });
+
+        unitPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                editorInteraction.mouseMoved(toMouseEventData(e));
+            }
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                editorInteraction.mouseDragged(toMouseEventData(e));
+            }
+        });
+
+        unitPanel.addMouseWheelListener(e ->
+                editorInteraction.mouseWheelMoved(toMouseEventData(e))
+        );
+
+        unitPanel.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                editorInteraction.keyPressed(toKeyEventData(e));
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                editorInteraction.keyReleased(toKeyEventData(e));
+            }
+            @Override
+            public void keyTyped(KeyEvent e) {
+                editorInteraction.keyTyped(toKeyEventData(e));
+            }
+        });
+    }
+
+    // 转换工具方法
+    private MouseEventData toMouseEventData(MouseEvent e) {
+        MouseEventData data = new MouseEventData();
+        data.setId(e.getID());
+        data.setX(e.getX());
+        data.setY(e.getY());
+        data.setClickCount(e.getClickCount());
+        data.setButton(e.getButton());
+        data.setModifiersEx(e.getModifiersEx());
+        data.setPopupTrigger(e.isPopupTrigger());
+        data.setWhen(e.getWhen());
+        return data;
+    }
+    private MouseEventData toMouseEventData(MouseWheelEvent e) {
+        MouseEventData data = toMouseEventData((MouseEvent)e);
+        data.setId(MouseEventData.MOUSE_WHEEL);
+        return data;
+    }
+    private KeyEventData toKeyEventData(KeyEvent e) {
+        KeyEventData data = new KeyEventData();
+        data.setId(e.getID());
+        data.setKeyCode(e.getKeyCode());
+        data.setKeyChar(e.getKeyChar());
+        data.setModifiersEx(e.getModifiersEx());
+        data.setWhen(e.getWhen());
+        return data;
     }
 
     private void build() {

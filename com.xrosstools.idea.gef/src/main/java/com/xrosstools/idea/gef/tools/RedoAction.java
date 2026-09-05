@@ -5,27 +5,28 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.xrosstools.idea.gef.EditorPanel;
 import com.xrosstools.idea.gef.GefIcons;
+import com.xrosstools.idea.gef.control.EditorInteraction;
 import org.jetbrains.annotations.NotNull;
 
 public class RedoAction extends AnAction {
-    private EditorPanel editorPanel;
+    private EditorInteraction editorInteraction;
 
-    public RedoAction(EditorPanel editorPanel) {
+    public RedoAction(EditorInteraction editorInteraction) {
         super("Redo", "Redo", GefIcons.Redo);
-        this.editorPanel = editorPanel;
+        this.editorInteraction = editorInteraction;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-        editorPanel.redo();
+        editorInteraction.redo();
     }
 
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
         Presentation presentation = e.getPresentation();
-        presentation.setEnabled(editorPanel.getCommandStack().canRedo());
+        presentation.setEnabled(editorInteraction.getCommandStack().canRedo());
         if(presentation.isEnabled())
-            presentation.setText("Redo " + editorPanel.getCommandStack().getRedoCommandLabel());
+            presentation.setText("Redo " + editorInteraction.getCommandStack().getRedoCommandLabel());
     }
 }

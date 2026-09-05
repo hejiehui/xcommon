@@ -10,6 +10,7 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.xrosstools.idea.gef.EditorPanel;
 import com.xrosstools.idea.gef.GefIcons;
+import com.xrosstools.idea.gef.control.EditorInteraction;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
@@ -26,11 +27,11 @@ public class SearchModelAction extends AnAction {
     private static final String MESSAGE = "Text";
     private static final String NODE_SEPARATOR = "/";
 
-    private EditorPanel editorPanel;
+    private EditorInteraction editorInteraction;
 
-    public SearchModelAction(EditorPanel editorPanel) {
+    public SearchModelAction(EditorInteraction editorInteraction) {
         super(NAME, "Search in model", GefIcons.SEARCH);
-        this.editorPanel = editorPanel;
+        this.editorInteraction = editorInteraction;
     }
 
     @Override
@@ -50,7 +51,7 @@ public class SearchModelAction extends AnAction {
 
         List<Entry> found = new ArrayList<>();
         if(dialog.getExitCode() == 0) {
-            search(dialog.getInputString(), found, "", editorPanel.getTreeRoot());
+            search(dialog.getInputString(), found, "", editorInteraction.getTreeRoot());
             if(found.isEmpty())
                 Messages.showErrorDialog("No model found", "Error");
             else
@@ -128,7 +129,7 @@ public class SearchModelAction extends AnAction {
                 public void valueChanged(ListSelectionEvent e) {
                     if (!e.getValueIsAdjusting()) { // 确保只触发一次
                         Entry selected = list.getSelectedValue();
-                        editorPanel.selectModel(selected.model);
+                        editorInteraction.selectModel(selected.model);
                     }
                 }
             });
