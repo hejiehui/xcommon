@@ -121,6 +121,17 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
         return (AbstractGraphicalEditPart)findEditPart(getTargetConnections(), model);
     }
 
+
+    public final AbstractGraphicalEditPart findEditPart(String targetId) {
+        EditPart part = super.findEditPart(targetId);
+        if(part != null) return (AbstractGraphicalEditPart)part;
+
+        part = findEditPart(getSourceConnections(), targetId);
+        if(part != null) return (AbstractGraphicalEditPart)part;
+
+        return (AbstractGraphicalEditPart)findEditPart(getTargetConnections(), targetId);
+    }
+
     public Figure findFigure(Object model) {
         if(model != null && model == getModel())
             return getFigure();

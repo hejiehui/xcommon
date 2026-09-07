@@ -11,6 +11,7 @@ import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.parts.EditPolicy;
+import com.xrosstools.idea.gef.util.IPropertySource;
 
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,14 +21,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * 图形编辑器交互控制器，完全独立于 AWT/Swing，
  * 使用自定义事件数据对象与前端交互。
  */
-public class EditorInteraction<T> implements CommandExecutor, InteractionHandle {
+public class EditorInteraction<T extends IPropertySource> implements CommandExecutor, InteractionHandle {
     private AtomicReference<T> diagramRef = new AtomicReference<>();
     private ContextMenuProvider contextMenuBuilder;
 
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
 
-    private EditorFacade editorFacade;
+    private EditorFacade<T> editorFacade;
     private Point lastHit;
     private Figure lastSelected;
     private Figure lastHover;

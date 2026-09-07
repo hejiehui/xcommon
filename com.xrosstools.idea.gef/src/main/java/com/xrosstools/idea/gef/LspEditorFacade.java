@@ -25,6 +25,9 @@ import java.util.Map;
 public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<T> {
     public static final String PRE_PALETTE = "palette_";
     public static final String PRE_TOOL = "tool_";
+    public static final String ID = "id";
+    public static final String CATEGORY = "category";
+    public static final String VALUE = "value";
 
     private EditorInteraction<T> editorInteraction;
     private ContextMenuProvider outlineContextMenuProvider;
@@ -32,14 +35,17 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private PanelContentProvider<T> provider;
     private final String uri;
 
-    private Map<String, ActionListener> controls = new HashMap<>();
+    private Map<String, ActionListener> paletteItems = new HashMap<>();
+    private Map<String, AnAction> toolbarItems = new HashMap<>();
+    private Map<String, ActionListener> menuItems = new HashMap<>();
+
     // 暂存数据
     private Figure rootFigure;
     private Figure selectedFigure;
     private Object selectedModel;
     private Figure feedbackFigure;
     private String tooltipText;
-    private Object modelToSave;
+    private String modelToSave;
     private JPopupMenu popupMenu;
     private int popupX, popupY;
 
@@ -53,45 +59,50 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         editorInteraction.setModel(provider.convert(content));
         outlineContextMenuProvider = provider.getOutlineContextMenuProvider();
         outlineContextMenuProvider.setExecutor(editorInteraction);
-
-        registerListener();
-    }
-    private void registerListener() {
     }
 
-    public List<ControlItem> getPaletteItems() {
-        List<ControlItem> paletteItems = new ArrayList<>();
+    public JsonObject contentChanged(String content) {
+        try {
+            editorInteraction.setModel(provider.convert(content));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return getLastResponse();
+    }
+
+    public List<ControlItem> initPalette() {
+        List<ControlItem> palette = new ArrayList<>();
         JPanel palettePanel = new JPanel();
         provider.buildPalette(palettePanel);
         for(Component c: palettePanel.getComponents()){
             if(c instanceof JButton) {
                 JButton jb = (JButton) c;
                 String id = PRE_PALETTE + jb.getText();
-                paletteItems.add(new ControlItem(id, jb.getText(), jb.getToolTipText(), id));
-                controls.put(id, jb.getAction());
+                palette.add(new ControlItem(id, jb.getText(), jb.getToolTipText(), id));
+                paletteItems.put(id, jb.getAction());
             }
         }
-        return paletteItems;
+        return palette;
     }
 
-    public List<ControlItem> getToolbarItems() {
-        List<ControlItem> toolbarItems = new ArrayList<>();
+    public List<ControlItem> initToolbar() {
+        List<ControlItem> toolbar = new ArrayList<>();
 
         DefaultActionGroup actionGroup = (DefaultActionGroup) provider.createToolbar();
 
         AnAction[] actions = actionGroup.getChildActionsOrStubs();
 
         for (AnAction action : actions) {
-            toolbarItems.add(convert(action));
+            toolbar.add(convert(action));
         }
 
-        toolbarItems.add(convert(new UndoAction(editorInteraction)));
-        toolbarItems.add(convert(new RedoAction(editorInteraction)));
+        toolbar.add(convert(new UndoAction(editorInteraction)));
+        toolbar.add(convert(new RedoAction(editorInteraction)));
 
-        toolbarItems.add(convert(new SearchModelAction(editorInteraction)));
-//        toolbarItems.add(convert(new ExportPngAction(this)));
+        toolbar.add(convert(new SearchModelAction(editorInteraction)));
+//        toolbar.add(convert(new ExportPngAction(this)));
 
-        return toolbarItems;
+        return toolbar;
     }
 
     private ControlItem convert(AnAction action) {
@@ -101,13 +112,79 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         String id = PRE_TOOL + text;
         controlItem = new ControlItem(id, text, tooltipText, id);
 
-        controls.put(id, e -> action.actionPerformed(null));
+        toolbarItems.put(id, action);
         return controlItem;
     }
 
     public JsonObject execute(String command, JsonObject parameters) {
-        return null;
+        switch (command) {
+            case "selectModel":
+                return selectModel(parameters.get(ID).getAsString());
+            case "selectTreeNode":
+                return selectTreeNode(parameters.get(ID).getAsString());
+            case "selectPalette":
+                return selectPalette(parameters.get(ID).getAsString());
+            case "selectTool":
+                return selectTool(parameters.get(ID).getAsString());
+            case "selectContextMenu":
+                return selectContextMenu(parameters.get(ID).getAsString());
+            case "getTreeNodeContextMenu":
+                return  getTreeNodeContextMenu(parameters.get(ID).getAsString());
+            case "submitInputs":
+
+            case "updateProperty":
+                return updateProperty(
+                        parameters.get(CATEGORY).getAsString(),
+                        parameters.get(ID).getAsString(),
+                        parameters.get(VALUE).getAsString(),);
+            case "getXml":
+//                return getXml(params).thenApply(r -> r);
+            case "inputEvent":
+                return handleInputEvent("", parameters);
+            default:
+                throw new IllegalArgumentException("Unknown command: " + command);
+        }
     }
+
+    private JsonObject selectModel(String id) {
+        editorInteraction.getRoot().findEditPart(id);
+        // focus main window
+        return getLastResponse();
+    }
+
+    private JsonObject selectTreeNode(String id) {
+        editorInteraction.getRoot().findEditPart(id);
+        return getLastResponse();
+    }
+
+    private JsonObject selectPalette(String id) {
+        paletteItems.get(id).actionPerformed(null);
+        return getLastResponse();
+    }
+
+    private JsonObject selectTool(String id) {
+        toolbarItems.get(id).actionPerformed(null);
+        return getLastResponse();
+    }
+
+    private JsonObject selectContextMenu(String id) {
+        menuItems.get(id).actionPerformed(null);
+        return getLastResponse();
+    }
+
+    private JsonObject getTreeNodeContextMenu(String id) {
+        Object treePart = editorInteraction.getTreeRoot().findEditPart(id);
+        showContextMenu(-1, -1, outlineContextMenuProvider.buildContextMenu(treePart));
+
+        return getLastResponse();
+    }
+
+    private JsonObject updateProperty(String cat, String id, Object value) {
+        IPropertySource model = (IPropertySource) editorInteraction.getRoot().findEditPart(id).getModel();
+        model.setPropertyValue(cat, id, value);
+        return getLastResponse();
+    }
+
 
     @Override
     public synchronized void setToolTipText(String tooltip) {
@@ -188,11 +265,11 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     @Override
     public synchronized void save(T model) {
-        this.modelToSave = model;
-        // 这里可以立即保存，或延迟到 refreshVisual 后统一保存
-        // 根据您的需求，可以选择立即保存或暂存后统一处理
-        // 示例：立即保存（调用外部服务）
-        // saveModel(uri, model);
+        try {
+            modelToSave = provider.convert(model);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

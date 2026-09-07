@@ -12,12 +12,29 @@ public abstract class AbstractEditPart implements EditPart {
     private EditPartFactory factory;
     private EditPart parent;
     private Object model;
+    private String id;
     private EditContext editContext;
 
     //TODO fix the name
     abstract protected void addChildPartVisual(EditPart childEditPart, int index);
 
     abstract protected void removeChildVisual(EditPart childEditPart);
+
+    public EditPart findEditPart(String targetId) {
+        if (model == null || id == null) return null;
+
+        if (id.equals(targetId)) return this;
+    }
+
+    public static EditPart findEditPart(List parts, String targetId) {
+        for(Object oPart: parts) {
+            EditPart part = ((EditPart)oPart).findEditPart(targetId);
+            if(part != null)
+                return part;
+        }
+
+        return null;
+    }
 
     public EditPart findEditPart(Object model) {
         if(model == null)
@@ -65,12 +82,17 @@ public abstract class AbstractEditPart implements EditPart {
         return model;
     }
 
+    public String getId() {
+        return id;
+    }
+
     @Override
     public final void setModel(Object model) {
         if(this.model == model)
             return;
 
         this.model = model;
+        id = UUID.randomUUID().toString();
     }
 
     public List getModelChildren() {
