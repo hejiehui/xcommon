@@ -6,6 +6,7 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 import javax.swing.*;
 
 public interface EditorFacade<T extends IPropertySource> {
+    void register(ContentChangeListener listener);
     void setToolTipText(String tooltip);
     void updateRootFigure(Figure rootFigure);
 

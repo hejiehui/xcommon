@@ -11,6 +11,8 @@ public class EditContext {
 
     private AbstractTreeEditPart treeRootPart;
 
+    public EditContext() {}
+
     public EditContext(EditorPanel contentPane) {
         this.contentPane = contentPane;
     }

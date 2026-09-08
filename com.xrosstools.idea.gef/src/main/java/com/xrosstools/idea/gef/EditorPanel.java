@@ -58,7 +58,6 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
 
-    private ContextMenuProvider outlineContextMenuProvider;
     private ToolbarExtension extension;
 
     private DefaultTreeModel treeModel;
@@ -67,7 +66,6 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
 
     private Project project;
     private PanelContentProvider<T> contentProvider;
-    private List<ContentChangeListener<T>> listeners = new ArrayList<>();
 
     private AtomicBoolean saving = new AtomicBoolean(false);
 
@@ -78,11 +76,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
 
-        editorInteraction = new EditorInteraction<T>(this, contentProvider.getContextMenuProvider());
+        editorInteraction = new EditorInteraction<T>(this, contentProvider);
         editorInteraction.setModel(loadDiagram());
-
-        outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
-        outlineContextMenuProvider.setExecutor(editorInteraction);
 
         extension = ExtensionManager.createToolbarExtension(this);
 
@@ -326,18 +321,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     }
 
     private void build() {
-        contentChanged(getModel());
-
-        EditContext editContext = new EditContext(this);
-        EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
-        EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
-
-        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, getModel());
-        root.activate();
-        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, getModel());
-        treeRoot.activate();
-
-        editorInteraction.setRoots(root, treeRoot);
+        root = editorInteraction.getRoot();
+        treeRoot = editorInteraction.getTreeRoot();
 
         treeModel = new DefaultTreeModel(treeRoot.getTreeNode(), false);
         tableModel = createTableModel((IPropertySource) treeRoot.getModel());
@@ -369,7 +354,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
                     if (node == null)
                         return;
 
-                    outlineContextMenuProvider.buildDisplayMenu(node.getUserObject()).show(evt.getComponent(), evt.getX(), evt.getY());
+                    editorInteraction.getTreePopupMenu(node.getUserObject()).show(evt.getComponent(), evt.getX(), evt.getY());
                 }
             }
         });
@@ -465,12 +450,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     }
 
     public void register(ContentChangeListener listener) {
-        listeners.add(listener);
-    }
-
-    public void contentChanged(T content) {
-        for (ContentChangeListener<T> listener : listeners)
-            listener.contentChanged(content);
+        editorInteraction.register(listener);
     }
 
     public void save(T model) {

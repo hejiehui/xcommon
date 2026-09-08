@@ -1,19 +1,22 @@
 package com.xrosstools.idea.gef.control;
 
+import com.xrosstools.idea.gef.ContentChangeListener;
 import com.xrosstools.idea.gef.ContextMenuProvider;
 import com.xrosstools.idea.gef.EditorFacade;
+import com.xrosstools.idea.gef.PanelContentProvider;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Endpoint;
 import com.xrosstools.idea.gef.figures.Figure;
-import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
-import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
-import com.xrosstools.idea.gef.parts.EditPolicy;
+import com.xrosstools.idea.gef.parts.*;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
+import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,7 +26,11 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class EditorInteraction<T extends IPropertySource> implements CommandExecutor, InteractionHandle {
     private AtomicReference<T> diagramRef = new AtomicReference<>();
+    private List<ContentChangeListener<T>> listeners = new ArrayList<>();
+
+    private PanelContentProvider<T> contentProvider;
     private ContextMenuProvider contextMenuBuilder;
+    private ContextMenuProvider outlineContextMenuProvider;
 
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
@@ -54,10 +61,15 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     private final InteractionHandle targetEndpointSelectedHandle = new TargetEndpointSelectedHandle();
     private final InteractionHandle adjusterEndpointSelectedHandle = new AdjusterEndpointSelectedHandle();
 
-    public EditorInteraction(EditorFacade editorFacade, ContextMenuProvider contextMenuBuilder) {
+    public EditorInteraction(EditorFacade editorFacade, PanelContentProvider<T> contentProvider) {
         this.editorFacade = editorFacade;
-        this.contextMenuBuilder = contextMenuBuilder;
+        this.contentProvider = contentProvider;
+
+        contextMenuBuilder = contentProvider.getContextMenuProvider();
+        outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
+
         contextMenuBuilder.setExecutor(this);
+        outlineContextMenuProvider.setExecutor(this);
         curHandle = readyHandle;
     }
 
@@ -67,15 +79,37 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
     public void setModel(T model) {
         diagramRef.set(model);
+        contentChanged(getModel());
+
+        EditContext editContext = new EditContext();
+        EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
+        EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
+
+        AbstractGraphicalEditPart root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, model);
+        root.activate();
+
+        AbstractTreeEditPart treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, model);
+        treeRoot.activate();
+        /**
+         *         contentProvider.preBuildRoot();
+         *
+         *         root.refresh();
+         *         treeRoot.refresh();
+         *         contentProvider.postBuildRoot();
+         */
+    }
+
+    public void register(ContentChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    private void contentChanged(T content) {
+        for (ContentChangeListener<T> listener : listeners)
+            listener.contentChanged(content);
     }
 
     public CommandStack getCommandStack() {
         return commandStack;
-    }
-
-    public void setRoots(AbstractGraphicalEditPart root, AbstractTreeEditPart treeRoot) {
-        this.root = root;
-        this.treeRoot = treeRoot;
     }
 
     public AbstractGraphicalEditPart getRoot() {
@@ -123,6 +157,10 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     public void selectTreeModel(Object selectedModel) {
         if (inProcessing.get()) return;
         selectModel(selectedModel);
+    }
+
+    public JPopupMenu getTreePopupMenu(Object selected) {
+        return outlineContextMenuProvider.buildDisplayMenu(selected);
     }
 
     // ----- 命令执行 -----

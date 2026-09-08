@@ -1,12 +1,12 @@
 package com.xrosstools.idea.gef;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.actionSystem.*;
 import com.xrosstools.idea.gef.control.EditorInteraction;
 import com.xrosstools.idea.gef.control.KeyEventData;
 import com.xrosstools.idea.gef.control.MouseEventData;
 import com.xrosstools.idea.gef.figures.Figure;
-import com.xrosstools.idea.gef.tools.ExportPngAction;
 import com.xrosstools.idea.gef.tools.RedoAction;
 import com.xrosstools.idea.gef.tools.SearchModelAction;
 import com.xrosstools.idea.gef.tools.UndoAction;
@@ -14,7 +14,6 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,11 +27,14 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     public static final String ID = "id";
     public static final String CATEGORY = "category";
     public static final String VALUE = "value";
+    public static final String LABEL = "label";
+    public static final String TOOLTIP = "tooltip";
+
 
     private EditorInteraction<T> editorInteraction;
-    private ContextMenuProvider outlineContextMenuProvider;
 
     private PanelContentProvider<T> provider;
+
     private final String uri;
 
     private Map<String, ActionListener> paletteItems = new HashMap<>();
@@ -55,10 +57,12 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     public LspEditorFacade(String uri, String content, PanelContentProvider<T> provider) throws Exception {
         this.uri = uri;
         this.provider = provider;
-        editorInteraction = new EditorInteraction<T>(this, provider.getContextMenuProvider());
+        editorInteraction = new EditorInteraction<T>(this, provider));
         editorInteraction.setModel(provider.convert(content));
-        outlineContextMenuProvider = provider.getOutlineContextMenuProvider();
-        outlineContextMenuProvider.setExecutor(editorInteraction);
+    }
+
+    public void register(ContentChangeListener listener) {
+        editorInteraction.register(listener);
     }
 
     public JsonObject contentChanged(String content) {
@@ -174,7 +178,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private JsonObject getTreeNodeContextMenu(String id) {
         Object treePart = editorInteraction.getTreeRoot().findEditPart(id);
-        showContextMenu(-1, -1, outlineContextMenuProvider.buildContextMenu(treePart));
+        showContextMenu(-1, -1, editorInteraction.getTreePopupMenu(treePart));
 
         return getLastResponse();
     }
@@ -256,6 +260,11 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             response.addProperty("tooltip", tooltipText);
         }
 
+        // Context Menu
+        if(popupMenu != null) {
+            response.add("popupMenu", convertContextMenu("0", popupMenu));
+        }
+
         // 保存最后响应
         this.lastResponse = response;
 
@@ -277,7 +286,30 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         this.popupX = x;
         this.popupY = y;
         this.popupMenu = menu;
+        menuItems.clear();
         // 对于 LSP 后端，上下文菜单由前端实现，所以这里只记录位置，不实际显示
+    }
+
+    private JsonObject convertContextMenu(String id, MenuElement menuElement) {
+        JsonObject menuItem = new JsonObject();
+        menuItem.addProperty(ID, id);
+        if(menuElement.getSubElements().length > 0) {
+            menuItem.addProperty(LABEL, ((JMenu)menuElement).getText());
+            menuItem.addProperty(TOOLTIP, ((JMenu)menuElement).getToolTipText());
+            JsonArray subMenu = new JsonArray();
+            int i = 0;
+            for(MenuElement item: menuElement.getSubElements()){
+                subMenu.add(convertContextMenu(id + "-" + i++, item));
+            }
+            menuItem.add("submenu", subMenu);
+        }else {
+            if(menuElement instanceof JPopupMenu)
+                return menuItem;//TODO check this
+
+            if(((JMenuItem) menuElement).getActionListeners().length != 0)
+                menuItems.put(id, ((JMenuItem) menuElement).getActionListeners()[0]);
+        }
+        return menuItem;
     }
 
     /**
