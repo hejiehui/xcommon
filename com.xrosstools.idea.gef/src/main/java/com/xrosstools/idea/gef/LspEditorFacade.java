@@ -1,5 +1,6 @@
 package com.xrosstools.idea.gef;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.actionSystem.*;
@@ -7,9 +8,11 @@ import com.xrosstools.idea.gef.control.EditorInteraction;
 import com.xrosstools.idea.gef.control.KeyEventData;
 import com.xrosstools.idea.gef.control.MouseEventData;
 import com.xrosstools.idea.gef.figures.Figure;
+import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.tools.RedoAction;
 import com.xrosstools.idea.gef.tools.SearchModelAction;
 import com.xrosstools.idea.gef.tools.UndoAction;
+import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
@@ -22,8 +25,8 @@ import java.util.Map;
 
 // For client like VS Code, Eclipse, etc
 public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<T> {
-    public static final String PRE_PALETTE = "palette_";
-    public static final String PRE_TOOL = "tool_";
+    public static final String PALETTE = "palette";
+    public static final String TOOLBAR = "toolbar";
     public static final String ID = "id";
     public static final String CATEGORY = "category";
     public static final String VALUE = "value";
@@ -32,16 +35,18 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
 
     private EditorInteraction<T> editorInteraction;
-
     private PanelContentProvider<T> provider;
 
     private final String uri;
 
+    private static Gson gson = new Gson();
     private Map<String, ActionListener> paletteItems = new HashMap<>();
     private Map<String, AnAction> toolbarItems = new HashMap<>();
     private Map<String, ActionListener> menuItems = new HashMap<>();
 
     // 暂存数据
+    JsonArray paletteItemArray;
+    JsonArray toolbarItemArray;
     private Figure rootFigure;
     private Figure selectedFigure;
     private Object selectedModel;
@@ -57,8 +62,11 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     public LspEditorFacade(String uri, String content, PanelContentProvider<T> provider) throws Exception {
         this.uri = uri;
         this.provider = provider;
-        editorInteraction = new EditorInteraction<T>(this, provider));
+        editorInteraction = new EditorInteraction<T>(this, provider);
         editorInteraction.setModel(provider.convert(content));
+
+        initPalette();
+        initToolbar();
     }
 
     public void register(ContentChangeListener listener) {
@@ -74,22 +82,19 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return getLastResponse();
     }
 
-    public List<ControlItem> initPalette() {
+    public void initPalette() {
         List<ControlItem> palette = new ArrayList<>();
         JPanel palettePanel = new JPanel();
         provider.buildPalette(palettePanel);
         for(Component c: palettePanel.getComponents()){
-            if(c instanceof JButton) {
-                JButton jb = (JButton) c;
-                String id = PRE_PALETTE + jb.getText();
-                palette.add(new ControlItem(id, jb.getText(), jb.getToolTipText(), id));
-                paletteItems.put(id, jb.getAction());
-            }
+            if(c instanceof JButton)
+                palette.add(ControlItem.convert(paletteItems, (JButton)c));
         }
-        return palette;
+
+        paletteItemArray = gson.toJsonTree(palette).getAsJsonArray();
     }
 
-    public List<ControlItem> initToolbar() {
+    public void initToolbar() {
         List<ControlItem> toolbar = new ArrayList<>();
 
         DefaultActionGroup actionGroup = (DefaultActionGroup) provider.createToolbar();
@@ -97,27 +102,16 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         AnAction[] actions = actionGroup.getChildActionsOrStubs();
 
         for (AnAction action : actions) {
-            toolbar.add(convert(action));
+            toolbar.add(ControlItem.convert(toolbarItems, action));
         }
 
-        toolbar.add(convert(new UndoAction(editorInteraction)));
-        toolbar.add(convert(new RedoAction(editorInteraction)));
+        toolbar.add(ControlItem.convert(toolbarItems, new UndoAction(editorInteraction)));
+        toolbar.add(ControlItem.convert(toolbarItems, new RedoAction(editorInteraction)));
 
-        toolbar.add(convert(new SearchModelAction(editorInteraction)));
+        toolbar.add(ControlItem.convert(toolbarItems, new SearchModelAction(editorInteraction)));
 //        toolbar.add(convert(new ExportPngAction(this)));
 
-        return toolbar;
-    }
-
-    private ControlItem convert(AnAction action) {
-        ControlItem controlItem = null;
-        String text = action.getTemplatePresentation().getText();
-        String tooltipText = action.getTemplatePresentation().getDescription();
-        String id = PRE_TOOL + text;
-        controlItem = new ControlItem(id, text, tooltipText, id);
-
-        toolbarItems.put(id, action);
-        return controlItem;
+        toolbarItemArray = gson.toJsonTree(toolbar).getAsJsonArray();
     }
 
     public JsonObject execute(String command, JsonObject parameters) {
@@ -140,7 +134,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 return updateProperty(
                         parameters.get(CATEGORY).getAsString(),
                         parameters.get(ID).getAsString(),
-                        parameters.get(VALUE).getAsString(),);
+                        parameters.get(VALUE).getAsString());
             case "getXml":
 //                return getXml(params).thenApply(r -> r);
             case "inputEvent":
@@ -240,11 +234,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
         // 选中的业务模型（用于属性面板）
         if (selectedModel != null) {
-            // 如果 selectedModel 实现了 IPropertySource，可以提取属性
-            // 这里简化，只传类名
-            JsonObject modelInfo = new JsonObject();
-            modelInfo.addProperty("className", selectedModel.getClass().getName());
-            response.add("selectedModel", modelInfo);
+            response.add("selectedModel", gson.toJsonTree(PropertyItem.convert((IPropertySource)selectedModel)).getAsJsonArray());
         }
 
         // 反馈图形（如连接线预览）
@@ -260,8 +250,20 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             response.addProperty("tooltip", tooltipText);
         }
 
+        // Palette
+        if (paletteItemArray != null) {
+            response.add(PALETTE, paletteItemArray);
+            paletteItemArray = null;
+        }
+
+        // Toolbar
+        if (toolbarItemArray != null) {
+            response.add(TOOLBAR, toolbarItemArray);
+            toolbarItemArray = null;
+        }
+
         // Context Menu
-        if(popupMenu != null) {
+        if (popupMenu != null) {
             response.add("popupMenu", convertContextMenu("0", popupMenu));
         }
 
@@ -422,11 +424,27 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         String label;
         String tooltip;
         String icon;
-        ControlItem(String id, String label, String tooltip, String icon) {
-            this.id = id;
-            this.tooltip = tooltip;
-            this.label = label;
-            this.icon = icon;
+
+        public static ControlItem convert(Map<String, ActionListener> paletteItems, JButton jb) {
+            ControlItem controlItem = new ControlItem();
+            String id = jb.getText();
+            controlItem.id = id;
+            controlItem.tooltip = jb.getToolTipText();
+            controlItem.label = controlItem.id;
+            controlItem.icon = controlItem.id;
+            paletteItems.put(id, jb.getAction());
+            return controlItem;
+        }
+
+        public static ControlItem convert(Map<String, AnAction> toolbarItems, AnAction action) {
+            ControlItem controlItem = new ControlItem();
+            controlItem.id = action.getTemplatePresentation().getText();
+            controlItem.tooltip = action.getTemplatePresentation().getDescription();
+            controlItem.label = controlItem.id;
+            controlItem.icon = controlItem.id;
+
+            toolbarItems.put(controlItem.id, action);
+            return controlItem;
         }
     }
 
@@ -436,16 +454,21 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         String label;
         Object value;
         String[] options;
-        PropertyItem(String id, String label, Object value, String[] options) {
-            this(null, id, label, value, options);
-        }
 
-        PropertyItem(String category, String id, String label, Object value, String[] options) {
-            this.category = category;
-            this.id = id;
-            this.label = label;
-            this.value = value;
-            this.options = options;
+        public static List<PropertyItem> convert(IPropertySource propertySource) {
+            List<PropertyItem>  items = new ArrayList<>();
+            for(IPropertyDescriptor descriptor: propertySource.getPropertyDescriptors()) {
+                PropertyItem item = new PropertyItem();
+
+                item.category = descriptor.getCategory();
+                item.id = descriptor.getId().toString();
+                item.label = descriptor.getLabel();
+                item.value = propertySource.getPropertyValue(item.category, item.id);
+                //TODO optons
+                items.add(item);
+            }
+
+            return items;
         }
     }
 
@@ -460,6 +483,10 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             this.label = label;
             this.tooltip = tooltip;
             this.icon = icon;
+        }
+
+        public static TreeItem convert(AbstractTreeEditPart treeNode) {
+
         }
     }
 }
