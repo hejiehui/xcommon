@@ -223,6 +223,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             }
         }
 
+        // Tree outline
+        response.add("outlineModel", gson.toJsonTree(TreeItem.convert(editorInteraction.getTreeRoot())));
+
         // 选中的图形（可选）
         // TODO this is unnecessary
         if (selectedFigure != null) {
@@ -464,7 +467,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 item.id = descriptor.getId().toString();
                 item.label = descriptor.getLabel();
                 item.value = propertySource.getPropertyValue(item.category, item.id);
-                //TODO optons
+                //TODO options
                 items.add(item);
             }
 
@@ -475,18 +478,19 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     static class TreeItem {
         String id;
         String label;
-        String tooltip;
         String icon;
-        List<TreeItem> children;
-        TreeItem(String id, String label, String tooltip, String icon) {
-            this.id = id;
-            this.label = label;
-            this.tooltip = tooltip;
-            this.icon = icon;
-        }
+        List<TreeItem> children = new ArrayList<>();
 
         public static TreeItem convert(AbstractTreeEditPart treeNode) {
+            TreeItem item = new TreeItem();
+            item.id = treeNode.getId();
+            item.label = treeNode.getText();
+            item.icon = treeNode.getModel().getClass().getSimpleName();
 
+            for (Object child: treeNode.getChildren()) {
+                item.children.add(convert((AbstractTreeEditPart)child));
+            }
+            return item;
         }
     }
 }
