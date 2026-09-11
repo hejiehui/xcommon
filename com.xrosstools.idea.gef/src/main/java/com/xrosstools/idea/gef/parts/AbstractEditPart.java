@@ -12,7 +12,7 @@ public abstract class AbstractEditPart implements EditPart {
     private EditPartFactory factory;
     private EditPart parent;
     private Object model;
-    private String id;
+    private final String id = UUID.randomUUID().toString();
     private EditContext editContext;
 
     //TODO fix the name
@@ -21,9 +21,9 @@ public abstract class AbstractEditPart implements EditPart {
     abstract protected void removeChildVisual(EditPart childEditPart);
 
     public EditPart findEditPart(String targetId) {
-        if (model == null || id == null) return null;
+        if (model == null || id == null || !id.equals(targetId)) return null;
 
-        if (id.equals(targetId)) return this;
+        return this;
     }
 
     public static EditPart findEditPart(List parts, String targetId) {
@@ -92,7 +92,6 @@ public abstract class AbstractEditPart implements EditPart {
             return;
 
         this.model = model;
-        id = UUID.randomUUID().toString();
     }
 
     public List getModelChildren() {

@@ -11,8 +11,11 @@ import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class Figure implements ImageObserver {
+    private final String id = UUID.randomUUID().toString();
+
     public static final int SELECTION_GAP = 2;
     public static final Color SELECTION_LINE_COLOR = Color.lightGray;
 
@@ -54,6 +57,27 @@ public class Figure implements ImageObserver {
         this.rootPane = rootPane;
         for(Figure c: components)
             c.setRootPane(rootPane);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Figure findById(String targetId) {
+        if(id.equals(targetId)) return this;
+
+        for (Connection conn: connections) {
+            Figure found = conn.findById(targetId);
+            if(found != null)
+                return found;
+        }
+
+        for(Figure c: components) {
+            Figure found = c.findById(targetId);
+            if (found != null) return c;
+        }
+
+        return null;
     }
 
     public AbstractGraphicalEditPart getPart() {

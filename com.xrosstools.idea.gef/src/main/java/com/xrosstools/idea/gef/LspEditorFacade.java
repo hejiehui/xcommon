@@ -145,13 +145,15 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private JsonObject selectModel(String id) {
-        editorInteraction.getRoot().findEditPart(id);
+        Object model = editorInteraction.getRoot().findEditPart(id).getModel();
+        editorInteraction.selectModel(model);
         // focus main window
         return getLastResponse();
     }
 
     private JsonObject selectTreeNode(String id) {
-        editorInteraction.getRoot().findEditPart(id);
+        Object model = editorInteraction.getRoot().findEditPart(id).getModel();
+        editorInteraction.selectTreeModel(model);
         return getLastResponse();
     }
 
