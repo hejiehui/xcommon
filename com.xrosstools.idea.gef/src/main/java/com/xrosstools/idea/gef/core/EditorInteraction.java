@@ -1,9 +1,9 @@
-package com.xrosstools.idea.gef.control;
+package com.xrosstools.idea.gef.core;
 
 import com.xrosstools.idea.gef.ContentChangeListener;
 import com.xrosstools.idea.gef.ContextMenuProvider;
-import com.xrosstools.idea.gef.EditorFacade;
 import com.xrosstools.idea.gef.PanelContentProvider;
+import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
@@ -28,9 +28,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     private AtomicReference<T> diagramRef = new AtomicReference<>();
     private List<ContentChangeListener<T>> listeners = new ArrayList<>();
 
-    private PanelContentProvider<T> contentProvider;
-    private ContextMenuProvider contextMenuBuilder;
-    private ContextMenuProvider outlineContextMenuProvider;
+    private ContentProvider<T> contentProvider;
 
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
@@ -61,15 +59,10 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     private final InteractionHandle targetEndpointSelectedHandle = new TargetEndpointSelectedHandle();
     private final InteractionHandle adjusterEndpointSelectedHandle = new AdjusterEndpointSelectedHandle();
 
-    public EditorInteraction(EditorFacade editorFacade, PanelContentProvider<T> contentProvider) {
+    public EditorInteraction(EditorFacade editorFacade, ContentProvider<T> contentProvider) {
         this.editorFacade = editorFacade;
         this.contentProvider = contentProvider;
 
-        contextMenuBuilder = contentProvider.getContextMenuProvider();
-        outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
-
-        contextMenuBuilder.setExecutor(this);
-        outlineContextMenuProvider.setExecutor(this);
         curHandle = readyHandle;
     }
 
@@ -159,8 +152,8 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         selectModel(selectedModel);
     }
 
-    public JPopupMenu getTreePopupMenu(Object selected) {
-        return outlineContextMenuProvider.buildDisplayMenu(selected);
+    public Action[] getOutlineContextMenuItems(AbstractTreeEditPart selected) {
+        return contentProvider.getOutlineContextMenuItems(selected);
     }
 
     // ----- 命令执行 -----
@@ -307,8 +300,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
     private void showContextMenu(int x, int y) {
         if (lastSelected == null) return;
-        editorFacade.showContextMenu(x, y,
-                contextMenuBuilder.buildDisplayMenu(lastSelected.getPart()));
+        editorFacade.showContextMenu(x, y, contentProvider.getContextMenuItems(lastSelected.getPart()));
     }
 
     // ----- InteractionHandle 默认实现 (主控状态) -----

@@ -1,4 +1,4 @@
-package com.xrosstools.idea.gef.control;
+package com.xrosstools.idea.gef.core;
 
 /**
  * 跨平台鼠标事件数据，用于替代 AWT MouseEvent。

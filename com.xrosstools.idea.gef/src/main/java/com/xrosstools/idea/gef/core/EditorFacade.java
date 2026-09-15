@@ -1,9 +1,9 @@
-package com.xrosstools.idea.gef;
+package com.xrosstools.idea.gef.core;
 
+import com.xrosstools.idea.gef.ContentChangeListener;
+import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.util.IPropertySource;
-
-import javax.swing.*;
 
 public interface EditorFacade<T extends IPropertySource> {
     void register(ContentChangeListener listener);
@@ -20,5 +20,5 @@ public interface EditorFacade<T extends IPropertySource> {
 
     // Model is changed and needs save
     void save(T model);
-    void showContextMenu(int x, int y, JPopupMenu menu);
+    void showContextMenu(int x, int y, Action[] actions);
 }

@@ -22,11 +22,18 @@ public abstract class ContextMenuProvider {
 
     public abstract JPopupMenu buildContextMenu(Object selected);
 
+    private JPopupMenu lastMenu;
+
+    public JPopupMenu getLastMenu() {
+        return lastMenu;
+    }
+
     public JPopupMenu buildDisplayMenu(Object selected) {
         JPopupMenu menu = buildContextMenu(selected);
         attachExecutor(menu);
         return menu;
     }
+
     public ContextMenuProvider(){}
 
     @Deprecated

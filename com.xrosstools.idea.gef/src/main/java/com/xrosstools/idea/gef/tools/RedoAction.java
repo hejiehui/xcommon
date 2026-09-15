@@ -1,32 +1,30 @@
 package com.xrosstools.idea.gef.tools;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.Presentation;
-import com.xrosstools.idea.gef.EditorPanel;
 import com.xrosstools.idea.gef.GefIcons;
-import com.xrosstools.idea.gef.control.EditorInteraction;
-import org.jetbrains.annotations.NotNull;
+import com.xrosstools.idea.gef.actions.Action;
+import com.xrosstools.idea.gef.core.EditorInteraction;
 
-public class RedoAction extends AnAction {
+import java.awt.event.ActionEvent;
+
+public class RedoAction extends Action {
     private EditorInteraction editorInteraction;
 
     public RedoAction(EditorInteraction editorInteraction) {
-        super("Redo", "Redo", GefIcons.Redo);
+        setText("Redo");
+        setTooltip("Redo");
+        setIcon(GefIcons.Redo);
         this.editorInteraction = editorInteraction;
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+    public void actionPerformed(ActionEvent anActionEvent) {
         editorInteraction.redo();
     }
 
-    @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        Presentation presentation = e.getPresentation();
-        presentation.setEnabled(editorInteraction.getCommandStack().canRedo());
-        if(presentation.isEnabled())
-            presentation.setText("Redo " + editorInteraction.getCommandStack().getRedoCommandLabel());
+    public boolean calculateEnabled() {
+        boolean enabled = editorInteraction.getCommandStack().canRedo();
+        if(enabled)
+            setText("Redo " + editorInteraction.getCommandStack().getRedoCommandLabel());
+        return enabled;
     }
 }

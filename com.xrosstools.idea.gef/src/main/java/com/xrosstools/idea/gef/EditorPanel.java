@@ -16,18 +16,20 @@ import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
+import com.xrosstools.idea.gef.core.EditorFacade;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
-import com.xrosstools.idea.gef.control.EditorInteraction;
-import com.xrosstools.idea.gef.control.KeyEventData;
-import com.xrosstools.idea.gef.control.MouseEventData;
+import com.xrosstools.idea.gef.core.EditorInteraction;
+import com.xrosstools.idea.gef.core.KeyEventData;
+import com.xrosstools.idea.gef.core.MouseEventData;
 import com.xrosstools.idea.gef.extensions.ExtensionManager;
 import com.xrosstools.idea.gef.extensions.ToolbarExtension;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.*;
+import com.xrosstools.idea.gef.tools.AnActionAdapter;
 import com.xrosstools.idea.gef.tools.ExportPngAction;
 import com.xrosstools.idea.gef.tools.RedoAction;
 import com.xrosstools.idea.gef.tools.SearchModelAction;
@@ -42,9 +44,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EditorPanel<T extends IPropertySource> extends JPanel implements EditorFacade<T> {
@@ -58,6 +58,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
 
+    private ContextMenuProvider outlineContextMenuProvider;
     private ToolbarExtension extension;
 
     private DefaultTreeModel treeModel;
@@ -79,6 +80,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         editorInteraction = new EditorInteraction<T>(this, contentProvider);
         editorInteraction.setModel(loadDiagram());
 
+        outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
+        outlineContextMenuProvider.setExecutor(editorInteraction);
         extension = ExtensionManager.createToolbarExtension(this);
 
         createVisual();
@@ -177,12 +180,16 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
             actionGroup.addSeparator();
         }
 
-        actionGroup.add(new UndoAction(editorInteraction));
-        actionGroup.add(new RedoAction(editorInteraction));
+        actionGroup.add(adapt(new UndoAction(editorInteraction)));
+        actionGroup.add(adapt(new RedoAction(editorInteraction)));
 
         actionGroup.add(new SearchModelAction(editorInteraction));
         actionGroup.add(new ExportPngAction(this));
 
+    }
+
+    private AnActionAdapter adapt(Action action) {
+        return new AnActionAdapter(action.getText(), action.getTooltip(), action.getIcon(), action);
     }
 
     private JComponent createTree() {
@@ -354,7 +361,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
                     if (node == null)
                         return;
 
-                    editorInteraction.getTreePopupMenu(node.getUserObject()).show(evt.getComponent(), evt.getX(), evt.getY());
+                    outlineContextMenuProvider.buildDisplayMenu(node.getUserObject()).show(evt.getComponent(), evt.getX(), evt.getY());
                 }
             }
         });

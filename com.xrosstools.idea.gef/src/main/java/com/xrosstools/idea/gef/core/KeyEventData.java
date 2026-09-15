@@ -1,4 +1,4 @@
-package com.xrosstools.idea.gef.control;
+package com.xrosstools.idea.gef.core;
 
 /**
  * 跨平台键盘事件数据，用于替代 AWT KeyEvent。

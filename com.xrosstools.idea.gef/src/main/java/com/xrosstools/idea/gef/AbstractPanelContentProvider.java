@@ -1,11 +1,9 @@
 package com.xrosstools.idea.gef;
 
-import com.intellij.openapi.actionSystem.ActionGroup;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.actions.Action;
+import com.xrosstools.idea.gef.tools.AnActionAdapter;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -107,22 +105,8 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         return new AnActionAdapter(tooltip, tooltip, icon, attachExecutor(action));
     }
 
-    public static class AnActionAdapter extends AnAction {
-        private ActionListener listener;
-        public AnActionAdapter(@Nullable String text, @Nullable String description, @Nullable Icon icon, @Nullable ActionListener listener) {
-            super(text, description, icon);
-            this.listener = listener;
-        }
-
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-            //TODO in the future, we need to construct action event from anActionEvent.
-            listener.actionPerformed(null);
-        }
-
-        public ActionListener getListener() {
-            return listener;
-        }
+    public AnAction createToolbarAction(Action action) {
+        return new AnActionAdapter(action.getText(), action.getTooltip(), action.getIcon(), attachExecutor(action));
     }
 
     @Deprecated

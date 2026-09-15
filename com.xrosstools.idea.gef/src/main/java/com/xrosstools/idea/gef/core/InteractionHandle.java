@@ -1,4 +1,4 @@
-package com.xrosstools.idea.gef.control;
+package com.xrosstools.idea.gef.core;
 
 import com.xrosstools.idea.gef.figures.Figure;
 

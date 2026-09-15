@@ -3,13 +3,22 @@ package com.xrosstools.idea.gef.actions;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandListener;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 
 public abstract class Action implements ActionListener {
+    public static final Action SEPARATOR = new Action() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        }
+    };
+
     private String text;
+    private String tooltip;
     private boolean checked;
+    private Icon icon;
     private CommandExecutor executor;
 
     @Deprecated
@@ -39,7 +48,7 @@ public abstract class Action implements ActionListener {
         this.checked = checked;
     }
 
-    protected boolean calculateEnabled() {
+    public boolean calculateEnabled() {
         return true;
     }
 
@@ -52,5 +61,21 @@ public abstract class Action implements ActionListener {
         executor.execute(c);
     }
 
-    public abstract Command createCommand();
+    public Command createCommand() {return null;}
+
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    public void setTooltip(String tooltip) {
+        this.tooltip = tooltip;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
+    }
 }
