@@ -5,8 +5,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.tools.AnActionAdapter;
 import com.xrosstools.idea.gef.util.IPropertySource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -103,10 +101,6 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
 
     public AnAction createToolbarAction(ActionListener action, Icon icon, String tooltip) {
         return new AnActionAdapter(tooltip, tooltip, icon, attachExecutor(action));
-    }
-
-    public AnAction createToolbarAction(Action action) {
-        return new AnActionAdapter(action.getText(), action.getTooltip(), action.getIcon(), attachExecutor(action));
     }
 
     @Deprecated

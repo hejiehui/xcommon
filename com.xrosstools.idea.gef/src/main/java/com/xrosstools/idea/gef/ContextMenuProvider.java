@@ -1,13 +1,22 @@
 package com.xrosstools.idea.gef;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.actions.Action;
+import com.xrosstools.idea.gef.actions.ActionContainer;
 import com.xrosstools.idea.gef.actions.CommandAction;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
+import com.xrosstools.idea.gef.core.ContentProvider;
+import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
+import com.xrosstools.idea.gef.parts.EditPart;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+
+import static com.xrosstools.idea.gef.LspEditorFacade.IS_SEPARATOR;
+import static com.xrosstools.idea.gef.LspEditorFacade.TOOLTIP;
 
 public abstract class ContextMenuProvider {
     public static final ContextMenuProvider DEFAULT_PROVIDER = new ContextMenuProvider() {
@@ -15,6 +24,40 @@ public abstract class ContextMenuProvider {
             return new JPopupMenu();
         }
     };
+
+    public static class ContentProviderContextMenuProvider extends ContextMenuProvider {
+        private ContentProvider contentProvider;
+        private boolean isContextMenu;
+        public ContentProviderContextMenuProvider(ContentProvider contentProvider, boolean isContextMenu) {
+            this.contentProvider = contentProvider;
+            this.isContextMenu = isContextMenu;
+        }
+
+        public JPopupMenu buildContextMenu(Object selected) {
+            Action[] actions = isContextMenu ? contentProvider.getContextMenuItems((EditPart)  selected) : contentProvider.getOutlineContextMenuItems((AbstractTreeEditPart) selected);
+
+            return new JPopupMenu();
+        }
+
+        private JsonObject convertContextMenu(String id, Action action) {
+            JsonObject menuItem = new JsonObject();
+            menuItem.addProperty(ID, id);
+            if (action instanceof ActionContainer) {
+                menuItem.addProperty(LABEL, action.getText());
+                menuItem.addProperty(TOOLTIP, action.getTooltip());
+                JsonArray subMenu = new JsonArray();
+                int i = 0;
+                for(Action item: ((ActionContainer)action).getSubItems()){
+                    subMenu.add(convertContextMenu(id + "-" + i++, item));
+                }
+                menuItem.add("submenu", subMenu);
+            }else {
+                menuItem.addProperty(IS_SEPARATOR, action == Action.SEPARATOR);
+                menuItems.put(id, action);
+            }
+            return menuItem;
+        }
+    }
 
     private static final JMenuItem SEPARATOR = new JMenuItem();
 

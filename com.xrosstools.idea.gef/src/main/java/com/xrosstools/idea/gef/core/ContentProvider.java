@@ -8,7 +8,6 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 
 public interface ContentProvider<T extends IPropertySource> {
     T convert(String text) throws Exception;
-
     String convert(T diagram) throws Exception;
 
     Action[] getPaletteItems();
@@ -19,10 +18,4 @@ public interface ContentProvider<T extends IPropertySource> {
 
     Action[] getContextMenuItems(EditPart editPart);
     Action[] getOutlineContextMenuItems(AbstractTreeEditPart editPart);
-
-    void preBuildRoot();
-    void postBuildRoot();
-
-    void createConnection(Object connModel);
-    void createModel(Object model);
 }

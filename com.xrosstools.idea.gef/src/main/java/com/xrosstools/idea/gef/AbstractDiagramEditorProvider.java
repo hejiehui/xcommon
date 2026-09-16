@@ -7,6 +7,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xrosstools.idea.gef.core.ContentProvider;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +15,27 @@ public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> i
     public abstract FileType getFileType();
     public abstract String getExtention();
     public abstract String getEditorTypeId();
-    public abstract PanelContentProvider<T> createPanelContentProvider(@NotNull Project project, @NotNull VirtualFile virtualFile);
+
+    private Project project;
+    private VirtualFile virtualFile;
+
+    /**
+     * For backward compatible. The old version implements it to provide old version of PanelContentProvider.
+     * The new version will not implement it and will implement createPanelContentProvider instead.
+     * The default logic is to wrap ContentProvider into PanelContentProvider to work with EditPanel
+     */
+    @Deprecated
+    public PanelContentProvider<T> createPanelContentProvider(@NotNull Project project, @NotNull VirtualFile virtualFile) {
+        return null;
+    }
+
+    /**
+     * New subclass should override this method to provide ContentProvider.
+     * For old version, it will provide ContentProvider wrapper for PanelContentProvider to make it backward compatible
+     */
+    public ContentProvider<T> createContentProvider() {
+        return null;
+    }
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {
@@ -30,7 +51,19 @@ public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> i
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return new DiagramEditor(project, getEditorTypeId(), createPanelContentProvider(project, virtualFile));
+        this.project = project;
+        this.virtualFile = virtualFile;
+
+        PanelContentProvider<T> panelContentProvider = null;
+
+        ContentProvider contentProvider = createContentProvider();
+        if(contentProvider != null) {
+            panelContentProvider = new PanelContentProviderAdapter<T>(contentProvider);
+        } else
+            panelContentProvider = createPanelContentProvider(project, virtualFile);
+        if(contentProvider != null)
+
+        return new DiagramEditor(project, getEditorTypeId(), panelContentProvider);
     }
 
     @NotNull
@@ -38,4 +71,6 @@ public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> i
     public FileEditorPolicy getPolicy() {
         return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
     }
+
+
 }

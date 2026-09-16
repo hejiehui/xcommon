@@ -58,6 +58,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     private AbstractGraphicalEditPart root;
     private AbstractTreeEditPart treeRoot;
 
+    private ContextMenuProvider contextMenuBuilder;
     private ContextMenuProvider outlineContextMenuProvider;
     private ToolbarExtension extension;
 
@@ -77,8 +78,11 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         this.contentProvider = contentProvider;
         contentProvider.setEditorPanel(this);
 
-        editorInteraction = new EditorInteraction<T>(this, contentProvider);
+        editorInteraction = new EditorInteraction<T>(this, contentProvider.getContentProvider());
         editorInteraction.setModel(loadDiagram());
+
+        contextMenuBuilder = contentProvider.getContextMenuProvider();
+        contextMenuBuilder.setExecutor(editorInteraction);
 
         outlineContextMenuProvider = contentProvider.getOutlineContextMenuProvider();
         outlineContextMenuProvider.setExecutor(editorInteraction);
@@ -637,8 +641,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
             scrollBar.setValue(start - 100);
     }
 
-    public void showContextMenu(int x, int y, JPopupMenu menu) {
-        menu.show(unitPanel, x, y);
+    public void showContextMenu(int x, int y, Action[] actions) {
+        contextMenuBuilder.getLastMenu().show(unitPanel, x, y);
     }
 
     @Override

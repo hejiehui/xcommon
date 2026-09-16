@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.xrosstools.idea.gef.actions.Action;
+import com.xrosstools.idea.gef.actions.CommandExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,11 @@ public class AnActionAdapter extends AnAction {
     public AnActionAdapter(@Nullable String text, @Nullable String description, @Nullable Icon icon, @Nullable ActionListener listener) {
         super(text, description, icon);
         this.listener = listener;
+    }
+
+    public AnActionAdapter(Action action, CommandExecutor executor) {
+        super(action.getText(), action.getTooltip(), action.getIcon());
+        action.setExecutor(executor);
     }
 
     @Override
