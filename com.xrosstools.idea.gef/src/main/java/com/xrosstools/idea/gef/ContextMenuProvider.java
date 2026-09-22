@@ -35,27 +35,27 @@ public abstract class ContextMenuProvider {
 
         public JPopupMenu buildContextMenu(Object selected) {
             Action[] actions = isContextMenu ? contentProvider.getContextMenuItems((EditPart)  selected) : contentProvider.getOutlineContextMenuItems((AbstractTreeEditPart) selected);
-
-            return new JPopupMenu();
+            JPopupMenu menu = new JPopupMenu();
+            for (Action action : actions) {
+                if(action == Action.SEPARATOR)
+                    menu.addSeparator();
+                else if(action instanceof ActionContainer)
+                    menu.add(convertContextMenu((ActionContainer)action));
+                else
+                    menu.add(createItem(action));
+            }
+            return menu;
         }
 
-        private JsonObject convertContextMenu(String id, Action action) {
-            JsonObject menuItem = new JsonObject();
-            menuItem.addProperty(ID, id);
-            if (action instanceof ActionContainer) {
-                menuItem.addProperty(LABEL, action.getText());
-                menuItem.addProperty(TOOLTIP, action.getTooltip());
-                JsonArray subMenu = new JsonArray();
-                int i = 0;
-                for(Action item: ((ActionContainer)action).getSubItems()){
-                    subMenu.add(convertContextMenu(id + "-" + i++, item));
-                }
-                menuItem.add("submenu", subMenu);
-            }else {
-                menuItem.addProperty(IS_SEPARATOR, action == Action.SEPARATOR);
-                menuItems.put(id, action);
+        private JMenu convertContextMenu(ActionContainer actionContainer) {
+            JMenu menu = new JMenu(actionContainer.getText());
+            for (Action action : actionContainer.getSubItems()) {
+                if(action == Action.SEPARATOR)
+                    menu.addSeparator();
+                else
+                    menu.add(createItem(action));
             }
-            return menuItem;
+            return menu;
         }
     }
 

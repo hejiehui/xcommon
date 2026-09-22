@@ -6,6 +6,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class EditContext {
     private EditorPanel contentPane;
+    private DefaultTreeModel treeModel;
 
     private AbstractGraphicalEditPart rootPart;
 
@@ -32,7 +33,7 @@ public class EditContext {
     }
 
     public DefaultTreeModel getTreeModel() {
-        return contentPane.getTreeModel();
+        return treeModel;
     }
 
     public AbstractGraphicalEditPart findEditPart(Object model) {
@@ -41,5 +42,9 @@ public class EditContext {
 
     public AbstractTreeEditPart findTreeEditPart(Object model) {
         return (AbstractTreeEditPart)treeRootPart.findEditPart(model);
+    }
+
+    public void setTreeModel(DefaultTreeModel treeModel) {
+        this.treeModel = treeModel;
     }
 }

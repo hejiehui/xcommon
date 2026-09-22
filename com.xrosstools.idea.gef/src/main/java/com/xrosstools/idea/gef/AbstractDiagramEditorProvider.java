@@ -56,14 +56,13 @@ public abstract class AbstractDiagramEditorProvider<T extends IPropertySource> i
 
         PanelContentProvider<T> panelContentProvider = null;
 
-        ContentProvider contentProvider = createContentProvider();
+        ContentProvider<T> contentProvider = createContentProvider();
         if(contentProvider != null) {
-            panelContentProvider = new PanelContentProviderAdapter<T>(contentProvider);
+            panelContentProvider = new PanelContentProviderAdapter<T>(project, virtualFile, contentProvider);
         } else
             panelContentProvider = createPanelContentProvider(project, virtualFile);
-        if(contentProvider != null)
 
-        return new DiagramEditor(project, getEditorTypeId(), panelContentProvider);
+        return new DiagramEditor<T>(project, getEditorTypeId(), panelContentProvider);
     }
 
     @NotNull

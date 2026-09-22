@@ -1,12 +1,10 @@
 package com.xrosstools.idea.gef.core;
 
-import com.xrosstools.idea.gef.ContentChangeListener;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 public interface EditorFacade<T extends IPropertySource> {
-    void register(ContentChangeListener listener);
     void setToolTipText(String tooltip);
     void updateRootFigure(Figure rootFigure);
 

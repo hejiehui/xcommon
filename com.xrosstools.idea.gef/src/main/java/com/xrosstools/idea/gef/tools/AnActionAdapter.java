@@ -19,6 +19,7 @@ public class AnActionAdapter extends AnAction {
     }
 
     public AnActionAdapter(Action action, CommandExecutor executor) {
+        //TODO fix null
         super(action.getText(), action.getTooltip(), action.getIcon());
         action.setExecutor(executor);
     }

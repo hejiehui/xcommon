@@ -2,6 +2,7 @@ package com.xrosstools.idea.gef;
 
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.core.ContentProvider;
+import com.xrosstools.idea.gef.core.EditorInteraction;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.parts.EditPart;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
@@ -29,13 +30,13 @@ public class ContentProviderAdapter<T extends IPropertySource> implements Conten
     }
 
     @Override
-    public Action[] getPaletteItems() {
+    public Action[] getPaletteItems(EditorInteraction<T> editorInteraction) {
         // EditorInteraction will never use this
         return new Action[0];
     }
 
     @Override
-    public Action[] getToolbarItems() {
+    public Action[] getToolbarItems(EditorInteraction<T> editorInteraction) {
         // EditorInteraction will never use this
         return new Action[0];
     }

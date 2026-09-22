@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.ui.IconManager;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
@@ -193,7 +194,12 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     }
 
     private AnActionAdapter adapt(Action action) {
-        return new AnActionAdapter(action.getText(), action.getTooltip(), action.getIcon(), action);
+
+        return new AnActionAdapter(action.getText(), action.getTooltip(), GefIcons.getIcon(action.getIconId(), contentProvider.getClass()), action);
+    }
+
+    private Icon getIcon(String iconId) {
+        return IconManager.getInstance().getIcon("/icons/" + iconId + ".png", contentProvider.getClass());
     }
 
     private JComponent createTree() {
@@ -460,7 +466,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         }
     }
 
-    public void register(ContentChangeListener listener) {
+    public void register(ContentChangeListener<T> listener) {
         editorInteraction.register(listener);
     }
 
@@ -721,7 +727,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         return editorInteraction.getCommandStack();
     }
 
-    public CommandExecutor getCommandExecutor() {
+    public EditorInteraction<T> getEditorInteraction() {
         return editorInteraction;
     }
 }

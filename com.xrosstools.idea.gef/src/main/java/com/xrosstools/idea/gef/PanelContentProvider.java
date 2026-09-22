@@ -10,8 +10,8 @@ import javax.swing.*;
 
 public interface PanelContentProvider<T extends IPropertySource>{
     VirtualFile getFile();
-    void setEditorPanel(EditorPanel editorPanel);
-    EditorPanel getEditorPanel();
+    void setEditorPanel(EditorPanel<T> editorPanel);
+    EditorPanel<T> getEditorPanel();
 
     //Read from virtual file
     T getContent() throws Exception;

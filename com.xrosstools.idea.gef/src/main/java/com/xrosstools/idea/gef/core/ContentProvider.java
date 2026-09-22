@@ -10,8 +10,8 @@ public interface ContentProvider<T extends IPropertySource> {
     T convert(String text) throws Exception;
     String convert(T diagram) throws Exception;
 
-    Action[] getPaletteItems();
-    Action[] getToolbarItems();
+    Action[] getPaletteItems(EditorInteraction<T> editorInteraction);
+    Action[] getToolbarItems(EditorInteraction<T> editorInteraction);
 
     EditPartFactory createEditPartFactory();
     EditPartFactory createTreePartFactory();

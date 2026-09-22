@@ -14,7 +14,7 @@ import java.beans.PropertyChangeListener;
 
 public abstract class AbstractPanelContentProvider<T extends IPropertySource> implements PanelContentProvider<T>, PropertyChangeListener {
     private VirtualFile virtualFile;
-    private EditorPanel editorPanel;
+    private EditorPanel<T> editorPanel;
 
     public AbstractPanelContentProvider(VirtualFile virtualFile) {
         this.virtualFile = virtualFile;
@@ -30,12 +30,12 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
     }
 
     @Override
-    public void setEditorPanel(EditorPanel editorPanel) {
+    public void setEditorPanel(EditorPanel<T> editorPanel) {
         this.editorPanel = editorPanel;
     }
 
     @Override
-    public EditorPanel getEditorPanel() {
+    public EditorPanel<T> getEditorPanel() {
         return editorPanel;
     }
 
@@ -123,7 +123,7 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
 
     public ActionListener attachExecutor(ActionListener action) {
         if(action instanceof Action)
-            ((Action)action).setExecutor(editorPanel.getCommandExecutor());
+            ((Action)action).setExecutor(editorPanel.getEditorInteraction());
         return action;
     }
 }

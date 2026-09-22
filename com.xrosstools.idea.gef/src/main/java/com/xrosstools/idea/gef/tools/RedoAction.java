@@ -7,11 +7,13 @@ import com.xrosstools.idea.gef.core.EditorInteraction;
 import java.awt.event.ActionEvent;
 
 public class RedoAction extends Action {
+    public static final String REDO = "Redo";
     private EditorInteraction editorInteraction;
 
     public RedoAction(EditorInteraction editorInteraction) {
-        setText("Redo");
-        setTooltip("Redo");
+        setText(REDO);
+        setTooltip(REDO);
+        setIconId(REDO);
         setIcon(GefIcons.Redo);
         this.editorInteraction = editorInteraction;
     }
@@ -24,7 +26,7 @@ public class RedoAction extends Action {
     public boolean calculateEnabled() {
         boolean enabled = editorInteraction.getCommandStack().canRedo();
         if(enabled)
-            setText("Redo " + editorInteraction.getCommandStack().getRedoCommandLabel());
+            setText(REDO+ " " + editorInteraction.getCommandStack().getRedoCommandLabel());
         return enabled;
     }
 }

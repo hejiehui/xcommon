@@ -655,8 +655,9 @@ public class Figure implements ImageObserver {
         componentModel.addProperty("selected", isSelected());
         componentModel.addProperty("showSourceFeedback", showSourceFeedback);
         componentModel.addProperty("showTargetFeedback", showTargetFeedback);
-        componentModel.addProperty("foreground", foreground.getRGB());
-        componentModel.addProperty("background", background.getRGB());
+        componentModel.addProperty("foreground", (foreground == null ? Color.white.getRGB() : foreground.getRGB()));
+        if(background != null)
+            componentModel.addProperty("background", background.getRGB());
 
         //TODO implement later
 //        paintInsertionFeedback(graphics);

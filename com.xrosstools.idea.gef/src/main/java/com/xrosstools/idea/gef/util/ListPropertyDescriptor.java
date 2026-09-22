@@ -1,6 +1,6 @@
 package com.xrosstools.idea.gef.util;
 
-import com.intellij.openapi.ui.ComboBox;
+//import com.intellij.openapi.ui.ComboBox;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public class ListPropertyDescriptor extends PropertyDescriptor {
     private Supplier<Object[]> provider;
     private Object[] values;
-    private ComboBox ctrl = new ComboBox();
+    private JComboBox  ctrl = new JComboBox ();
 
     /**
      * For fixed options

@@ -9,7 +9,6 @@ import com.xrosstools.idea.gef.core.*;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.tools.RedoAction;
-import com.xrosstools.idea.gef.tools.SearchModelAction;
 import com.xrosstools.idea.gef.tools.UndoAction;
 import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
@@ -86,10 +85,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         editorInteraction.setModel(provider.convert(content));
     }
 
-    public void register(ContentChangeListener listener) {
-        editorInteraction.register(listener);
-    }
-
     public JsonObject contentChanged(String content) {
         try {
             editorInteraction.setModel(provider.convert(content));
@@ -101,7 +96,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     public JsonArray initPalette() {
         JsonArray palette = new JsonArray();
-        for(Action action: provider.getPaletteItems()){
+        for(Action action: provider.getPaletteItems(editorInteraction)){
             palette.add(convert(action));
             paletteItems.put(action.getText(), action);
         }
@@ -111,13 +106,13 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     public JsonArray initToolbar() {
         JsonArray toolbar = new JsonArray();
-        for(Action action: provider.getToolbarItems()){
+        for(Action action: provider.getToolbarItems(editorInteraction)){
             toolbar.add(convert(action));
             toolbarItems.put(action.getText(), action);
         }
 
-//        toolbar.add(ControlItem.convert(toolbarItems, new UndoAction(editorInteraction)));
-//        toolbar.add(ControlItem.convert(toolbarItems, new RedoAction(editorInteraction)));
+//        toolbarItems.add(UndoAction.UNDO, new UndoAction(editorInteraction)));
+//        toolbarItems.add(RedoAction.REDO, new RedoAction(editorInteraction)));
 //
 //        toolbar.add(ControlItem.convert(toolbarItems, new SearchModelAction(editorInteraction)));
 //        toolbar.add(convert(new ExportPngAction(this)));
@@ -126,6 +121,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     public synchronized JsonObject initialize() {
+        updateSelectedModel(editorInteraction.getModel());
+        updateRootFigure(editorInteraction.getRoot().getFigure());
+
         refreshVisual();
         JsonObject response = getLastResponse();
         if (response == null) {

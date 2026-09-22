@@ -14,6 +14,7 @@ import com.xrosstools.idea.gef.parts.*;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,11 +79,13 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
         EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
 
-        AbstractGraphicalEditPart root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, model);
+        root = (AbstractGraphicalEditPart) editPartFactory.createEditPart(editContext, null, model);
         root.activate();
 
-        AbstractTreeEditPart treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, model);
+        treeRoot = (AbstractTreeEditPart) treeEditPartFactory.createEditPart(editContext, null, model);
         treeRoot.activate();
+
+        editContext.setTreeModel(new DefaultTreeModel(treeRoot.getTreeNode(), false));
         /**
          *         contentProvider.preBuildRoot();
          *
@@ -90,9 +93,11 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
          *         treeRoot.refresh();
          *         contentProvider.postBuildRoot();
          */
+        root.refresh();
+        treeRoot.refresh();
     }
 
-    public void register(ContentChangeListener listener) {
+    public void register(ContentChangeListener<T> listener) {
         listeners.add(listener);
     }
 
