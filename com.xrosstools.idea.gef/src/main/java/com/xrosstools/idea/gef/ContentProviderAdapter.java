@@ -20,6 +20,12 @@ public class ContentProviderAdapter<T extends IPropertySource> implements Conten
     }
 
     @Override
+    public String[] getIconIds() {
+        // EditorInteraction will never use this
+        return new String[0];
+    }
+
+    @Override
     public T convert(String text) throws Exception {
         return contentProvider.convert(text);
     }

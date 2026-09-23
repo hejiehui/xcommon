@@ -7,6 +7,7 @@ import com.xrosstools.idea.gef.core.EditorInteraction;
 import java.awt.event.ActionEvent;
 
 public class UndoAction extends Action {
+    public static final String ID = "undo";
     public static final String UNDO = "Undo";
     private EditorInteraction editorInteraction;
 

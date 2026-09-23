@@ -7,6 +7,8 @@ import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 public interface ContentProvider<T extends IPropertySource> {
+    String[] getIconIds();
+
     T convert(String text) throws Exception;
     String convert(T diagram) throws Exception;
 

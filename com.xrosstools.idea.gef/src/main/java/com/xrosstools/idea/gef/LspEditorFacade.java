@@ -8,17 +8,19 @@ import com.xrosstools.idea.gef.actions.ActionContainer;
 import com.xrosstools.idea.gef.core.*;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
+import com.xrosstools.idea.gef.tools.ExportPngAction;
 import com.xrosstools.idea.gef.tools.RedoAction;
+import com.xrosstools.idea.gef.tools.SearchModelAction;
 import com.xrosstools.idea.gef.tools.UndoAction;
 import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 // For client like VS Code, Eclipse, etc
 public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<T> {
@@ -49,6 +51,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     public static final String VALUES = "values";
     public static final String LABEL = "label";
     public static final String TOOLTIP = "tooltip";
+    public static final String ICON_ID = "iconId";
     public static final String CHECKED = "checked";
     public static final String SUB_ITEMS = "subItems";
     public static final String IS_SEPARATOR = "isSeparator";
@@ -62,6 +65,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private Map<String, ActionListener> paletteItems = new HashMap<>();
     private Map<String, ActionListener> toolbarItems = new HashMap<>();
     private Map<String, ActionListener> menuItems = new HashMap<>();
+    private static final Map<String, String> iconDataCache = new HashMap<>();
 
     // 暂存数据
     JsonArray paletteItemArray;
@@ -133,8 +137,28 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
         response.add(PALETTE, initPalette());
         response.add(TOOLBAR, initToolbar());
+        response.add("icons", buildIconMap());
 
         return response;
+    }
+
+    /**
+     * 构建 iconId -> data URI 的映射。
+     */
+    private JsonObject buildIconMap() {
+        JsonObject icons = new JsonObject();
+
+        icons.addProperty(UndoAction.ID, loadIconAsDataUri(UndoAction.ID, this.getClass()));
+        icons.addProperty(RedoAction.ID, loadIconAsDataUri(RedoAction.ID, this.getClass()));
+        icons.addProperty(SearchModelAction.ID, loadIconAsDataUri(SearchModelAction.ID, this.getClass()));
+        icons.addProperty(ExportPngAction.ID, loadIconAsDataUri(ExportPngAction.ID, this.getClass()));
+
+        String[] iconIds = provider.getIconIds();
+        if (iconIds == null) return icons;
+        for (String iconId : iconIds) {
+            icons.addProperty(iconId, loadIconAsDataUri(iconId, provider.getClass()));
+        }
+        return icons;
     }
 
     public JsonObject execute(String command, JsonObject parameters) {
@@ -162,8 +186,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                         parameters.get(VALUE).getAsString());
             case GET_XML:
 //                return getXml(params).thenApply(r -> r);
+                return getLastResponse();
             case HANDLE_INPUT_EVENT:
-                return handleInputEvent(parameters.get("eventType").getAsString(), parameters);
+                return handleInputEvent(parameters.get("eventType").getAsString(), parameters.get("data").getAsJsonObject());
             default:
                 throw new IllegalArgumentException("Unknown command: " + command);
         }
@@ -456,6 +481,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         JsonObject e = new JsonObject();
         e.addProperty(ID, action.getText());
         e.addProperty(TOOLTIP, action.getTooltip());
+        e.addProperty(ICON_ID, action.getIconId());
 
         if(action instanceof ActionContainer) {
             JsonArray subItems = new JsonArray();
@@ -466,6 +492,32 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         }
 
         return e;
+    }
+
+    private String loadIconAsDataUri(String iconId, Class<?> clazz) {
+        if (iconDataCache.containsKey(iconId)) return iconDataCache.get(iconId);
+
+        String dataUri = null;
+        String path = "/icons/" + iconId + ".png";
+        try (InputStream is = clazz.getResourceAsStream(path)) {
+            byte[] bytes = readAllBytes(is);
+            dataUri = "data:image/png;base64," + Base64.getEncoder().encodeToString(bytes);
+        } catch (Exception e) {
+            System.err.println("=== icon load failed: " + path + " -> " + e.getMessage());
+        }
+
+        iconDataCache.put(iconId, dataUri);
+        return dataUri;
+    }
+
+    private static byte[] readAllBytes(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = is.read(buf)) != -1) {
+            baos.write(buf, 0, n);
+        }
+        return baos.toByteArray();
     }
 
     static class PropertyItem {

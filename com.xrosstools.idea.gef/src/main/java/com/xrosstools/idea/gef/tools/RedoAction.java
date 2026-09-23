@@ -7,6 +7,7 @@ import com.xrosstools.idea.gef.core.EditorInteraction;
 import java.awt.event.ActionEvent;
 
 public class RedoAction extends Action {
+    public static final String ID = "redo";
     public static final String REDO = "Redo";
     private EditorInteraction editorInteraction;
 

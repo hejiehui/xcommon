@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ExportPngAction extends AnAction {
+    public static final String ID = "export_png";
     public static final String NAME = "Export";
     private EditorPanel editorPanel;
 

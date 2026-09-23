@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchModelAction extends AnAction {
+    public static final String ID = "search";
     public static final String NAME = "Search";
     private static final String MESSAGE = "Text";
     private static final String NODE_SEPARATOR = "/";
