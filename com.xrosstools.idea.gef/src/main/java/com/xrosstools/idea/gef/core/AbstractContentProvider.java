@@ -12,7 +12,7 @@ public abstract class AbstractContentProvider<T extends IPropertySource> impleme
         Action createAction = new CreateConnectionAction(editorInteraction, connectionClass);
         createAction.setText(name);
         createAction.setTooltip("Create " + name);
-        createAction.setIconId(name);
+        createAction.setIconId(name.replace(" ", "_").toLowerCase());
         return createAction;
     }
 
@@ -20,7 +20,7 @@ public abstract class AbstractContentProvider<T extends IPropertySource> impleme
         Action createAction = new CreateModelAction(editorInteraction, modelClass);
         createAction.setText(name);
         createAction.setTooltip("Create " + name);
-        createAction.setIconId(name);
+        createAction.setIconId(name.replace(" ", "_").toLowerCase());
         return createAction;
     }
 

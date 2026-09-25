@@ -68,8 +68,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private static final Map<String, String> iconDataCache = new HashMap<>();
 
     // 暂存数据
-    JsonArray paletteItemArray;
-    JsonArray toolbarItemArray;
     private Figure rootFigure;
     private Figure selectedFigure;
     private Object selectedModel;
@@ -77,10 +75,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private String tooltipText;
     private String modelToSave;
     private Action[] popupMenu;
-    private int popupX, popupY;
-
-    // 响应数据（每次 refreshVisual 后更新）
-    private JsonObject lastResponse;
 
     public LspEditorFacade(String uri, String content, ContentProvider<T> provider) throws Exception {
         this.uri = uri;
@@ -110,14 +104,12 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     public JsonArray initToolbar() {
         JsonArray toolbar = new JsonArray();
-        for(Action action: provider.getToolbarItems(editorInteraction)){
-            toolbar.add(convert(action));
-            toolbarItems.put(action.getText(), action);
-        }
+        for(Action action: provider.getToolbarItems(editorInteraction))
+            toolbar.add(convert(toolbarItems, action));
 
-//        toolbarItems.add(UndoAction.UNDO, new UndoAction(editorInteraction)));
-//        toolbarItems.add(RedoAction.REDO, new RedoAction(editorInteraction)));
-//
+        toolbar.add(convert(new UndoAction(editorInteraction)));
+        toolbar.add(convert(new RedoAction(editorInteraction)));
+
 //        toolbar.add(ControlItem.convert(toolbarItems, new SearchModelAction(editorInteraction)));
 //        toolbar.add(convert(new ExportPngAction(this)));
 
@@ -128,7 +120,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         updateSelectedModel(editorInteraction.getModel());
         updateRootFigure(editorInteraction.getRoot().getFigure());
 
-        refreshVisual();
         JsonObject response = getLastResponse();
         if (response == null) {
             response = new JsonObject();
@@ -185,8 +176,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                         parameters.get(ID).getAsString(),
                         parameters.get(VALUE).getAsString());
             case GET_XML:
-//                return getXml(params).thenApply(r -> r);
-                return getLastResponse();
+                return getXml();
             case HANDLE_INPUT_EVENT:
                 return handleInputEvent(parameters.get("eventType").getAsString(), parameters.get("data").getAsJsonObject());
             default:
@@ -202,7 +192,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private JsonObject selectTreeNode(String id) {
-        Object model = editorInteraction.getRoot().findEditPart(id).getModel();
+        Object model = editorInteraction.getTreeRoot().findEditPart(id).getModel();
         editorInteraction.selectTreeModel(model);
         return getLastResponse();
     }
@@ -239,6 +229,10 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return getLastResponse();
     }
 
+    private JsonObject getXml() {
+        save(editorInteraction.getModel());
+        return getLastResponse();
+    }
 
     @Override
     public synchronized void setToolTipText(String tooltip) {
@@ -265,8 +259,11 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         this.feedbackFigure = feedbackFigure;
     }
 
-    @Override
     public synchronized void refreshVisual() {
+        // Do nothing for lsp facade
+    }
+
+    public synchronized JsonObject getLastResponse() {
         // 构建完整响应 JSON
         JsonObject response = new JsonObject();
         response.addProperty("uri", uri);
@@ -319,11 +316,10 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             response.addProperty("modelContent", modelToSave);
         }
 
-        // 保存最后响应
-        this.lastResponse = response;
-
         // 清空暂存（避免重复发送旧数据）
         clearCache();
+
+        return response;
     }
 
     @Override
@@ -337,8 +333,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     @Override
     public synchronized void showContextMenu(int x, int y, Action[] actions) {
-        this.popupX = x;
-        this.popupY = y;
         this.popupMenu = actions;
         menuItems.clear();
         // 对于 LSP 后端，上下文菜单由前端实现，所以这里只记录位置，不实际显示
@@ -370,14 +364,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             menuItems.put(id, action);
         }
         return menuItem;
-    }
-
-    /**
-     * 获取最后一次 refreshVisual 构建的完整响应。
-     * 调用后不会清除响应，可以多次获取。
-     */
-    public synchronized JsonObject getLastResponse() {
-        return lastResponse;
     }
 
     /**
@@ -477,6 +463,12 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         }
     }
 
+    private JsonObject convert(Map<String, ActionListener> actionMap, Action action) {
+        JsonObject jsonObject = convert(action);
+        actionMap.put(action.getText(), action);
+        return jsonObject;
+    }
+
     private JsonObject convert(Action action) {
         JsonObject e = new JsonObject();
         e.addProperty(ID, action.getText());
@@ -547,14 +539,14 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     static class TreeItem {
         String id;
         String label;
-        String icon;
+        String iconId;
         List<TreeItem> children = new ArrayList<>();
 
         public static TreeItem convert(AbstractTreeEditPart treeNode) {
             TreeItem item = new TreeItem();
             item.id = treeNode.getId();
             item.label = treeNode.getText();
-            item.icon = treeNode.getModel().getClass().getSimpleName();
+            item.iconId = treeNode.getIconId();
 
             for (Object child: treeNode.getChildren()) {
                 item.children.add(convert((AbstractTreeEditPart)child));

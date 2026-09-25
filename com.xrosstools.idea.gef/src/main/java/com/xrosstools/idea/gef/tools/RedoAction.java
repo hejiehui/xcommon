@@ -14,7 +14,7 @@ public class RedoAction extends Action {
     public RedoAction(EditorInteraction editorInteraction) {
         setText(REDO);
         setTooltip(REDO);
-        setIconId(REDO);
+        setIconId(ID);
         setIcon(GefIcons.Redo);
         this.editorInteraction = editorInteraction;
     }
