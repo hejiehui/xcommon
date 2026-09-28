@@ -391,6 +391,13 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         treeNavigator.expandPath(new TreePath(treeRoot.getTreeNode()));
     }
 
+    private Icon getImage(AbstractTreeEditPart treeEditPart) {
+        if(treeEditPart.getImage() != null)
+            return treeEditPart.getImage();
+
+        return contentProvider.getIconById(treeEditPart.getIconId());
+    }
+
     private boolean isRefreshAllowed() {
         if (editorInteraction.isInProcessing() || saving.get())
             return false;

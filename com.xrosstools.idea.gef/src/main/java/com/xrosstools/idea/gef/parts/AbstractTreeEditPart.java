@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractTreeEditPart extends AbstractEditPart {
+    private String iconId;
     private DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(this);
     private List<AbstractTreeEditPart> childEditParts = new ArrayList<>();
 
@@ -52,8 +53,6 @@ public abstract class AbstractTreeEditPart extends AbstractEditPart {
 
     public abstract Icon getImage();
 
-    public abstract getIconId();
-
     protected EditPart createOrFindPart(Object model) {
         EditPart childEditPart = getContext().findTreeEditPart(model);
         if(childEditPart != null)
@@ -61,5 +60,13 @@ public abstract class AbstractTreeEditPart extends AbstractEditPart {
 
         childEditPart = getEditPartFactory().createEditPart(getContext(), this, model);
         return childEditPart;
+    }
+
+    public void setIconId(String iconId) {
+        this.iconId = iconId;
+    }
+
+    public String getIconId() {
+        return iconId;
     }
 }

@@ -18,6 +18,12 @@ public class CollectionTreePart extends AbstractTreeEditPart {
         this.children = children;
     }
 
+    public CollectionTreePart(String category, String iconId, Collection children) {
+        setIconId(iconId);
+        this.text = category;
+        this.children = children;
+    }
+
     @Override
     public String getText() {
         return text;

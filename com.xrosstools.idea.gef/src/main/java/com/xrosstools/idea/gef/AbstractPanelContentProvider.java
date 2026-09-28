@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
 
 public abstract class AbstractPanelContentProvider<T extends IPropertySource> implements PanelContentProvider<T>, PropertyChangeListener {
     private VirtualFile virtualFile;
@@ -125,5 +126,14 @@ public abstract class AbstractPanelContentProvider<T extends IPropertySource> im
         if(action instanceof Action)
             ((Action)action).setExecutor(editorPanel.getEditorInteraction());
         return action;
+    }
+
+    private HashMap<String, Icon> iconMap = new HashMap<>();
+    public Icon getIconById(String id) {
+        if(iconMap.containsKey(id)) return iconMap.get(id);
+
+        Icon icon = GefIcons.getIcon(id, this.getClass());
+        iconMap.put(id, icon);
+        return icon;
     }
 }

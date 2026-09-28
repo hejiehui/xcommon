@@ -38,6 +38,7 @@ public interface PanelContentProvider<T extends IPropertySource>{
         return null;
     }
 
+    Icon getIconById(String id);
 
     /**
      * This is for backward compatible for old xross tools that does not provide ContentPovider
