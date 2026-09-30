@@ -305,6 +305,9 @@ public class Connection extends Figure {
     public JsonObject getComponentModel() {
         JsonObject result = new JsonObject();
 
+        Figure parent = getParent() == null ? sourcePart.getFigure() :getParent();
+        translateToRelative(parent, points);
+
         JsonArray pointsArray = new JsonArray();
         for (Point point : points.getInternalPoints()) {
             JsonObject obj = new JsonObject();
