@@ -72,6 +72,10 @@ public class Endpoint extends Figure {
         }
     }
 
+    public FigureType getFigureType() {
+        return FigureType.Endpoint;
+    }
+
     @Override
     public boolean isVisible() {
         return isSelectable() && getParentConnection().isSelected();

@@ -1,5 +1,7 @@
 package com.xrosstools.idea.gef.figures;
 
+import com.google.gson.JsonObject;
+
 import java.awt.*;
 
 public class RoundedRectangle extends Figure {
@@ -37,5 +39,18 @@ public class RoundedRectangle extends Figure {
         }
         graphics.drawRoundRect(getX(), getY(), getWidth(),getHeight(), arcWidth, arcHeight);
         graphics.setColor(oldColor);
+    }
+
+    public FigureType getFigureType() {
+        return FigureType.RoundedRectangle;
+    }
+
+    public JsonObject getComponentModel() {
+        JsonObject componentModel = super.getComponentModel();
+
+        componentModel.addProperty("arcWidth", arcWidth);
+        componentModel.addProperty("arcHeight", arcHeight);
+
+        return componentModel;
     }
 }

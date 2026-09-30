@@ -72,12 +72,15 @@ public class Text extends Figure {
         return new Dimension(width, height);
     }
 
+    public FigureType getFigureType() {
+        return FigureType.Text;
+    }
+
     public JsonObject getComponentModel() {
         JsonObject componentModel = super.getComponentModel();
 
         componentModel.addProperty("text", text);
 
         return componentModel;
-
     }
 }

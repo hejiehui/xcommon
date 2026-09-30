@@ -625,13 +625,17 @@ public class Figure implements ImageObserver {
         this.minSize = minSize;
     }
 
+    public FigureType getFigureType() {
+        return FigureType.Figure;
+    }
+
     public JsonObject getGraphicModel() {
         if(!isVisible())
             return null;
 
         layout();
         JsonObject componentModel = getComponentModel();
-        componentModel.addProperty("type", getClass().getSimpleName());
+        componentModel.addProperty("type", getFigureType().name());
 
         JsonArray nodesArray = new JsonArray();
         for (Figure node : getChildren()) {

@@ -42,11 +42,16 @@ public class ArrowDecoration extends RotatableDecoration {
         g2d.fill(poly);
     }
 
+    public FigureType getFigureType() {
+        return FigureType.ArrowDecoration;
+    }
+
     public JsonObject getComponentModel() {
         JsonObject componentModel = super.getComponentModel();
 
         componentModel.addProperty("aWidth", aWidth);
         componentModel.addProperty("aHeight", aHeight);
+        componentModel.addProperty("angle", getAngle());
 
         return componentModel;
     }

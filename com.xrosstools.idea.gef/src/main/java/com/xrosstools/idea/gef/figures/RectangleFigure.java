@@ -18,4 +18,8 @@ public class RectangleFigure extends Figure {
         graphics.drawRect(getX(), getY(), getWidth(),getHeight());
         graphics.setColor(oldColor);
     }
+
+    public FigureType getFigureType() {
+        return FigureType.RectangleFigure;
+    }
 }

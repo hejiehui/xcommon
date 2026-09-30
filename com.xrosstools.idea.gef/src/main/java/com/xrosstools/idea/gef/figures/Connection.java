@@ -297,6 +297,10 @@ public class Connection extends Figure {
             return getConnectionPart().getTargetFigure();
     }
 
+    public FigureType getFigureType() {
+        return FigureType.Connection;
+    }
+
     @Override
     public JsonObject getComponentModel() {
         JsonObject result = new JsonObject();
@@ -309,14 +313,6 @@ public class Connection extends Figure {
             pointsArray.add(obj);
         }
         result.add("points", pointsArray);
-
-        JsonArray nodesArray = new JsonArray();
-        for (Figure node : getChildren()) {
-            JsonObject obj = node.getGraphicModel();
-            nodesArray.add(obj);
-        }
-        result.add("children", nodesArray);
-
 
         return result;
     }

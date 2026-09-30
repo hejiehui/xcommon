@@ -37,4 +37,8 @@ public class Rhombus extends Figure {
         graphics.drawPolygon(xPoints, yPoints, 4);
         graphics.setColor(oldColor);
     }
+
+    public FigureType getFigureType() {
+        return FigureType.Rhombus;
+    }
 }
