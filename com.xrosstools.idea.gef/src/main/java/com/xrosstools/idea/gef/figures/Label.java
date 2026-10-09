@@ -44,6 +44,14 @@ public class Label extends Figure {
         icon.setSource(iconSrc);
     }
 
+    public void setIconId(String iconId) {
+        if (icon == null) {
+            icon = new IconFigure();
+            add(icon);
+        }
+        icon.setIconId(iconId);
+    }
+
     public void setLabelAlignment(int position){
         //TODO
     }

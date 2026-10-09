@@ -41,7 +41,7 @@ public class IconFigure extends Figure {
     @Override
     public Dimension getPreferredSize() {
         return  image == null ?
-            new Dimension(getMarginWidth(), getMarginHeight()) :
+            new Dimension(getMarginWidth() + 16, getMarginHeight() + 16) :
             new Dimension(image.getIconWidth() + getMarginWidth(), image.getIconHeight() + getMarginHeight());
     }
 
