@@ -16,11 +16,13 @@ import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.List;
 
 // For client like VS Code, Eclipse, etc
 public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<T> {
@@ -270,6 +272,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
         // 根图形（完整图形树）
         if (rootFigure != null) {
+            Dimension size = rootFigure.getPreferredSize();
+            rootFigure.setSize(size);
+            size.height += 100;
             JsonObject graphicModel = rootFigure.getGraphicModel();
             if (graphicModel != null) {
                 response.add("graphicModel", graphicModel);
