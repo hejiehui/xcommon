@@ -19,7 +19,6 @@ public abstract class Action implements ActionListener {
     private String tooltip;
     private boolean checked;
     private Icon icon;
-    private String iconId;
     private CommandExecutor executor;
 
     @Deprecated
@@ -70,14 +69,6 @@ public abstract class Action implements ActionListener {
 
     public void setTooltip(String tooltip) {
         this.tooltip = tooltip;
-    }
-
-    public String getIconId() {
-        return iconId;
-    }
-
-    public void setIconId(String iconId) {
-        this.iconId = iconId;
     }
 
     public Icon getIcon() {

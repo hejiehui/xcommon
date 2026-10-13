@@ -2,10 +2,15 @@ package com.xrosstools.idea.gef.parts;
 
 import com.xrosstools.idea.gef.EditorPanel;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
+import java.util.Map;
 
 public class EditContext {
     private EditorPanel contentPane;
+
+    private Map<Icon, String> iconMap;
+
     private DefaultTreeModel treeModel;
 
     private AbstractGraphicalEditPart rootPart;
@@ -46,5 +51,14 @@ public class EditContext {
 
     public void setTreeModel(DefaultTreeModel treeModel) {
         this.treeModel = treeModel;
+    }
+
+
+    public String getIconId(Icon icon) {
+        return iconMap.get(icon);
+    }
+
+    public void setIconMap(Map<Icon, String> iconMap) {
+        this.iconMap = iconMap;
     }
 }

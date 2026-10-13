@@ -7,7 +7,6 @@ import java.awt.*;
 
 public class IconFigure extends Figure {
     private Icon image;
-    private String iconId;
 
     public IconFigure() {
         setSource(null);
@@ -34,10 +33,6 @@ public class IconFigure extends Figure {
         }
     }
 
-    public void setIconId(String iconId) {
-        this.iconId = iconId;
-    }
-
     @Override
     public Dimension getPreferredSize() {
         return  image == null ?
@@ -52,7 +47,12 @@ public class IconFigure extends Figure {
     public JsonObject getComponentModel() {
         JsonObject componentModel = super.getComponentModel();
 
-        componentModel.addProperty("iconId", iconId);
+        Figure fiure = this;
+        while(fiure.getPart() == null){
+            fiure = fiure.getParent();
+        }
+
+        componentModel.addProperty("iconId", fiure.getPart().getContext().getIconId(image));
 
         return componentModel;
     }

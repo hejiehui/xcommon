@@ -8,6 +8,9 @@ import com.xrosstools.idea.gef.parts.EditPart;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
+import javax.swing.*;
+import java.util.Map;
+
 /**
  * This is for EditorPanel to work with EditorInteraction
  * @param <T>
@@ -20,9 +23,9 @@ public class ContentProviderAdapter<T extends IPropertySource> implements Conten
     }
 
     @Override
-    public String[] getIconIds() {
+    public Map<Icon, String> getIconMap() {
         // EditorInteraction will never use this
-        return new String[0];
+        return Map.of();
     }
 
     @Override

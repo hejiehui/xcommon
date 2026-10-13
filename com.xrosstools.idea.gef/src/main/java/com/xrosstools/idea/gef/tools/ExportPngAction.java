@@ -27,7 +27,7 @@ public class ExportPngAction extends AnAction {
     private EditorPanel editorPanel;
 
     public ExportPngAction(EditorPanel editorPanel) {
-        super(NAME, "Export diagram to PNG file", GefIcons.EXPORT_PDF);
+        super(NAME, "Export diagram to PNG file", GefIcons.EXPORT_PNG);
         this.editorPanel = editorPanel;
     }
 

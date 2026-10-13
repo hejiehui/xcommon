@@ -6,8 +6,11 @@ import com.xrosstools.idea.gef.parts.EditPart;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
+import javax.swing.*;
+import java.util.Map;
+
 public interface ContentProvider<T extends IPropertySource> {
-    String[] getIconIds();
+    Map<Icon, String> getIconMap();
 
     T convert(String text) throws Exception;
     String convert(T diagram) throws Exception;

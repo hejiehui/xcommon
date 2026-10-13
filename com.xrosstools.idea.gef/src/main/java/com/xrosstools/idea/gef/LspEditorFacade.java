@@ -67,7 +67,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private Map<String, ActionListener> paletteItems = new HashMap<>();
     private Map<String, ActionListener> toolbarItems = new HashMap<>();
     private Map<String, ActionListener> menuItems = new HashMap<>();
-    private static final Map<String, String> iconDataCache = new HashMap<>();
+
+    private Map<Icon, String> iconMap;
+    private Map<String, String> iconDataCache = new HashMap<>();
 
     // 暂存数据
     private Figure rootFigure;
@@ -81,7 +83,8 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     public LspEditorFacade(String uri, String content, ContentProvider<T> provider) throws Exception {
         this.uri = uri;
         this.provider = provider;
-        editorInteraction = new EditorInteraction<T>(this, provider);
+        iconMap = initIconMap();
+        editorInteraction = new EditorInteraction<T>(this, provider, iconMap);
         editorInteraction.setModel(provider.convert(content));
     }
 
@@ -92,6 +95,29 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             throw new RuntimeException(e);
         }
         return getLastResponse();
+    }
+
+    private Map<Icon, String> initIconMap() {
+        Map<Icon, String> iconMap = getDefaultIconMap();
+
+        loadIconAsDataUri(UndoAction.ID, this.getClass());
+        loadIconAsDataUri(RedoAction.ID, this.getClass());
+        loadIconAsDataUri(SearchModelAction.ID, this.getClass());
+        loadIconAsDataUri(ExportPngAction.ID, this.getClass());
+
+        for (String iconId : iconMap.values()) {
+            loadIconAsDataUri(iconId, getClass());
+        }
+
+        Map<Icon, String> additionalIconMap = provider.getIconMap();
+        if (additionalIconMap.isEmpty()) return iconMap;
+
+        for (String iconId : additionalIconMap.values()) {
+            loadIconAsDataUri(iconId, provider.getClass());
+        }
+
+        iconMap.putAll(additionalIconMap);
+        return iconMap;
     }
 
     public JsonArray initPalette() {
@@ -141,17 +167,22 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private JsonObject buildIconMap() {
         JsonObject icons = new JsonObject();
 
-        icons.addProperty(UndoAction.ID, loadIconAsDataUri(UndoAction.ID, this.getClass()));
-        icons.addProperty(RedoAction.ID, loadIconAsDataUri(RedoAction.ID, this.getClass()));
-        icons.addProperty(SearchModelAction.ID, loadIconAsDataUri(SearchModelAction.ID, this.getClass()));
-        icons.addProperty(ExportPngAction.ID, loadIconAsDataUri(ExportPngAction.ID, this.getClass()));
-
-        String[] iconIds = provider.getIconIds();
-        if (iconIds == null) return icons;
-        for (String iconId : iconIds) {
-            icons.addProperty(iconId, loadIconAsDataUri(iconId, provider.getClass()));
+        for (String iconId : iconMap.values()) {
+            icons.addProperty(iconId, iconDataCache.get(iconId));
         }
+
         return icons;
+    }
+
+    private Map<Icon, String> getDefaultIconMap() {
+        Map<Icon, String> iconMap =new HashMap<>();
+
+        iconMap.put(GefIcons.Undo, UndoAction.ID);
+        iconMap.put(GefIcons.Redo, RedoAction.ID);
+        iconMap.put(GefIcons.SEARCH, SearchModelAction.ID);
+        iconMap.put(GefIcons.EXPORT_PNG, ExportPngAction.ID);
+
+        return iconMap;
     }
 
     public JsonObject execute(String command, JsonObject parameters) {
@@ -282,7 +313,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         }
 
         // Tree outline
-        response.add("outlineModel", gson.toJsonTree(TreeItem.convert(editorInteraction.getTreeRoot())));
+        response.add("outlineModel", gson.toJsonTree(convert(editorInteraction.getTreeRoot())));
 
         // 选中的图形（可选）
         // TODO this is unnecessary
@@ -478,7 +509,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         JsonObject e = new JsonObject();
         e.addProperty(ID, action.getText());
         e.addProperty(TOOLTIP, action.getTooltip());
-        e.addProperty(ICON_ID, action.getIconId());
+        e.addProperty(ICON_ID, iconMap.get(action.getIcon()));
 
         if(action instanceof ActionContainer) {
             JsonArray subItems = new JsonArray();
@@ -491,8 +522,8 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return e;
     }
 
-    private String loadIconAsDataUri(String iconId, Class<?> clazz) {
-        if (iconDataCache.containsKey(iconId)) return iconDataCache.get(iconId);
+    private void loadIconAsDataUri(String iconId, Class<?> clazz) {
+        if (iconDataCache.containsKey(iconId)) return;
 
         String dataUri = null;
         String path = "/icons/" + iconId + ".png";
@@ -504,7 +535,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         }
 
         iconDataCache.put(iconId, dataUri);
-        return dataUri;
     }
 
     private static byte[] readAllBytes(InputStream is) throws IOException {
@@ -546,17 +576,18 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         String label;
         String iconId;
         List<TreeItem> children = new ArrayList<>();
-
-        public static TreeItem convert(AbstractTreeEditPart treeNode) {
-            TreeItem item = new TreeItem();
-            item.id = treeNode.getId();
-            item.label = treeNode.getText();
-            item.iconId = treeNode.getIconId();
-
-            for (Object child: treeNode.getChildren()) {
-                item.children.add(convert((AbstractTreeEditPart)child));
-            }
-            return item;
-        }
     }
+
+    private TreeItem convert(AbstractTreeEditPart treeNode) {
+        TreeItem item = new TreeItem();
+        item.id = treeNode.getId();
+        item.label = treeNode.getText();
+        item.iconId = iconMap.get(treeNode.getImage());
+
+        for (Object child: treeNode.getChildren()) {
+            item.children.add(convert((AbstractTreeEditPart)child));
+        }
+        return item;
+    }
+
 }

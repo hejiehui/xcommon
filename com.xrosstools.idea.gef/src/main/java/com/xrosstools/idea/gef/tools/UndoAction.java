@@ -14,7 +14,6 @@ public class UndoAction extends Action {
     public UndoAction(EditorInteraction editorInteraction) {
         setText(UNDO);
         setTooltip(UNDO);
-        setIconId(ID);
         setIcon(GefIcons.Undo);
         this.editorInteraction = editorInteraction;
     }

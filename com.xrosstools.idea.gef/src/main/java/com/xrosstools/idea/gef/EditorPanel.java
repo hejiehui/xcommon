@@ -194,8 +194,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
     }
 
     private AnActionAdapter adapt(Action action) {
-
-        return new AnActionAdapter(action.getText(), action.getTooltip(), GefIcons.getIcon(action.getIconId(), contentProvider.getClass()), action);
+        return new AnActionAdapter(action.getText(), action.getTooltip(), action.getIcon(), action);
     }
 
     private Icon getIcon(String iconId) {
@@ -389,13 +388,6 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         });
 
         treeNavigator.expandPath(new TreePath(treeRoot.getTreeNode()));
-    }
-
-    private Icon getImage(AbstractTreeEditPart treeEditPart) {
-        if(treeEditPart.getImage() != null)
-            return treeEditPart.getImage();
-
-        return contentProvider.getIconById(treeEditPart.getIconId());
     }
 
     private boolean isRefreshAllowed() {

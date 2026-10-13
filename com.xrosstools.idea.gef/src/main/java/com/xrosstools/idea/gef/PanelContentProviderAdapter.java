@@ -44,7 +44,7 @@ public class PanelContentProviderAdapter<T extends IPropertySource> extends Abst
     @Override
     public void buildPalette(JPanel palette) {
         for (Action action : contentProvider.getPaletteItems(getEditorPanel().getEditorInteraction())) {
-            palette.add(createPaletteButton(action, GefIcons.getIcon(action.getIconId(), contentProvider.getClass()), action.getTooltip()));
+            palette.add(createPaletteButton(action, action.getIcon(), action.getTooltip()));
         }
     }
 
@@ -56,7 +56,7 @@ public class PanelContentProviderAdapter<T extends IPropertySource> extends Abst
                 actionGroup.addSeparator();
             }
 
-            actionGroup.add(createToolbarAction(action, GefIcons.getIcon(action.getIconId(), contentProvider.getClass()), action.getTooltip()));
+            actionGroup.add(createToolbarAction(action, action.getIcon(), action.getTooltip()));
         }
         return actionGroup;
     }

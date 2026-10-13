@@ -18,6 +18,7 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,6 +30,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     private AtomicReference<T> diagramRef = new AtomicReference<>();
     private List<ContentChangeListener<T>> listeners = new ArrayList<>();
 
+    private Map<Icon, String> iconMap;
     private ContentProvider<T> contentProvider;
 
     private AbstractGraphicalEditPart root;
@@ -67,6 +69,11 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         curHandle = readyHandle;
     }
 
+    public EditorInteraction(EditorFacade editorFacade, ContentProvider<T> contentProvider, Map<Icon, String> iconMap) {
+        this(editorFacade, contentProvider);
+        this.iconMap = iconMap;
+    }
+
     public T getModel() {
         return diagramRef.get();
     }
@@ -76,6 +83,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         contentChanged(getModel());
 
         EditContext editContext = new EditContext();
+        editContext.setIconMap(iconMap);
         EditPartFactory editPartFactory = contentProvider.createEditPartFactory();
         EditPartFactory treeEditPartFactory = contentProvider.createTreePartFactory();
 

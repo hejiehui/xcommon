@@ -20,7 +20,4 @@ public class PropertyEntryTreePart extends AbstractTreeEditPart {
     public PropertyEntryTreePart(Icon icon) {
         this.icon = icon;
     }
-    public PropertyEntryTreePart(String iconId) {
-        setIconId(iconId);
-    }
 }
