@@ -562,7 +562,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 item.category = descriptor.getCategory();
                 item.id = descriptor.getId().toString();
                 item.label = descriptor.getLabel();
-                item.value = propertySource.getPropertyValue(item.category, item.id);
+                item.value = item.category == null ? propertySource.getPropertyValue(item.id) : propertySource.getPropertyValue(item.category, item.id);
                 //TODO options
                 items.add(item);
             }
