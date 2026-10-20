@@ -333,6 +333,15 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         data.setKeyChar(e.getKeyChar());
         data.setModifiersEx(e.getModifiersEx());
         data.setWhen(e.getWhen());
+
+        switch (data.getKeyCode()) {
+            case KeyEvent.VK_UP: data.setKey(KeyEventData.KEY_UP); break;
+            case KeyEvent.VK_DOWN: data.setKey(KeyEventData.KEY_DOWN); break;
+            case KeyEvent.VK_LEFT: data.setKey(KeyEventData.KEY_LEFT); break;
+            case KeyEvent.VK_RIGHT: data.setKey(KeyEventData.KEY_RIGHT); break;
+            case KeyEvent.VK_DELETE: data.setKey(KeyEventData.KEY_DELETE); break;
+            case KeyEvent.VK_ESCAPE: data.setKey(KeyEventData.KEY_ESCAPE); break;
+        }
         return data;
     }
 

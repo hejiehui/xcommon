@@ -20,6 +20,10 @@ public class PropertyChangeCommand extends Command {
         this.newValue = newValue;
     }
 
+    public PropertyChangeCommand(IPropertySource source, String category, String propertyName, Object newValue) {
+        this(source, propertyName, category, source.getPropertyValue(category, propertyName), newValue);
+    }
+
     public PropertyChangeCommand(IPropertySource source, String category, String propertyName, Object oldValue, Object newValue) {
         this(source, propertyName, oldValue, newValue);
         this.category = category;

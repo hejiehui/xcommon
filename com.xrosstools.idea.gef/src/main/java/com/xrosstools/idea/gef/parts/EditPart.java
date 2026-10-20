@@ -23,6 +23,8 @@ public interface EditPart extends PropertyChangeListener {
 
     EditPart findEditPart(Object model);
 
+    EditPart findEditPartById(String targetId);
+
     void setContext(EditContext editContext);
 
     EditContext getContext();

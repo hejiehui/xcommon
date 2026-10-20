@@ -303,11 +303,12 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
     private void repaint() {
         editorFacade.updateRootFigure(root.getFigure());
-        editorFacade.updateFeedbackFigure(curHandle.getFeedback());
+        //editorFacade.updateFeedbackFigure(curHandle.getFeedback());
         editorFacade.refreshVisual();
     }
 
     private void refreshVisual() {
+        repaint();
         editorFacade.refreshVisual();
     }
 
@@ -475,11 +476,16 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
         @Override
         public void keyPressed(KeyEventData e) {
-            if (e.getKeyCode() == java.awt.event.KeyEvent.VK_DELETE && lastSelected != null) {
+            log(String.format("key pressed: %s",e.getKey()));
+            if (KeyEventData.KEY_DELETE.equalsIgnoreCase(e.getKey()) && lastSelected != null) {
                 EditPolicy policy = lastSelected.getPart().getEditPolicy();
                 if (policy != null) {
                     Command deleteCmd = policy.getDeleteCommand();
-                    if (deleteCmd != null) execute(deleteCmd);
+                    if (deleteCmd != null) {
+                        log("Before execute delete");
+                        execute(deleteCmd);
+                        log("Delete command executed");
+                    }
                 }
             }
         }
@@ -528,7 +534,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
         @Override
         public void keyPressed(KeyEventData e) {
-            if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+            if (KeyEventData.KEY_ESCAPE.equalsIgnoreCase(e.getKey())) {
                 gotoNext(readyHandle);
             }
         }
@@ -555,7 +561,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
         @Override
         public void keyPressed(KeyEventData e) {
-            if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+            if (KeyEventData.KEY_ESCAPE.equalsIgnoreCase(e.getKey())) {
                 eraseSourceFeedback();
                 gotoNext(readyHandle);
             }
@@ -614,7 +620,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
         @Override
         public void keyPressed(KeyEventData e) {
-            if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+            if (KeyEventData.KEY_ESCAPE.equalsIgnoreCase(e.getKey())) {
                 eraseTargetFeedback();
                 gotoNext(readyHandle);
             }
@@ -770,5 +776,12 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
             Connection connection = ((Endpoint) lastSelected).getParentConnection();
             return policy.getAdjustConnectionCommand(connection.getConnectionPart());
         }
+    }
+
+    private String lastMsg;
+    private void log(String message) {
+        if(message.equals(lastMsg)) return;
+        lastMsg = message;
+        System.err.println(message);
     }
 }

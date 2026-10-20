@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.parts.AbstractGraphicalEditPart;
 import com.xrosstools.idea.gef.routers.PointList;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -655,13 +656,7 @@ public class Figure implements ImageObserver {
     }
 
     public JsonObject getComponentModel() {
-        JsonObject componentModel = new JsonObject();
-        componentModel.addProperty("selected", isSelected());
-        componentModel.addProperty("showSourceFeedback", showSourceFeedback);
-        componentModel.addProperty("showTargetFeedback", showTargetFeedback);
-        componentModel.addProperty("foreground", (foreground == null ? Color.white.getRGB() : foreground.getRGB()));
-        if(background != null)
-            componentModel.addProperty("background", background.getRGB());
+        JsonObject componentModel = getBaseModel();
 
         //TODO implement later
 //        paintInsertionFeedback(graphics);
@@ -680,6 +675,18 @@ public class Figure implements ImageObserver {
         insetsObj.addProperty("right", insets.right);
         insetsObj.addProperty("bottom", insets.bottom);
         componentModel.add("insets", insetsObj);
+        return componentModel;
+    }
+
+    private @NotNull JsonObject getBaseModel() {
+        JsonObject componentModel = new JsonObject();
+        componentModel.addProperty("id", id);
+        componentModel.addProperty("selected", isSelected());
+        componentModel.addProperty("showSourceFeedback", showSourceFeedback);
+        componentModel.addProperty("showTargetFeedback", showTargetFeedback);
+        componentModel.addProperty("foreground", (foreground == null ? Color.white.getRGB() : foreground.getRGB()));
+        if(background != null)
+            componentModel.addProperty("background", background.getRGB());
         return componentModel;
     }
 }

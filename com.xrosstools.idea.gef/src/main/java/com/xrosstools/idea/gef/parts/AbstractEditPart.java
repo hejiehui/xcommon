@@ -20,15 +20,19 @@ public abstract class AbstractEditPart implements EditPart {
 
     abstract protected void removeChildVisual(EditPart childEditPart);
 
-    public EditPart findEditPart(String targetId) {
-        if (model == null || id == null || !id.equals(targetId)) return null;
+    public EditPart findEditPartById(String targetId) {
+        if (model == null || id == null)
+            return null;
 
-        return this;
+        if (id.equals(targetId))
+            return this;
+
+        return findEditPartById(getChildren(), targetId);
     }
 
-    public static EditPart findEditPart(List parts, String targetId) {
+    public static EditPart findEditPartById(List parts, String targetId) {
         for(Object oPart: parts) {
-            EditPart part = ((EditPart)oPart).findEditPart(targetId);
+            EditPart part = ((EditPart)oPart).findEditPartById(targetId);
             if(part != null)
                 return part;
         }

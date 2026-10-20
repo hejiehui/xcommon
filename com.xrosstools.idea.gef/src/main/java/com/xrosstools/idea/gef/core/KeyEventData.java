@@ -9,21 +9,19 @@ public class KeyEventData {
     public static final int KEY_PRESSED = 401;
     public static final int KEY_RELEASED = 402;
 
+    public static final String KEY_DELETE = "delete";
+    public static final String KEY_ESCAPE = "escape";
+    public static final String KEY_UP = "up";
+    public static final String KEY_DOWN = "down";
+    public static final String KEY_LEFT = "left";
+    public static final String KEY_RIGHT = "right";
+
     private int id;
+    private String key;
     private int keyCode;
     private char keyChar;
     private int modifiersEx;
     private long when;
-
-    public KeyEventData() {}
-
-    public KeyEventData(int id, int keyCode, char keyChar, int modifiersEx, long when) {
-        this.id = id;
-        this.keyCode = keyCode;
-        this.keyChar = keyChar;
-        this.modifiersEx = modifiersEx;
-        this.when = when;
-    }
 
     // Getters and Setters
     public int getId() { return id; }
@@ -36,4 +34,6 @@ public class KeyEventData {
     public void setModifiersEx(int modifiersEx) { this.modifiersEx = modifiersEx; }
     public long getWhen() { return when; }
     public void setWhen(long when) { this.when = when; }
+    public String getKey() { return key; }
+    public void setKey(String key) { this.key = key; }
 }

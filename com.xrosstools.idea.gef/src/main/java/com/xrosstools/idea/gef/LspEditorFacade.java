@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.ActionContainer;
+import com.xrosstools.idea.gef.commands.PropertyChangeCommand;
 import com.xrosstools.idea.gef.core.*;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
@@ -18,6 +19,7 @@ import com.xrosstools.idea.gef.util.IPropertySource;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -135,8 +137,8 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         for(Action action: provider.getToolbarItems(editorInteraction))
             toolbar.add(convert(toolbarItems, action));
 
-        toolbar.add(convert(new UndoAction(editorInteraction)));
-        toolbar.add(convert(new RedoAction(editorInteraction)));
+        toolbar.add(convert(toolbarItems, new UndoAction(editorInteraction)));
+        toolbar.add(convert(toolbarItems, new RedoAction(editorInteraction)));
 
 //        toolbar.add(ControlItem.convert(toolbarItems, new SearchModelAction(editorInteraction)));
 //        toolbar.add(convert(new ExportPngAction(this)));
@@ -186,46 +188,53 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     public JsonObject execute(String command, JsonObject parameters) {
-        switch (command) {
-            case INITIALIZE:
-                return initialize();
-            case "selectModel":
-                return selectModel(parameters.get(ID).getAsString());
-            case "selectTreeNode":
-                return selectTreeNode(parameters.get(ID).getAsString());
-            case "selectPalette":
-                return selectPalette(parameters.get(ID).getAsString());
-            case "selectTool":
-                return selectTool(parameters.get(ID).getAsString());
-            case "selectContextMenu":
-                return selectContextMenu(parameters.get(ID).getAsString());
-            case "getTreeNodeContextMenu":
-                return  getTreeNodeContextMenu(parameters.get(ID).getAsString());
-            case "submitInputs":
-                return submitInputs(parameters.get(ID).getAsString(),parameters.get(VALUES).getAsJsonObject());
-            case UPDATE_PROPERTY:
-                return updateProperty(
-                        parameters.get(CATEGORY).getAsString(),
-                        parameters.get(ID).getAsString(),
-                        parameters.get(VALUE).getAsString());
-            case GET_XML:
-                return getXml();
-            case HANDLE_INPUT_EVENT:
-                return handleInputEvent(parameters.get("eventType").getAsString(), parameters.get("data").getAsJsonObject());
-            default:
-                throw new IllegalArgumentException("Unknown command: " + command);
+        try {
+            switch (command) {
+                case INITIALIZE:
+                    return initialize();
+                case SELECT_MODEL:
+                    return selectModel(parameters.get(ID).getAsString());
+                case SELECT_TREE_NODE:
+                    return selectTreeNode(parameters.get(ID).getAsString());
+                case SELECT_PALETTE:
+                    return selectPalette(parameters.get(ID).getAsString());
+                case SELECT_TOOL:
+                    return selectTool(parameters.get(ID).getAsString());
+                case SELECT_CONTEXT_MENU:
+                    return selectContextMenu(parameters.get(ID).getAsString());
+                case GET_TREE_NODE_CONTEXT_MENU:
+                    return  getTreeNodeContextMenu(parameters.get(ID).getAsString());
+                case SUBMIT_INPUT:
+                    return submitInputs(parameters.get(ID).getAsString(),parameters.get(VALUES).getAsJsonObject());
+                case UPDATE_PROPERTY:
+                    return updateProperty(
+                            parameters.get(CATEGORY) == null ? null: parameters.get(CATEGORY).getAsString(),
+                            parameters.get(ID).getAsString(),
+                            parameters.get(VALUE).getAsString());
+                case GET_XML:
+                    return getXml();
+                case HANDLE_INPUT_EVENT:
+                    return handleInputEvent(parameters.get("eventType").getAsString(), parameters.get("data").getAsJsonObject());
+                default:
+                    throw new IllegalArgumentException("Unknown command: " + command);
+            }
+        }catch (Throwable e){
+            log(e.getMessage());
+            e.printStackTrace(System.err);
+            throw e;
         }
     }
 
     private JsonObject selectModel(String id) {
-        Object model = editorInteraction.getRoot().findEditPart(id).getModel();
+        Object model = editorInteraction.getRoot().findEditPartById(id).getModel();
         editorInteraction.selectModel(model);
         // focus main window
         return getLastResponse();
     }
 
     private JsonObject selectTreeNode(String id) {
-        Object model = editorInteraction.getTreeRoot().findEditPart(id).getModel();
+        log("selectTreeNode: " + id);
+        Object model = editorInteraction.getTreeRoot().findEditPartById(id).getModel();
         editorInteraction.selectTreeModel(model);
         return getLastResponse();
     }
@@ -246,7 +255,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private JsonObject getTreeNodeContextMenu(String id) {
-        AbstractTreeEditPart treePart = (AbstractTreeEditPart)editorInteraction.getTreeRoot().findEditPart(id);
+        AbstractTreeEditPart treePart = (AbstractTreeEditPart)editorInteraction.getTreeRoot().findEditPartById(id);
         showContextMenu(-1, -1, editorInteraction.getOutlineContextMenuItems(treePart));
 
         return getLastResponse();
@@ -257,12 +266,16 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private JsonObject updateProperty(String cat, String id, Object value) {
-        IPropertySource model = (IPropertySource) editorInteraction.getRoot().findEditPart(id).getModel();
-        model.setPropertyValue(cat, id, value);
+        IPropertySource model = (IPropertySource) selectedModel;
+        PropertyChangeCommand cmd = cat == null ?
+                new PropertyChangeCommand((IPropertySource) selectedModel, id, value):
+                new PropertyChangeCommand((IPropertySource) selectedModel, cat, id, value);
+        editorInteraction.execute(cmd);
         return getLastResponse();
     }
 
     private JsonObject getXml() {
+        log("getXml");
         save(editorInteraction.getModel());
         return getLastResponse();
     }
@@ -270,30 +283,35 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     @Override
     public synchronized void setToolTipText(String tooltip) {
         this.tooltipText = tooltip;
+        if(tooltip != null) log("setToolTipText: " + tooltip);
     }
 
     @Override
     public synchronized void updateRootFigure(Figure rootFigure) {
+        log("updateRootFigure: " + rootFigure.getId());
         this.rootFigure = rootFigure;
     }
 
     @Override
     public synchronized void updateSelectedFigure(Figure selectedFigure) {
+        log("updateSelectedFigure: " + selectedFigure.getId());
         this.selectedFigure = selectedFigure;
     }
 
     @Override
     public synchronized void updateSelectedModel(Object model) {
+        log("updateSelectedModel: " + model);
         this.selectedModel = model;
     }
 
     @Override
     public synchronized void updateFeedbackFigure(Figure feedbackFigure) {
+        log("updateFeedbackFigure:  " + (feedbackFigure == null ? "null" : feedbackFigure.getId()));
         this.feedbackFigure = feedbackFigure;
     }
 
     public synchronized void refreshVisual() {
-        // Do nothing for lsp facade
+        log("refreshVisual");
     }
 
     public synchronized JsonObject getLastResponse() {
@@ -319,7 +337,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         // TODO this is unnecessary
         if (selectedFigure != null) {
             JsonObject selected = new JsonObject();
-            selected.addProperty("type", selectedFigure.getClass().getSimpleName());
             selected.addProperty("id", selectedFigure.getId());
             response.add("selectedFigure", selected);
         }
@@ -349,6 +366,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
         // Model content
         if (modelToSave != null) {
+            log("modelContent changes");
             response.addProperty("modelContent", modelToSave);
         }
 
@@ -409,7 +427,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         tooltipText = null;
         rootFigure =  null;
         selectedFigure = null;
-        selectedModel  = null;
+//        selectedModel  = null;
         feedbackFigure  = null;
         modelToSave = null;
         popupMenu = null;
@@ -479,6 +497,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         e.setKeyChar(data.get("keyChar").getAsString().charAt(0));
         e.setModifiersEx(data.get("modifiersEx").getAsInt());
         e.setWhen(data.get("when").getAsLong());
+        e.setKey(data.get("key").getAsString().toLowerCase());
         return e;
     }
 
@@ -590,4 +609,8 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return item;
     }
 
+    private void log(String message) {
+        if(message != null && !message.startsWith("setToolTipText"))
+            System.err.println(message);
+    }
 }

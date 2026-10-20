@@ -122,11 +122,11 @@ public abstract class AbstractGraphicalEditPart extends AbstractEditPart {
     }
 
 
-    public final AbstractGraphicalEditPart findEditPart(String targetId) {
-        EditPart part = super.findEditPart(targetId);
+    public final AbstractGraphicalEditPart findEditPartById(String targetId) {
+        EditPart part = super.findEditPartById(targetId);
         if(part != null) return (AbstractGraphicalEditPart)part;
 
-        part = findEditPart(getSourceConnections(), targetId);
+        part = findEditPartById(getSourceConnections(), targetId);
         if(part != null) return (AbstractGraphicalEditPart)part;
 
         return (AbstractGraphicalEditPart)findEditPart(getTargetConnections(), targetId);
