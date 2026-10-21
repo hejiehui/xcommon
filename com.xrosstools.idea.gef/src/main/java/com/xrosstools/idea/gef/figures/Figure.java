@@ -682,9 +682,18 @@ public class Figure implements ImageObserver {
         JsonObject componentModel = new JsonObject();
         componentModel.addProperty("id", id);
         componentModel.addProperty("selected", isSelected());
+
         componentModel.addProperty("showSourceFeedback", showSourceFeedback);
         componentModel.addProperty("showTargetFeedback", showTargetFeedback);
         componentModel.addProperty("foreground", (foreground == null ? Color.white.getRGB() : foreground.getRGB()));
+
+        if(moveFeedbackLocation != null) {
+            JsonObject feedbackLocation = new JsonObject();
+            feedbackLocation.addProperty("x", moveFeedbackLocation.x);
+            feedbackLocation.addProperty("y", moveFeedbackLocation.y);
+            componentModel.add("moveFeedbackLocation", feedbackLocation);
+        }
+
         if(background != null)
             componentModel.addProperty("background", background.getRGB());
         return componentModel;

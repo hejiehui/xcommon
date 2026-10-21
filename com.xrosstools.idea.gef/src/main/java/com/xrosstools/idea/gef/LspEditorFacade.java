@@ -294,13 +294,11 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     @Override
     public synchronized void updateSelectedFigure(Figure selectedFigure) {
-        log("updateSelectedFigure: " + selectedFigure.getId());
         this.selectedFigure = selectedFigure;
     }
 
     @Override
     public synchronized void updateSelectedModel(Object model) {
-        log("updateSelectedModel: " + model);
         this.selectedModel = model;
     }
 
@@ -451,6 +449,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 editorInteraction.mouseMoved(toMouseEventData(data));
                 break;
             case "MOUSE_DRAGGED":
+                log("MOUSE_DRAGGED");
                 editorInteraction.mouseDragged(toMouseEventData(data));
                 break;
             case "MOUSE_ENTERED":

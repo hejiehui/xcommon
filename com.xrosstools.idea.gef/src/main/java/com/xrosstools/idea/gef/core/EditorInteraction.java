@@ -223,6 +223,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         curHandle.leave();
         next.enter();
         curHandle = next;
+        repaint();
     }
 
     private void updateFigureSelection(Figure selected) {
@@ -303,13 +304,12 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
     private void repaint() {
         editorFacade.updateRootFigure(root.getFigure());
-        //editorFacade.updateFeedbackFigure(curHandle.getFeedback());
+        editorFacade.updateFeedbackFigure(curHandle.getFeedback());
         editorFacade.refreshVisual();
     }
 
     private void refreshVisual() {
         repaint();
-        editorFacade.refreshVisual();
     }
 
     private void showContextMenu(int x, int y) {
@@ -355,7 +355,6 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
             newModel = null;
             sourcePart = null;
             clearHover();
-            refreshVisual();
         }
 
         @Override
