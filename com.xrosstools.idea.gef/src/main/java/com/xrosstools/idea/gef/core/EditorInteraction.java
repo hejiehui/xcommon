@@ -220,8 +220,12 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     // ----- 内部辅助方法 -----
 
     private void gotoNext(InteractionHandle next) {
+        log("leave " + curHandle.getClass().getSimpleName());
         curHandle.leave();
+
+        log("enter " + next.getClass().getSimpleName());
         next.enter();
+
         curHandle = next;
         repaint();
     }
@@ -475,15 +479,12 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
         @Override
         public void keyPressed(KeyEventData e) {
-            log(String.format("key pressed: %s",e.getKey()));
             if (KeyEventData.KEY_DELETE.equalsIgnoreCase(e.getKey()) && lastSelected != null) {
                 EditPolicy policy = lastSelected.getPart().getEditPolicy();
                 if (policy != null) {
                     Command deleteCmd = policy.getDeleteCommand();
                     if (deleteCmd != null) {
-                        log("Before execute delete");
                         execute(deleteCmd);
-                        log("Delete command executed");
                     }
                 }
             }

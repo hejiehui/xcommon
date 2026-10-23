@@ -283,18 +283,19 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     @Override
     public synchronized void setToolTipText(String tooltip) {
         this.tooltipText = tooltip;
-        if(tooltip != null) log("setToolTipText: " + tooltip);
     }
 
     @Override
     public synchronized void updateRootFigure(Figure rootFigure) {
-        log("updateRootFigure: " + rootFigure.getId());
+        if(this.rootFigure != rootFigure)
+            log("updateRootFigure: " + rootFigure.getId());
         this.rootFigure = rootFigure;
     }
 
     @Override
     public synchronized void updateSelectedFigure(Figure selectedFigure) {
         this.selectedFigure = selectedFigure;
+        this.rootFigure = editorInteraction.getRoot().getFigure();
     }
 
     @Override
@@ -304,12 +305,12 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     @Override
     public synchronized void updateFeedbackFigure(Figure feedbackFigure) {
-        log("updateFeedbackFigure:  " + (feedbackFigure == null ? "null" : feedbackFigure.getId()));
+//        log("updateFeedbackFigure:  " + (feedbackFigure == null ? "null" : feedbackFigure.getId()));
         this.feedbackFigure = feedbackFigure;
     }
 
     public synchronized void refreshVisual() {
-        log("refreshVisual");
+//        log("refreshVisual");
     }
 
     public synchronized JsonObject getLastResponse() {
@@ -364,7 +365,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
         // Model content
         if (modelToSave != null) {
-            log("modelContent changes");
             response.addProperty("modelContent", modelToSave);
         }
 
@@ -449,7 +449,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 editorInteraction.mouseMoved(toMouseEventData(data));
                 break;
             case "MOUSE_DRAGGED":
-                log("MOUSE_DRAGGED");
                 editorInteraction.mouseDragged(toMouseEventData(data));
                 break;
             case "MOUSE_ENTERED":
@@ -611,5 +610,16 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private void log(String message) {
         if(message != null && !message.startsWith("setToolTipText"))
             System.err.println(message);
+    }
+
+    private String lastEvt;
+    private void delog(String message) {
+        if(message == null || lastEvt == null || lastEvt.equals(message)) {
+            lastEvt = message;
+            return;
+        }
+
+        log(message);
+        lastEvt = message;
     }
 }
