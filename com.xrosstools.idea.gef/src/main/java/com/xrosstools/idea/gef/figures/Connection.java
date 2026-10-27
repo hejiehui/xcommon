@@ -303,7 +303,9 @@ public class Connection extends Figure {
 
     @Override
     public JsonObject getComponentModel() {
-        JsonObject result = new JsonObject();
+        JsonObject componentModel = new JsonObject();
+        componentModel.addProperty("id", getId());
+        componentModel.addProperty("lineWidth", getLineWidth());
 
         Figure parent = getParent() == null ? sourcePart.getFigure() :getParent();
         translateToRelative(parent, points);
@@ -315,8 +317,8 @@ public class Connection extends Figure {
             obj.addProperty("y", point.getY());
             pointsArray.add(obj);
         }
-        result.add("points", pointsArray);
+        componentModel.add("points", pointsArray);
 
-        return result;
+        return componentModel;
     }
 }

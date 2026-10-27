@@ -7,6 +7,7 @@ import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.ActionContainer;
 import com.xrosstools.idea.gef.commands.PropertyChangeCommand;
 import com.xrosstools.idea.gef.core.*;
+import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.tools.ExportPngAction;
@@ -15,11 +16,11 @@ import com.xrosstools.idea.gef.tools.SearchModelAction;
 import com.xrosstools.idea.gef.tools.UndoAction;
 import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.util.List;
 
 // For client like VS Code, Eclipse, etc
 public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<T> {
+    // Command list
     public static final String INITIALIZE = "initialize";
     public static final String HANDLE_INPUT_EVENT = "handleInputEvent";
     public static final String SELECT_MODEL = "selectModel";
@@ -46,6 +48,20 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             SELECT_MODEL, SELECT_TREE_NODE,
             SELECT_PALETTE, SELECT_TOOL, SELECT_CONTEXT_MENU, GET_TREE_NODE_CONTEXT_MENU,
             SUBMIT_INPUT,UPDATE_PROPERTY,GET_XML};
+
+    // Event list
+    public static final String MOUSE_PRESSED = "MOUSE_PRESSED";
+    public static final String MOUSE_RELEASED = "MOUSE_RELEASED";
+    public static final String MOUSE_CLICKED = "MOUSE_CLICKED";
+    public static final String MOUSE_MOVED = "MOUSE_MOVED";
+    public static final String MOUSE_DRAGGED = "MOUSE_DRAGGED";
+    public static final String MOUSE_ENTERED = "MOUSE_ENTERED";
+    public static final String MOUSE_EXITED = "MOUSE_EXITED";
+    public static final String MOUSE_WHEEL = "MOUSE_WHEEL";
+    public static final String KEY_PRESSED = "KEY_PRESSED";
+    public static final String KEY_RELEASED = "KEY_RELEASED";
+    public static final String KEY_TYPED = "KEY_TYPED";
+
 
     public static final String PALETTE = "palette";
     public static final String TOOLBAR = "toolbar";
@@ -75,12 +91,16 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     // 暂存数据
     private Figure rootFigure;
-    private Figure selectedFigure;
     private Object selectedModel;
-    private Figure feedbackFigure;
+
+    private Figure insertionTarget;
+
     private String tooltipText;
     private String modelToSave;
     private Action[] popupMenu;
+
+    private String curCommand;
+    private String curEventType;
 
     public LspEditorFacade(String uri, String content, ContentProvider<T> provider) throws Exception {
         this.uri = uri;
@@ -122,7 +142,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return iconMap;
     }
 
-    public JsonArray initPalette() {
+    private JsonArray initPalette() {
         JsonArray palette = new JsonArray();
         for(Action action: provider.getPaletteItems(editorInteraction)){
             palette.add(convert(action));
@@ -132,7 +152,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return palette;
     }
 
-    public JsonArray initToolbar() {
+    private JsonArray initToolbar() {
         JsonArray toolbar = new JsonArray();
         for(Action action: provider.getToolbarItems(editorInteraction))
             toolbar.add(convert(toolbarItems, action));
@@ -146,7 +166,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return toolbar;
     }
 
-    public synchronized JsonObject initialize() {
+    private JsonObject initialize() {
         updateSelectedModel(editorInteraction.getModel());
         updateRootFigure(editorInteraction.getRoot().getFigure());
 
@@ -187,8 +207,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return iconMap;
     }
 
-    public JsonObject execute(String command, JsonObject parameters) {
+    public synchronized JsonObject execute(String command, JsonObject parameters) {
         try {
+            curCommand = command;
             switch (command) {
                 case INITIALIZE:
                     return initialize();
@@ -223,6 +244,49 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
             e.printStackTrace(System.err);
             throw e;
         }
+    }
+
+    private JsonObject handleInputEvent(String eventType, JsonObject data) {
+        curEventType = eventType;
+        switch (eventType) {
+            case MOUSE_PRESSED:
+                editorInteraction.mousePressed(toMouseEventData(data));
+                break;
+            case MOUSE_RELEASED:
+                editorInteraction.mouseReleased(toMouseEventData(data));
+                break;
+            case MOUSE_CLICKED:
+                editorInteraction.mouseClicked(toMouseEventData(data));
+                break;
+            case MOUSE_MOVED:
+                editorInteraction.mouseMoved(toMouseEventData(data));
+                break;
+            case MOUSE_DRAGGED:
+                editorInteraction.mouseDragged(toMouseEventData(data));
+                break;
+            case MOUSE_ENTERED:
+                editorInteraction.mouseEntered(toMouseEventData(data));
+                break;
+            case MOUSE_EXITED:
+                editorInteraction.mouseExited(toMouseEventData(data));
+                break;
+            case MOUSE_WHEEL:
+                editorInteraction.mouseWheelMoved(toMouseEventData(data));
+                break;
+            case KEY_PRESSED:
+                editorInteraction.keyPressed(toKeyEventData(data));
+                break;
+            case KEY_RELEASED:
+                editorInteraction.keyReleased(toKeyEventData(data));
+                break;
+            case KEY_TYPED:
+                editorInteraction.keyTyped(toKeyEventData(data));
+                break;
+            default:
+                log("eventType == null");
+        }
+
+        return getLastResponse();
     }
 
     private JsonObject selectModel(String id) {
@@ -282,20 +346,19 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     @Override
     public synchronized void setToolTipText(String tooltip) {
+//        log("tooltip" + tooltip);
         this.tooltipText = tooltip;
     }
 
     @Override
     public synchronized void updateRootFigure(Figure rootFigure) {
-        if(this.rootFigure != rootFigure)
-            log("updateRootFigure: " + rootFigure.getId());
-        this.rootFigure = rootFigure;
+//        log("updateRootFigure: " + rootFigure.getId());
+//        this.rootFigure = rootFigure;
     }
 
     @Override
     public synchronized void updateSelectedFigure(Figure selectedFigure) {
-        this.selectedFigure = selectedFigure;
-        this.rootFigure = editorInteraction.getRoot().getFigure();
+//        this.rootFigure = editorInteraction.getRoot().getFigure();
     }
 
     @Override
@@ -305,8 +368,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     @Override
     public synchronized void updateFeedbackFigure(Figure feedbackFigure) {
-//        log("updateFeedbackFigure:  " + (feedbackFigure == null ? "null" : feedbackFigure.getId()));
-        this.feedbackFigure = feedbackFigure;
     }
 
     public synchronized void refreshVisual() {
@@ -319,39 +380,23 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         response.addProperty("uri", uri);
 
         // 根图形（完整图形树）
-        if (rootFigure != null) {
-            Dimension size = rootFigure.getPreferredSize();
-            rootFigure.setSize(size);
-            size.height += 100;
-            JsonObject graphicModel = rootFigure.getGraphicModel();
-            if (graphicModel != null) {
-                response.add("graphicModel", graphicModel);
-            }
+        if (showRootFigure()) {
+            response.add("graphicModel", getRootFigure());
+            log("Response rootFigure: " + rootFigure.getId());
         }
 
         // Tree outline
         response.add("outlineModel", gson.toJsonTree(convert(editorInteraction.getTreeRoot())));
 
         // 选中的图形（可选）
-        // TODO this is unnecessary
-        if (selectedFigure != null) {
-            JsonObject selected = new JsonObject();
-            selected.addProperty("id", selectedFigure.getId());
-            response.add("selectedFigure", selected);
-        }
+        response.add("selectedFigure", getSelected());
 
         // 选中的业务模型（用于属性面板）
         if (selectedModel instanceof IPropertySource) {
             response.add("selectedModel", gson.toJsonTree(PropertyItem.convert((IPropertySource)selectedModel)).getAsJsonArray());
         }
 
-        // 反馈图形（如连接线预览）
-        if (feedbackFigure != null) {
-            JsonObject feedback = feedbackFigure.getGraphicModel();
-            if (feedback != null) {
-                response.add("feedbackFigure", feedback);
-            }
-        }
+        getFeedback(response);
 
         // Tooltip（可选）
         if (tooltipText != null) {
@@ -372,6 +417,77 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         clearCache();
 
         return response;
+    }
+
+    private boolean showRootFigure() {
+        if( curCommand != null && !curCommand.equalsIgnoreCase(HANDLE_INPUT_EVENT) )
+            return true;
+
+        boolean result = !(curEventType == null ||
+                curEventType.equalsIgnoreCase(MOUSE_MOVED) ||
+                curEventType.equalsIgnoreCase(MOUSE_ENTERED) ||
+                curEventType.equalsIgnoreCase(MOUSE_EXITED) ||
+                curEventType.equalsIgnoreCase(MOUSE_WHEEL));
+        if (result) {
+            log("curEventType: " + curEventType);
+        }
+        return result;
+    }
+
+    private JsonObject getRootFigure() {
+        rootFigure = editorInteraction.getRoot().getFigure();
+        Dimension size = rootFigure.getPreferredSize();
+        rootFigure.setSize(size);
+        size.height += 100;
+        return rootFigure.getGraphicModel();
+    }
+
+    private void getFeedback(JsonObject response) {
+        if(!isFeedback) return;
+
+        response.addProperty("selectableSource", editorInteraction.getLastSelectableSource() == null ? null : editorInteraction.getLastSelectableSource().getId());
+        response.addProperty("selectableTarget", editorInteraction.getLastSelectableTarget() == null ? null : editorInteraction.getLastSelectableTarget().getId());
+
+        if (editorInteraction.getLastHover() != null) {
+            insertionTarget = editorInteraction.getLastHover();
+            response.addProperty("insertionTarget", insertionTarget == null ? null : insertionTarget.getId());
+//            log("insertionTarget");
+            if (insertionTarget != null && editorInteraction.getInsertionPoint() != null) {
+                JsonObject location = new JsonObject();
+                Point insertionPoint = editorInteraction.getInsertionPoint();
+                location.addProperty("x", insertionPoint.getX());
+                location.addProperty("y", insertionPoint.getY());
+                response.add("insertionPoint", location);
+//                log("insertionPoint");
+            }
+        }
+    }
+
+    private JsonObject getSelected() {
+        Figure lastSelected = editorInteraction.getLastSelected();
+        if (lastSelected == null)
+            return null;
+
+        if(lastSelected instanceof Connection) {
+            log("Connection");
+            return lastSelected.getGraphicModel();
+        }
+
+        if (lastSelected.getMoveFeedbackLocation() != null) {
+            JsonObject selected = new JsonObject();
+            selected.addProperty("id", lastSelected.getId());
+
+            JsonObject feedbackLocation = new JsonObject();
+            Point moveFeedbackLocation = lastSelected.getMoveFeedbackLocation();
+            feedbackLocation.addProperty("x", moveFeedbackLocation.x);
+            feedbackLocation.addProperty("y", moveFeedbackLocation.y);
+            selected.add("moveFeedbackLocation", feedbackLocation);
+
+            log("selected");
+            return selected;
+        }
+
+        return null;
     }
 
     @Override
@@ -411,7 +527,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 subMenu.add(convertContextMenu(id + "-" + i++, item));
             }
             menuItem.add("submenu", subMenu);
-        }else {
+        } else {
             menuItem.addProperty(IS_SEPARATOR, action == Action.SEPARATOR);
             menuItems.put(id, action);
         }
@@ -422,58 +538,17 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
      * 清除暂存数据（在 refreshVisual 中调用，避免重复发送）
      */
     private void clearCache() {
+        curEventType = null;
+        curCommand = null;
         tooltipText = null;
-        rootFigure =  null;
-        selectedFigure = null;
+        rootFigure = null;
 //        selectedModel  = null;
-        feedbackFigure  = null;
         modelToSave = null;
         popupMenu = null;
     }
 
     // 如果需要保存模型，可以提供一个外部注入的保存函数
     // private void saveModel(String uri, Object model) { ... }
-
-    public JsonObject handleInputEvent(String eventType, JsonObject data) {
-        switch (eventType) {
-            case "MOUSE_PRESSED":
-                editorInteraction.mousePressed(toMouseEventData(data));
-                break;
-            case "MOUSE_RELEASED":
-                editorInteraction.mouseReleased(toMouseEventData(data));
-                break;
-            case "MOUSE_CLICKED":
-                editorInteraction.mouseClicked(toMouseEventData(data));
-                break;
-            case "MOUSE_MOVED":
-                editorInteraction.mouseMoved(toMouseEventData(data));
-                break;
-            case "MOUSE_DRAGGED":
-                editorInteraction.mouseDragged(toMouseEventData(data));
-                break;
-            case "MOUSE_ENTERED":
-                editorInteraction.mouseEntered(toMouseEventData(data));
-                break;
-            case "MOUSE_EXITED":
-                editorInteraction.mouseExited(toMouseEventData(data));
-                break;
-            case "MOUSE_WHEEL":
-                editorInteraction.mouseWheelMoved(toMouseEventData(data));
-                break;
-            case "KEY_PRESSED":
-                editorInteraction.keyPressed(toKeyEventData(data));
-                break;
-            case "KEY_RELEASED":
-                editorInteraction.keyReleased(toKeyEventData(data));
-                break;
-            case "KEY_TYPED":
-                editorInteraction.keyTyped(toKeyEventData(data));
-                break;
-        }
-
-        return getLastResponse();
-    }
-
     // TODO simplify the data mapping
     private MouseEventData toMouseEventData(JsonObject data) {
         MouseEventData e = new MouseEventData();
@@ -501,17 +576,17 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private int getEventId(String type) {
         switch (type) {
-            case "MOUSE_PRESSED": return MouseEventData.MOUSE_PRESSED;
-            case "MOUSE_RELEASED": return MouseEventData.MOUSE_RELEASED;
-            case "MOUSE_CLICKED": return MouseEventData.MOUSE_CLICKED;
-            case "MOUSE_MOVED": return MouseEventData.MOUSE_MOVED;
-            case "MOUSE_DRAGGED": return MouseEventData.MOUSE_DRAGGED;
-            case "MOUSE_ENTERED": return MouseEventData.MOUSE_ENTERED;
-            case "MOUSE_EXITED": return MouseEventData.MOUSE_EXITED;
-            case "MOUSE_WHEEL": return MouseEventData.MOUSE_WHEEL;
-            case "KEY_PRESSED": return KeyEventData.KEY_PRESSED;
-            case "KEY_RELEASED": return KeyEventData.KEY_RELEASED;
-            case "KEY_TYPED": return KeyEventData.KEY_TYPED;
+            case MOUSE_PRESSED: return MouseEventData.MOUSE_PRESSED;
+            case MOUSE_RELEASED: return MouseEventData.MOUSE_RELEASED;
+            case MOUSE_CLICKED: return MouseEventData.MOUSE_CLICKED;
+            case MOUSE_MOVED: return MouseEventData.MOUSE_MOVED;
+            case MOUSE_DRAGGED: return MouseEventData.MOUSE_DRAGGED;
+            case MOUSE_ENTERED: return MouseEventData.MOUSE_ENTERED;
+            case MOUSE_EXITED: return MouseEventData.MOUSE_EXITED;
+            case MOUSE_WHEEL: return MouseEventData.MOUSE_WHEEL;
+            case KEY_PRESSED: return KeyEventData.KEY_PRESSED;
+            case KEY_RELEASED: return KeyEventData.KEY_RELEASED;
+            case KEY_TYPED: return KeyEventData.KEY_TYPED;
             default: return -1;
         }
     }
@@ -622,4 +697,6 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         log(message);
         lastEvt = message;
     }
+
+    private final boolean isFeedback = false;
 }

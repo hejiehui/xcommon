@@ -41,6 +41,9 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     private Figure lastSelected;
     private Figure lastHover;
     private Point lastHoverLocation;
+    private Point insertionPoint;
+    private Figure lastSelectableSource;
+    private Figure lastSelectableTarget;
     private boolean isRightButton;
 
     private Object newModel;
@@ -126,11 +129,32 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         return treeRoot;
     }
 
+    // ----- 内部状态调用接口 -----
+
     public boolean isInProcessing() {
         return inProcessing.get();
     }
 
-    // ----- 外部调用接口 -----
+    public Figure getLastSelectableSource() {
+        return lastSelectableSource;
+    }
+
+    public Figure getLastSelectableTarget() {
+        return lastSelectableTarget;
+    }
+
+    public Point getInsertionPoint() {
+        return insertionPoint;
+    }
+
+    public Figure getLastSelected() {
+        return lastSelected;
+    }
+
+    public Figure getLastHover() {
+        return lastHover;
+    }
+// ----- 外部调用接口 -----
 
     public void reset() {
         inProcessing.set(false);
@@ -220,12 +244,8 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     // ----- 内部辅助方法 -----
 
     private void gotoNext(InteractionHandle next) {
-        log("leave " + curHandle.getClass().getSimpleName());
         curHandle.leave();
-
-        log("enter " + next.getClass().getSimpleName());
         next.enter();
-
         curHandle = next;
         repaint();
     }
@@ -235,7 +255,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         if (lastSelected != null) lastSelected.setSelected(false);
         lastSelected = selected;
         if (lastSelected != null) lastSelected.setSelected(true);
-        editorFacade.updateSelectedFigure(lastSelected);
+//        editorFacade.updateSelectedFigure(lastSelected);
     }
 
     private void selectFigureAt(Point location) {
@@ -307,13 +327,13 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     }
 
     private void repaint() {
-        editorFacade.updateRootFigure(root.getFigure());
         editorFacade.updateFeedbackFigure(curHandle.getFeedback());
         editorFacade.refreshVisual();
     }
 
     private void refreshVisual() {
         repaint();
+        editorFacade.updateRootFigure(root.getFigure());
     }
 
     private void showContextMenu(int x, int y) {
@@ -495,10 +515,11 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
             if (moved && lastHoverLocation != null) {
                 lastHoverLocation.translate(delta.x, delta.y);
                 lastSelected.setMoveFeedbackLocation(lastHoverLocation);
+                return lastSelected;
             } else {
                 lastSelected.setMoveFeedbackLocation(null);
+                return null;
             }
-            return null;
         }
     }
 
@@ -573,7 +594,6 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         }
     }
 
-    private Figure lastSelectableSource;
     private void showSourceFeedback(Figure f, boolean selectable) {
         if (f == null || f == lastSelectableSource) { repaint(); return; }
         eraseSourceFeedback();
@@ -637,7 +657,6 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         }
     }
 
-    private Figure lastSelectableTarget;
     private void showTargetFeedback(Figure f, boolean selectable) {
         if (f == null || f == lastSelectableTarget) { repaint(); return; }
         eraseTargetFeedback();
@@ -778,10 +797,8 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         }
     }
 
-    private String lastMsg;
     private void log(String message) {
-        if(message.equals(lastMsg)) return;
-        lastMsg = message;
-        System.err.println(message);
+        if(message != null && !message.startsWith("setToolTipText"))
+            System.err.println(message);
     }
 }

@@ -377,10 +377,11 @@ public class Figure implements ImageObserver {
     }
 
     public void setMoveFeedbackLocation(Point moveFeedbackLocation) {
+        this.moveFeedbackLocation = moveFeedbackLocation;
+
         if(moveFeedbackLocation == null)
             return;
 
-        this.moveFeedbackLocation = moveFeedbackLocation;
         translateToRelative(moveFeedbackLocation);
     }
 
@@ -636,7 +637,6 @@ public class Figure implements ImageObserver {
 
         layout();
         JsonObject componentModel = getComponentModel();
-        componentModel.addProperty("type", getFigureType().name());
 
         JsonArray nodesArray = new JsonArray();
         for (Figure node : getChildren()) {
@@ -658,9 +658,6 @@ public class Figure implements ImageObserver {
     public JsonObject getComponentModel() {
         JsonObject componentModel = getBaseModel();
 
-        //TODO implement later
-//        paintInsertionFeedback(graphics);
-
         JsonObject boundsObj = new JsonObject();
         boundsObj.addProperty("x", getX());
         boundsObj.addProperty("y", getY());
@@ -675,16 +672,19 @@ public class Figure implements ImageObserver {
         insetsObj.addProperty("right", insets.right);
         insetsObj.addProperty("bottom", insets.bottom);
         componentModel.add("insets", insetsObj);
+
         return componentModel;
     }
 
     private @NotNull JsonObject getBaseModel() {
         JsonObject componentModel = new JsonObject();
+        componentModel.addProperty("type", getFigureType().name());
         componentModel.addProperty("id", id);
-        componentModel.addProperty("selected", isSelected());
 
+        componentModel.addProperty("selected", isSelected());
         componentModel.addProperty("showSourceFeedback", showSourceFeedback);
         componentModel.addProperty("showTargetFeedback", showTargetFeedback);
+
         componentModel.addProperty("foreground", (foreground == null ? Color.white.getRGB() : foreground.getRGB()));
 
         if(moveFeedbackLocation != null) {
