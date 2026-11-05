@@ -4,8 +4,6 @@ import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.PropertyChangeCommand;
 
 import javax.swing.table.AbstractTableModel;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.*;
 
 public class PropertyTableModel extends AbstractTableModel {

@@ -2,8 +2,9 @@ package com.xrosstools.idea.gef;
 
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xrosstools.gef.GefIcons;
 import com.xrosstools.idea.gef.actions.Action;
-import com.xrosstools.idea.gef.tools.AnActionAdapter;
+import com.xrosstools.gef.ContentChangeListener;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;

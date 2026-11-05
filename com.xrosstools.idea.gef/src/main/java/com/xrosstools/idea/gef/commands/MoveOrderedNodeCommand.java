@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef.commands;
 
-import com.xrosstools.idea.gef.model.Node;
 import com.xrosstools.idea.gef.model.NodeContainer;
 
 public class MoveOrderedNodeCommand extends Command {

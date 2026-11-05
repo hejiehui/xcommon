@@ -1,4 +1,4 @@
-package com.xrosstools.idea.gef.tools;
+package com.xrosstools.idea.gef;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;

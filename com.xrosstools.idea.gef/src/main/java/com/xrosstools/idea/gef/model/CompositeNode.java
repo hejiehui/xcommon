@@ -2,7 +2,6 @@ package com.xrosstools.idea.gef.model;
 
 import com.xrosstools.idea.gef.util.ListPropertyEntry;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CompositeNode<T extends Node> extends Node implements NodeContainer<T> {

@@ -8,6 +8,12 @@ import java.util.List;
 public class ActionContainer extends Action {
     private List<Action> subItems = new ArrayList<>();
 
+    public ActionContainer() {}
+
+    public ActionContainer(String label) {
+        setText(label);
+    }
+
     public void add(Action actionItem) {
         subItems.add(actionItem);
     }

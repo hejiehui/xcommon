@@ -2,12 +2,11 @@ package com.xrosstools.idea.gef.references;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.util.IncorrectOperationException;
-import com.xrosstools.idea.gef.actions.ImplementationUtil;
+import com.xrosstools.idea.gef.ImplementationUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class AttributeClassReference extends PsiReferenceBase<XmlAttributeValue> {

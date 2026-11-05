@@ -1,8 +1,10 @@
-package com.xrosstools.idea.gef.core;
+package com.xrosstools.gef;
 
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.util.IPropertySource;
+
+import java.util.List;
 
 public interface EditorFacade<T extends IPropertySource> {
     void setToolTipText(String tooltip);
@@ -18,5 +20,5 @@ public interface EditorFacade<T extends IPropertySource> {
 
     // Model is changed and needs save
     void save(T model);
-    void showContextMenu(int x, int y, Action[] actions);
+    void showContextMenu(int x, int y, List<Action> actions);
 }

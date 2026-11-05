@@ -1,22 +1,21 @@
-package com.xrosstools.idea.gef;
+package com.xrosstools.gef.lsp;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.xrosstools.gef.*;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.ActionContainer;
 import com.xrosstools.idea.gef.commands.PropertyChangeCommand;
-import com.xrosstools.idea.gef.core.*;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
-import com.xrosstools.idea.gef.tools.ExportPngAction;
-import com.xrosstools.idea.gef.tools.RedoAction;
-import com.xrosstools.idea.gef.tools.SearchModelAction;
-import com.xrosstools.idea.gef.tools.UndoAction;
+import com.xrosstools.idea.gef.actions.tools.ExportPngAction;
+import com.xrosstools.idea.gef.actions.tools.RedoAction;
+import com.xrosstools.idea.gef.actions.tools.SearchModelAction;
+import com.xrosstools.idea.gef.actions.tools.UndoAction;
 import com.xrosstools.idea.gef.util.IPropertyDescriptor;
 import com.xrosstools.idea.gef.util.IPropertySource;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,6 +28,8 @@ import java.util.List;
 
 // For client like VS Code, Eclipse, etc
 public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<T> {
+    public static final Gson GSON = new Gson();
+
     // Command list
     public static final String INITIALIZE = "initialize";
     public static final String HANDLE_INPUT_EVENT = "handleInputEvent";
@@ -42,12 +43,12 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     public static final String UPDATE_PROPERTY = "updateProperty";
     public static final String GET_XML = "getXml";
 
-    public static final String[] COMMANDS = new String[] {
+    public static final String[] COMMANDS = new String[]{
             INITIALIZE,
             HANDLE_INPUT_EVENT,
             SELECT_MODEL, SELECT_TREE_NODE,
             SELECT_PALETTE, SELECT_TOOL, SELECT_CONTEXT_MENU, GET_TREE_NODE_CONTEXT_MENU,
-            SUBMIT_INPUT,UPDATE_PROPERTY,GET_XML};
+            SUBMIT_INPUT, UPDATE_PROPERTY, GET_XML};
 
     // Event list
     public static final String MOUSE_PRESSED = "MOUSE_PRESSED";
@@ -65,7 +66,11 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     public static final String PALETTE = "palette";
     public static final String TOOLBAR = "toolbar";
+
     public static final String ID = "id";
+    public static final String TYPE = "type";
+    public static final String PARAMS = "params";
+
     public static final String CATEGORY = "category";
     public static final String VALUE = "value";
     public static final String VALUES = "values";
@@ -81,10 +86,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private final String uri;
 
-    private static Gson gson = new Gson();
     private Map<String, ActionListener> paletteItems = new HashMap<>();
     private Map<String, ActionListener> toolbarItems = new HashMap<>();
-    private Map<String, ActionListener> menuItems = new HashMap<>();
+    private Map<String, Action> menuItems = new HashMap<>();
 
     private Map<Icon, String> iconMap;
     private Map<String, String> iconDataCache = new HashMap<>();
@@ -97,7 +101,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private String tooltipText;
     private String modelToSave;
-    private Action[] popupMenu;
+    private List<Action> popupMenu;
 
     private String curCommand;
     private String curEventType;
@@ -144,7 +148,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private JsonArray initPalette() {
         JsonArray palette = new JsonArray();
-        for(Action action: provider.getPaletteItems(editorInteraction)){
+        for (Action action : provider.getPaletteItems()) {
             palette.add(convert(action));
             paletteItems.put(action.getText(), action);
         }
@@ -154,7 +158,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private JsonArray initToolbar() {
         JsonArray toolbar = new JsonArray();
-        for(Action action: provider.getToolbarItems(editorInteraction))
+        for (Action action : provider.getToolbarItems())
             toolbar.add(convert(toolbarItems, action));
 
         toolbar.add(convert(toolbarItems, new UndoAction(editorInteraction)));
@@ -197,7 +201,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private Map<Icon, String> getDefaultIconMap() {
-        Map<Icon, String> iconMap =new HashMap<>();
+        Map<Icon, String> iconMap = new HashMap<>();
 
         iconMap.put(GefIcons.Undo, UndoAction.ID);
         iconMap.put(GefIcons.Redo, RedoAction.ID);
@@ -222,14 +226,14 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 case SELECT_TOOL:
                     return selectTool(parameters.get(ID).getAsString());
                 case SELECT_CONTEXT_MENU:
-                    return selectContextMenu(parameters.get(ID).getAsString());
+                    return selectContextMenu(parameters.get(ID).getAsString(), parameters.get(PARAMS));
                 case GET_TREE_NODE_CONTEXT_MENU:
-                    return  getTreeNodeContextMenu(parameters.get(ID).getAsString());
+                    return getTreeNodeContextMenu(parameters.get(ID).getAsString());
                 case SUBMIT_INPUT:
-                    return submitInputs(parameters.get(ID).getAsString(),parameters.get(VALUES).getAsJsonObject());
+                    return submitInputs(parameters.get(ID).getAsString(), parameters.get(VALUES).getAsJsonObject());
                 case UPDATE_PROPERTY:
                     return updateProperty(
-                            parameters.get(CATEGORY) == null ? null: parameters.get(CATEGORY).getAsString(),
+                            parameters.get(CATEGORY) == null ? null : parameters.get(CATEGORY).getAsString(),
                             parameters.get(ID).getAsString(),
                             parameters.get(VALUE).getAsString());
                 case GET_XML:
@@ -239,7 +243,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 default:
                     throw new IllegalArgumentException("Unknown command: " + command);
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
             log(e.getMessage());
             e.printStackTrace(System.err);
             throw e;
@@ -313,13 +317,13 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return getLastResponse();
     }
 
-    private JsonObject selectContextMenu(String id) {
-        menuItems.get(id).actionPerformed(null);
+    private JsonObject selectContextMenu(String id, JsonObject params) {
+        menuItems.get(id).actionPerformed(params);
         return getLastResponse();
     }
 
     private JsonObject getTreeNodeContextMenu(String id) {
-        AbstractTreeEditPart treePart = (AbstractTreeEditPart)editorInteraction.getTreeRoot().findEditPartById(id);
+        AbstractTreeEditPart treePart = (AbstractTreeEditPart) editorInteraction.getTreeRoot().findEditPartById(id);
         showContextMenu(-1, -1, editorInteraction.getOutlineContextMenuItems(treePart));
 
         return getLastResponse();
@@ -332,7 +336,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     private JsonObject updateProperty(String cat, String id, Object value) {
         IPropertySource model = (IPropertySource) selectedModel;
         PropertyChangeCommand cmd = cat == null ?
-                new PropertyChangeCommand((IPropertySource) selectedModel, id, value):
+                new PropertyChangeCommand((IPropertySource) selectedModel, id, value) :
                 new PropertyChangeCommand((IPropertySource) selectedModel, cat, id, value);
         editorInteraction.execute(cmd);
         return getLastResponse();
@@ -386,14 +390,14 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         }
 
         // Tree outline
-        response.add("outlineModel", gson.toJsonTree(convert(editorInteraction.getTreeRoot())));
+        response.add("outlineModel", GSON.toJsonTree(convert(editorInteraction.getTreeRoot())));
 
         // 选中的图形（可选）
         response.add("selectedFigure", getSelected());
 
         // 选中的业务模型（用于属性面板）
         if (selectedModel instanceof IPropertySource) {
-            response.add("selectedModel", gson.toJsonTree(PropertyItem.convert((IPropertySource)selectedModel)).getAsJsonArray());
+            response.add("selectedModel", GSON.toJsonTree(PropertyItem.convert((IPropertySource) selectedModel)).getAsJsonArray());
         }
 
         getFeedback(response);
@@ -420,7 +424,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private boolean showRootFigure() {
-        if( curCommand != null && !curCommand.equalsIgnoreCase(HANDLE_INPUT_EVENT) )
+        if (curCommand != null && !curCommand.equalsIgnoreCase(HANDLE_INPUT_EVENT))
             return true;
 
         boolean result = !(curEventType == null ||
@@ -443,7 +447,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     private void getFeedback(JsonObject response) {
-        if(!isFeedback) return;
+        if (!isFeedback) return;
 
         response.addProperty("selectableSource", editorInteraction.getLastSelectableSource() == null ? null : editorInteraction.getLastSelectableSource().getId());
         response.addProperty("selectableTarget", editorInteraction.getLastSelectableTarget() == null ? null : editorInteraction.getLastSelectableTarget().getId());
@@ -468,7 +472,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         if (lastSelected == null)
             return null;
 
-        if(lastSelected instanceof Connection) {
+        if (lastSelected instanceof Connection) {
             log("Connection");
             return lastSelected.getGraphicModel();
         }
@@ -500,14 +504,14 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
     }
 
     @Override
-    public synchronized void showContextMenu(int x, int y, Action[] actions) {
+    public synchronized void showContextMenu(int x, int y, List<Action> actions) {
         this.popupMenu = actions;
         menuItems.clear();
-        // 对于 LSP 后端，上下文菜单由前端实现，所以这里只记录位置，不实际显示
     }
 
-    private JsonArray convertContextMenu(Action[] actions) {
+    private JsonArray convertContextMenu(List<Action> actions) {
         JsonArray menu = new JsonArray();
+        log("actions: " + actions.size());
         int i = 0;
         for (Action action : actions) {
             menu.add(convertContextMenu(String.valueOf(i++), action));
@@ -517,18 +521,23 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private JsonObject convertContextMenu(String id, Action action) {
         JsonObject menuItem = new JsonObject();
+
         menuItem.addProperty(ID, id);
+        menuItem.addProperty(TYPE, action.getClass().getSimpleName());
+        menuItem.addProperty(LABEL, action.getText());
+        menuItem.addProperty(TOOLTIP, action.getTooltip());
+        menuItem.addProperty(ICON_ID, iconMap.get(action.getIcon()));
+        menuItem.addProperty(IS_SEPARATOR, action == Action.SEPARATOR);
+        menuItem.add(PARAMS, action.getParams());
+
         if (action instanceof ActionContainer) {
-            menuItem.addProperty(LABEL, action.getText());
-            menuItem.addProperty(TOOLTIP, action.getTooltip());
             JsonArray subMenu = new JsonArray();
             int i = 0;
-            for(Action item: ((ActionContainer)action).getSubItems()){
+            for (Action item : ((ActionContainer) action).getSubItems()) {
                 subMenu.add(convertContextMenu(id + "-" + i++, item));
             }
             menuItem.add("submenu", subMenu);
         } else {
-            menuItem.addProperty(IS_SEPARATOR, action == Action.SEPARATOR);
             menuItems.put(id, action);
         }
         return menuItem;
@@ -576,18 +585,30 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
 
     private int getEventId(String type) {
         switch (type) {
-            case MOUSE_PRESSED: return MouseEventData.MOUSE_PRESSED;
-            case MOUSE_RELEASED: return MouseEventData.MOUSE_RELEASED;
-            case MOUSE_CLICKED: return MouseEventData.MOUSE_CLICKED;
-            case MOUSE_MOVED: return MouseEventData.MOUSE_MOVED;
-            case MOUSE_DRAGGED: return MouseEventData.MOUSE_DRAGGED;
-            case MOUSE_ENTERED: return MouseEventData.MOUSE_ENTERED;
-            case MOUSE_EXITED: return MouseEventData.MOUSE_EXITED;
-            case MOUSE_WHEEL: return MouseEventData.MOUSE_WHEEL;
-            case KEY_PRESSED: return KeyEventData.KEY_PRESSED;
-            case KEY_RELEASED: return KeyEventData.KEY_RELEASED;
-            case KEY_TYPED: return KeyEventData.KEY_TYPED;
-            default: return -1;
+            case MOUSE_PRESSED:
+                return MouseEventData.MOUSE_PRESSED;
+            case MOUSE_RELEASED:
+                return MouseEventData.MOUSE_RELEASED;
+            case MOUSE_CLICKED:
+                return MouseEventData.MOUSE_CLICKED;
+            case MOUSE_MOVED:
+                return MouseEventData.MOUSE_MOVED;
+            case MOUSE_DRAGGED:
+                return MouseEventData.MOUSE_DRAGGED;
+            case MOUSE_ENTERED:
+                return MouseEventData.MOUSE_ENTERED;
+            case MOUSE_EXITED:
+                return MouseEventData.MOUSE_EXITED;
+            case MOUSE_WHEEL:
+                return MouseEventData.MOUSE_WHEEL;
+            case KEY_PRESSED:
+                return KeyEventData.KEY_PRESSED;
+            case KEY_RELEASED:
+                return KeyEventData.KEY_RELEASED;
+            case KEY_TYPED:
+                return KeyEventData.KEY_TYPED;
+            default:
+                return -1;
         }
     }
 
@@ -603,9 +624,9 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         e.addProperty(TOOLTIP, action.getTooltip());
         e.addProperty(ICON_ID, iconMap.get(action.getIcon()));
 
-        if(action instanceof ActionContainer) {
+        if (action instanceof ActionContainer) {
             JsonArray subItems = new JsonArray();
-            for(Action child: ((ActionContainer)action).getSubItems()) {
+            for (Action child : ((ActionContainer) action).getSubItems()) {
                 subItems.add(convert(child));
             }
             e.add(SUB_ITEMS, subItems);
@@ -647,8 +668,8 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         String[] options;
 
         public static List<PropertyItem> convert(IPropertySource propertySource) {
-            List<PropertyItem>  items = new ArrayList<>();
-            for(IPropertyDescriptor descriptor: propertySource.getPropertyDescriptors()) {
+            List<PropertyItem> items = new ArrayList<>();
+            for (IPropertyDescriptor descriptor : propertySource.getPropertyDescriptors()) {
                 PropertyItem item = new PropertyItem();
 
                 item.category = descriptor.getCategory();
@@ -676,26 +697,15 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         item.label = treeNode.getText();
         item.iconId = iconMap.get(treeNode.getImage());
 
-        for (Object child: treeNode.getChildren()) {
-            item.children.add(convert((AbstractTreeEditPart)child));
+        for (Object child : treeNode.getChildren()) {
+            item.children.add(convert((AbstractTreeEditPart) child));
         }
         return item;
     }
 
     private void log(String message) {
-        if(message != null && !message.startsWith("setToolTipText"))
+        if (message != null && !message.startsWith("setToolTipText"))
             System.err.println(message);
-    }
-
-    private String lastEvt;
-    private void delog(String message) {
-        if(message == null || lastEvt == null || lastEvt.equals(message)) {
-            lastEvt = message;
-            return;
-        }
-
-        log(message);
-        lastEvt = message;
     }
 
     private final boolean isFeedback = false;

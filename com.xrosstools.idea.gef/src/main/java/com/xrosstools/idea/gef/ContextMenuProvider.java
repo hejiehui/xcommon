@@ -1,22 +1,17 @@
 package com.xrosstools.idea.gef;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.ActionContainer;
 import com.xrosstools.idea.gef.actions.CommandAction;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
-import com.xrosstools.idea.gef.core.ContentProvider;
+import com.xrosstools.gef.ContentProvider;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.parts.EditPart;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.util.List;
-
-import static com.xrosstools.idea.gef.LspEditorFacade.IS_SEPARATOR;
-import static com.xrosstools.idea.gef.LspEditorFacade.TOOLTIP;
 
 public abstract class ContextMenuProvider {
     public static final ContextMenuProvider DEFAULT_PROVIDER = new ContextMenuProvider() {
@@ -34,7 +29,7 @@ public abstract class ContextMenuProvider {
         }
 
         public JPopupMenu buildContextMenu(Object selected) {
-            Action[] actions = isContextMenu ? contentProvider.getContextMenuItems((EditPart)  selected) : contentProvider.getOutlineContextMenuItems((AbstractTreeEditPart) selected);
+            List<Action> actions = isContextMenu ? contentProvider.getContextMenu((EditPart)  selected) : contentProvider.getOutlineContextMenu((AbstractTreeEditPart) selected);
             JPopupMenu menu = new JPopupMenu();
             for (Action action : actions) {
                 if(action == Action.SEPARATOR)

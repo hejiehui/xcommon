@@ -1,6 +1,5 @@
 package com.xrosstools.idea.gef.actions.codegen;
 
-import com.intellij.openapi.project.Project;
 import com.xrosstools.idea.gef.actions.AbstractCodeGenerator;
 import com.xrosstools.idea.gef.actions.CodeGenHelper;
 import com.xrosstools.idea.gef.commands.Command;
@@ -48,8 +47,8 @@ public abstract class AbstractOptionalGeneratorAction extends AbstractCodeGenera
         return createCommand(source, classType, fullClassName, selectedOptions);
     }
 
-    public AbstractOptionalGeneratorAction(Project project, IPropertySource source, String classType){
-        super(project, SimpleCodeGenAction.getTitle(classType));
+    public AbstractOptionalGeneratorAction(IPropertySource source, String classType){
+        super(SimpleCodeGenAction.getTitle(classType));
         setText(SimpleCodeGenAction.getTitle(classType));
         this.source = source;
         this.classType = classType;

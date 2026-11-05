@@ -1,7 +1,7 @@
 package com.xrosstools.idea.gef.actions;
 
+import com.google.gson.JsonObject;
 import com.xrosstools.idea.gef.commands.Command;
-import com.xrosstools.idea.gef.commands.CommandListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -10,9 +10,7 @@ import java.beans.PropertyChangeListener;
 
 public abstract class Action implements ActionListener {
     public static final Action SEPARATOR = new Action() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-        }
+        public void actionPerformed(ActionEvent e) {}
     };
 
     private String text;
@@ -20,6 +18,7 @@ public abstract class Action implements ActionListener {
     private boolean checked;
     private Icon icon;
     private CommandExecutor executor;
+    private PlatformFacade platformFacade;
 
     @Deprecated
     public void setListener(PropertyChangeListener listener) {}
@@ -40,12 +39,28 @@ public abstract class Action implements ActionListener {
         this.text = text;
     }
 
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    public void setTooltip(String tooltip) {
+        this.tooltip = tooltip;
+    }
+
     public boolean isChecked() {
         return checked;
     }
 
     public void setChecked(boolean checked) {
         this.checked = checked;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     public boolean calculateEnabled() {
@@ -63,19 +78,27 @@ public abstract class Action implements ActionListener {
 
     public Command createCommand() {return null;}
 
-    public String getTooltip() {
-        return tooltip;
+    /**
+     * For LSP
+     */
+    public JsonObject getParams() {
+        return null;
     }
 
-    public void setTooltip(String tooltip) {
-        this.tooltip = tooltip;
+    /**
+     * For LSP
+     */
+    public JsonObject actionPerformed(JsonObject params) {
+        // Invoke
+        actionPerformed((ActionEvent) null);
+        return null;
     }
 
-    public Icon getIcon() {
-        return icon;
+    public PlatformFacade getPlatformFacade() {
+        return platformFacade;
     }
 
-    public void setIcon(Icon icon) {
-        this.icon = icon;
+    public void setPlatformFacade(PlatformFacade platformFacade) {
+        this.platformFacade = platformFacade;
     }
 }

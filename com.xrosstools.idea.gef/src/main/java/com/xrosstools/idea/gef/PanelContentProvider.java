@@ -2,7 +2,7 @@ package com.xrosstools.idea.gef;
 
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.xrosstools.idea.gef.core.ContentProvider;
+import com.xrosstools.gef.ContentProvider;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 

@@ -17,24 +17,19 @@ import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
-import com.xrosstools.idea.gef.core.EditorFacade;
+import com.xrosstools.gef.*;
 import com.xrosstools.idea.gef.actions.Action;
-import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.CommandStack;
-import com.xrosstools.idea.gef.core.EditorInteraction;
-import com.xrosstools.idea.gef.core.KeyEventData;
-import com.xrosstools.idea.gef.core.MouseEventData;
 import com.xrosstools.idea.gef.extensions.ExtensionManager;
 import com.xrosstools.idea.gef.extensions.ToolbarExtension;
 import com.xrosstools.idea.gef.figures.Connection;
 import com.xrosstools.idea.gef.figures.Figure;
 import com.xrosstools.idea.gef.parts.*;
-import com.xrosstools.idea.gef.tools.AnActionAdapter;
-import com.xrosstools.idea.gef.tools.ExportPngAction;
-import com.xrosstools.idea.gef.tools.RedoAction;
-import com.xrosstools.idea.gef.tools.SearchModelAction;
-import com.xrosstools.idea.gef.tools.UndoAction;
+import com.xrosstools.idea.gef.actions.tools.ExportPngAction;
+import com.xrosstools.idea.gef.actions.tools.RedoAction;
+import com.xrosstools.idea.gef.actions.tools.SearchModelAction;
+import com.xrosstools.idea.gef.actions.tools.UndoAction;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import com.xrosstools.idea.gef.util.PropertyTableModel;
 import com.xrosstools.idea.gef.util.SimpleTableCellEditor;
@@ -46,6 +41,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EditorPanel<T extends IPropertySource> extends JPanel implements EditorFacade<T> {
@@ -188,8 +184,8 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
         actionGroup.add(adapt(new UndoAction(editorInteraction)));
         actionGroup.add(adapt(new RedoAction(editorInteraction)));
 
-        actionGroup.add(new SearchModelAction(editorInteraction));
-        actionGroup.add(new ExportPngAction(this));
+        actionGroup.add(adapt(new SearchModelAction(editorInteraction)));
+        actionGroup.add(adapt(new ExportPngAction()));
 
     }
 
@@ -655,7 +651,7 @@ public class EditorPanel<T extends IPropertySource> extends JPanel implements Ed
             scrollBar.setValue(start - 100);
     }
 
-    public void showContextMenu(int x, int y, Action[] actions) {
+    public void showContextMenu(int x, int y, List<Action> actions) {
         contextMenuBuilder.getLastMenu().show(unitPanel, x, y);
     }
 

@@ -1,32 +1,33 @@
 package com.xrosstools.idea.gef.actions;
 
-import com.intellij.openapi.project.Project;
 import com.xrosstools.idea.gef.commands.Command;
 import com.xrosstools.idea.gef.commands.PropertyChangeCommand;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
+import java.awt.event.ActionEvent;
+
 public class ChangeImplementationAction extends Action implements ImplementationMessages {
-    private Project project;
     private IPropertySource source;
     private String propertyName;
+    private String inputValue;
 
-    public ChangeImplementationAction(Project project, IPropertySource source, String propertyName){
-        this(project, String.format(CHANGE_ACTION_MSG, propertyName), source, propertyName);
-    }
-
-    public ChangeImplementationAction(Project project, String message, IPropertySource source, String propertyName){
-        setText(message);
-        this.project = project;
+    public ChangeImplementationAction(String messageTemplate, IPropertySource source, String propertyName){
+        setText(String.format(messageTemplate, propertyName));
         this.source = source;
         this.propertyName = propertyName;
     }
 
-    public Command createCommand() {
-        String impl = ImplementationUtil.assignImpl(project, "");
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String curImpl = source.getPropertyValue(propertyName) == null ? "" : source.getPropertyValue(propertyName).toString();
+        inputValue = getPlatformFacade().assignImpl(curImpl);
+        super.actionPerformed(e);
+    }
 
-        if(impl == null || impl.equals(""))
+    public Command createCommand() {
+        if(inputValue == null || inputValue.isEmpty())
             return null;
 
-        return new PropertyChangeCommand(source, propertyName, impl);
+        return new PropertyChangeCommand(source, propertyName, inputValue);
     }
 }

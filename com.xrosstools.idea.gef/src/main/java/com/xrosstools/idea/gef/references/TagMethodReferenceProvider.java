@@ -6,7 +6,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceProvider;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
-import com.xrosstools.idea.gef.actions.ImplementationUtil;
+import com.xrosstools.idea.gef.ImplementationUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class TagMethodReferenceProvider extends PsiReferenceProvider {

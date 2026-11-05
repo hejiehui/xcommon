@@ -17,8 +17,8 @@ public class SimpleCodeGenAction extends AbstractCodeGenerator {
     private String property;
     private String defaultName;
 
-    public SimpleCodeGenAction(Project project, String template, IPropertySource source, String property, String defaultName){
-        super(project, getTitle(property));
+    public SimpleCodeGenAction(String template, IPropertySource source, String property, String defaultName){
+        super(getTitle(property));
         setText(getTitle(property));
         this.template = template;
         this.source = source;

@@ -1,8 +1,5 @@
-package com.xrosstools.idea.gef.core;
+package com.xrosstools.gef;
 
-import com.xrosstools.idea.gef.ContentChangeListener;
-import com.xrosstools.idea.gef.ContextMenuProvider;
-import com.xrosstools.idea.gef.PanelContentProvider;
 import com.xrosstools.idea.gef.actions.Action;
 import com.xrosstools.idea.gef.actions.CommandExecutor;
 import com.xrosstools.idea.gef.commands.Command;
@@ -68,6 +65,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     public EditorInteraction(EditorFacade editorFacade, ContentProvider<T> contentProvider) {
         this.editorFacade = editorFacade;
         this.contentProvider = contentProvider;
+        contentProvider.setEditorInteraction(this);
 
         curHandle = readyHandle;
     }
@@ -109,6 +107,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
     }
 
     public void register(ContentChangeListener<T> listener) {
+        if (listeners.contains(listener)) return;
         listeners.add(listener);
     }
 
@@ -189,8 +188,8 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
         selectModel(selectedModel);
     }
 
-    public Action[] getOutlineContextMenuItems(AbstractTreeEditPart selected) {
-        return contentProvider.getOutlineContextMenuItems(selected);
+    public List<Action> getOutlineContextMenuItems(AbstractTreeEditPart selected) {
+        return contentProvider.getOutlineContextMenu(selected);
     }
 
     // ----- 命令执行 -----
@@ -338,7 +337,7 @@ public class EditorInteraction<T extends IPropertySource> implements CommandExec
 
     private void showContextMenu(int x, int y) {
         if (lastSelected == null) return;
-        editorFacade.showContextMenu(x, y, contentProvider.getContextMenuItems(lastSelected.getPart()));
+        editorFacade.showContextMenu(x, y, contentProvider.getContextMenu(lastSelected.getPart()));
     }
 
     // ----- InteractionHandle 默认实现 (主控状态) -----

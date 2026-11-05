@@ -7,7 +7,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.xrosstools.idea.gef.core.ContentProvider;
+import com.xrosstools.gef.ContentProvider;
 import com.xrosstools.idea.gef.util.IPropertySource;
 import org.jetbrains.annotations.NotNull;
 

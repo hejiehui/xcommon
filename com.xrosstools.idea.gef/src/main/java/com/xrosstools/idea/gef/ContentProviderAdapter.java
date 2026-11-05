@@ -1,14 +1,15 @@
 package com.xrosstools.idea.gef;
 
 import com.xrosstools.idea.gef.actions.Action;
-import com.xrosstools.idea.gef.core.ContentProvider;
-import com.xrosstools.idea.gef.core.EditorInteraction;
+import com.xrosstools.gef.ContentProvider;
+import com.xrosstools.gef.EditorInteraction;
 import com.xrosstools.idea.gef.parts.AbstractTreeEditPart;
 import com.xrosstools.idea.gef.parts.EditPart;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +18,9 @@ import java.util.Map;
  */
 public class ContentProviderAdapter<T extends IPropertySource> implements ContentProvider<T> {
     private PanelContentProvider<T> contentProvider;
+
+    public void setEditorInteraction(EditorInteraction<T> editorInteraction){}
+    public EditorInteraction<T> getEditorInteraction(){return null;}
 
     public ContentProviderAdapter(PanelContentProvider<T> contentProvider) {
         this.contentProvider = contentProvider;
@@ -39,15 +43,15 @@ public class ContentProviderAdapter<T extends IPropertySource> implements Conten
     }
 
     @Override
-    public Action[] getPaletteItems(EditorInteraction<T> editorInteraction) {
+    public List<Action> getPaletteItems() {
         // EditorInteraction will never use this
-        return new Action[0];
+        return null;
     }
 
     @Override
-    public Action[] getToolbarItems(EditorInteraction<T> editorInteraction) {
+    public List<Action> getToolbarItems() {
         // EditorInteraction will never use this
-        return new Action[0];
+        return null;
     }
 
     @Override
@@ -61,15 +65,15 @@ public class ContentProviderAdapter<T extends IPropertySource> implements Conten
     }
 
     @Override
-    public Action[] getContextMenuItems(EditPart editPart) {
+    public List<Action> getContextMenu(EditPart editPart) {
         contentProvider.getContextMenuProvider().buildDisplayMenu(editPart);
         // EditorPanel will call ContextMenuProvider.getLastMenu() later
-        return new Action[0];
+        return null;
     }
 
     @Override
-    public Action[] getOutlineContextMenuItems(AbstractTreeEditPart editPart) {
+    public List<Action> getOutlineContextMenu(AbstractTreeEditPart editPart) {
         // EditorPanel will never use this
-        return new Action[0];
+        return null;
     }
 }

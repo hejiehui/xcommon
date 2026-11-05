@@ -7,13 +7,11 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xrosstools.idea.gef.actions.Action;
-import com.xrosstools.idea.gef.core.ContentProvider;
-import com.xrosstools.idea.gef.core.EditorInteraction;
+import com.xrosstools.gef.ContentProvider;
 import com.xrosstools.idea.gef.parts.EditPartFactory;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class PanelContentProviderAdapter<T extends IPropertySource> extends AbstractPanelContentProvider<T> {
     private ContentProvider<T> contentProvider;
@@ -43,7 +41,7 @@ public class PanelContentProviderAdapter<T extends IPropertySource> extends Abst
 
     @Override
     public void buildPalette(JPanel palette) {
-        for (Action action : contentProvider.getPaletteItems(getEditorPanel().getEditorInteraction())) {
+        for (Action action : contentProvider.getPaletteItems()) {
             palette.add(createPaletteButton(action, action.getIcon(), action.getTooltip()));
         }
     }
@@ -51,7 +49,7 @@ public class PanelContentProviderAdapter<T extends IPropertySource> extends Abst
     @Override
     public ActionGroup createToolbar() {
         DefaultActionGroup actionGroup = new DefaultActionGroup();
-        for (Action action : contentProvider.getToolbarItems(getEditorPanel().getEditorInteraction())) {
+        for (Action action : contentProvider.getToolbarItems()) {
             if(action == Action.SEPARATOR) {
                 actionGroup.addSeparator();
             }

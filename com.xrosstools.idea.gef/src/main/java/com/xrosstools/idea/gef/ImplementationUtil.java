@@ -1,4 +1,4 @@
-package com.xrosstools.idea.gef.actions;
+package com.xrosstools.idea.gef;
 
 import com.intellij.ide.util.TreeClassChooser;
 import com.intellij.ide.util.TreeClassChooserFactory;
@@ -10,6 +10,7 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.OpenSourceUtil;
+import com.xrosstools.idea.gef.actions.*;
 import com.xrosstools.idea.gef.util.IPropertySource;
 
 import javax.swing.*;
@@ -129,11 +130,11 @@ public class ImplementationUtil implements ImplementationMessages {
     public static void buildImplementationMenu(Project project, JPopupMenu menu, IPropertySource source, String propertyName, boolean allowMethod) {
         String implementation = (String)source.getPropertyValue(propertyName);
         if(isEmpty(implementation))
-            menu.add(createItem(new AssignImplementationAction(project, source, propertyName)));
+            menu.add(createItem(new ChangeImplementationAction(ASSIGN_ACTION_MSG, source, propertyName)));
         else{
-            menu.add(createItem(new ChangeImplementationAction(project, source, propertyName)));
+            menu.add(createItem(new ChangeImplementationAction(CHANGE_ACTION_MSG, source, propertyName)));
             menu.add(createItem(new RemoveImplementationAction(source, propertyName)));
-            menu.add(createItem(new OpenImplementationAction(project, propertyName, implementation)));
+            menu.add(createItem(new OpenImplementationAction(propertyName, implementation)));
 
             if(allowMethod)
                 buildReferenceMethodMenu(project, menu, source, propertyName, implementation);

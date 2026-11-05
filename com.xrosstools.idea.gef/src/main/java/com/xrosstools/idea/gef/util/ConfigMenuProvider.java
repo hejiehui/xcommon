@@ -1,9 +1,7 @@
 package com.xrosstools.idea.gef.util;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
-import com.xrosstools.idea.gef.actions.ImplementationUtil;
+import com.xrosstools.idea.gef.ImplementationUtil;
 import com.xrosstools.idea.gef.actions.InputTextCommandAction;
 import com.xrosstools.idea.gef.commands.CreatePropertyCommand;
 import com.xrosstools.idea.gef.commands.RemovePropertyCommand;
@@ -21,7 +19,7 @@ public class ConfigMenuProvider {
         JMenu createElementMenu = new JMenu(String.format("Create %s", propertyDisplayName));
 
         for(String typeName: DataTypeEnum.CONFIGURABLE_NAMES) {
-            createElementMenu.add(createItem(new InputTextCommandAction(project, typeName, String.format("Set %s name", propertyDisplayName), "", new CreatePropertyCommand(category, properties, DataTypeEnum.findByDisplayName(typeName)))));
+            createElementMenu.add(createItem(new InputTextCommandAction(typeName, String.format("Set %s name", propertyDisplayName), "", new CreatePropertyCommand(category, properties, DataTypeEnum.findByDisplayName(typeName)))));
         }
 
         menu.add(createElementMenu);
@@ -34,7 +32,7 @@ public class ConfigMenuProvider {
 
         JMenu subRename = new JMenu(String.format("Rename %s", propertyDisplayName));
         for(String name: properties.keySet(category)){
-            subRename.add(createItem(new InputTextCommandAction(project, name, String.format("Rename %s", name), name, new RenamePropertyCommand(category, properties, name))));
+            subRename.add(createItem(new InputTextCommandAction(name, String.format("Rename %s", name), name, new RenamePropertyCommand(category, properties, name))));
         }
 
         menu.add(subRename);

@@ -1,9 +1,9 @@
-package com.xrosstools.idea.gef;
+package com.xrosstools.gef;
 
-import com.xrosstools.idea.gef.tools.ExportPngAction;
-import com.xrosstools.idea.gef.tools.RedoAction;
-import com.xrosstools.idea.gef.tools.SearchModelAction;
-import com.xrosstools.idea.gef.tools.UndoAction;
+import com.xrosstools.idea.gef.actions.tools.ExportPngAction;
+import com.xrosstools.idea.gef.actions.tools.RedoAction;
+import com.xrosstools.idea.gef.actions.tools.SearchModelAction;
+import com.xrosstools.idea.gef.actions.tools.UndoAction;
 
 import javax.swing.*;
 import java.net.URL;
@@ -14,6 +14,8 @@ public interface GefIcons {
 
     Icon SEARCH = getIcon(SearchModelAction.ID, GefIcons.class);
     Icon EXPORT_PNG = getIcon(ExportPngAction.ID, GefIcons.class);
+
+    Icon TEXT_PNG = getIcon("text", GefIcons.class);
 
     static Icon getIcon(String iconId, Class<?> clazz) {
         try {

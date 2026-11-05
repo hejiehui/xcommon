@@ -1,6 +1,6 @@
 package com.xrosstools.idea.gef.actions;
 
-import com.xrosstools.idea.gef.core.EditorInteraction;
+import com.xrosstools.gef.EditorInteraction;
 
 import java.awt.event.ActionEvent;
 

@@ -1,14 +1,12 @@
 package com.xrosstools.idea.gef.references;
 
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceProvider;
 import com.intellij.psi.xml.XmlTag;
-import com.intellij.psi.xml.XmlTagValue;
 import com.intellij.psi.xml.XmlText;
 import com.intellij.util.ProcessingContext;
-import com.xrosstools.idea.gef.actions.ImplementationUtil;
+import com.xrosstools.idea.gef.ImplementationUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class TagClassReferenceProvider extends PsiReferenceProvider {

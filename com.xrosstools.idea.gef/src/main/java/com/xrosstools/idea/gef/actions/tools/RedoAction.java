@@ -1,8 +1,8 @@
-package com.xrosstools.idea.gef.tools;
+package com.xrosstools.idea.gef.actions.tools;
 
-import com.xrosstools.idea.gef.GefIcons;
+import com.xrosstools.gef.GefIcons;
 import com.xrosstools.idea.gef.actions.Action;
-import com.xrosstools.idea.gef.core.EditorInteraction;
+import com.xrosstools.gef.EditorInteraction;
 
 import java.awt.event.ActionEvent;
 
