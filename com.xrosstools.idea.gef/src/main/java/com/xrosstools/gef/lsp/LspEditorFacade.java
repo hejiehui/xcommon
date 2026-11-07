@@ -226,7 +226,7 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
                 case SELECT_TOOL:
                     return selectTool(parameters.get(ID).getAsString());
                 case SELECT_CONTEXT_MENU:
-                    return selectContextMenu(parameters.get(ID).getAsString(), parameters.get(PARAMS));
+                    return selectContextMenu(parameters.get(ID).getAsString(), parameters);
                 case GET_TREE_NODE_CONTEXT_MENU:
                     return getTreeNodeContextMenu(parameters.get(ID).getAsString());
                 case SUBMIT_INPUT:
@@ -317,7 +317,8 @@ public class LspEditorFacade<T extends IPropertySource> implements EditorFacade<
         return getLastResponse();
     }
 
-    private JsonObject selectContextMenu(String id, JsonObject params) {
+    private JsonObject selectContextMenu(String id, JsonObject parameters) {
+        JsonObject params = parameters.get(PARAMS) == null ? null : parameters.get(PARAMS).getAsJsonObject();
         menuItems.get(id).actionPerformed(params);
         return getLastResponse();
     }
